@@ -28,5 +28,9 @@ config.service.ts
 config.json
 *.properties
 
-
+# Other entries
 /Piramal - Shortcut.lnk
+.tern-project
+mvnw
+mvnw.cmd
+.mvn/
