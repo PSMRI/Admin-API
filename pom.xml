@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.iemr.admin</groupId>
@@ -19,7 +20,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 		<java.version>1.8</java.version>
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 		<org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
@@ -35,7 +36,7 @@
 
 		<hostname-test>10.208.122.38</hostname-test>
 		<port-test>9990</port-test>
-		
+
 		<hostname-uat>deviemr.piramalswasthya.org</hostname-uat>
 		<port-uat>9990</port-uat>
 
@@ -44,11 +45,6 @@
 		<server-port>{port-${environment}}</server-port>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>com.github.ulisesbocchio</groupId>
-			<artifactId>jasypt-spring-boot-starter</artifactId>
-			<version>2.0.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -106,13 +102,15 @@
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-multipart -->
+		<!--
+		https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-multipart -->
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-multipart</artifactId>
 			<version>1.18</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-multipart -->
+		<!--
+		https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-multipart -->
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-multipart</artifactId>
@@ -155,29 +153,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20160212</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-joda</artifactId>
-			<version>2.4.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.7.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>2.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -192,11 +178,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.openkm</groupId>
-			<artifactId>sdk4j</artifactId>
-			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -256,27 +237,17 @@
 			<version>5.0.4.RELEASE</version>
 		</dependency>
 		<dependency>
-    <groupId>org.apache.poi</groupId>
-    <artifactId>poi-ooxml</artifactId>
-    <version>5.0.0</version>
-</dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.0.0</version>
+		</dependency>
 
-<dependency>
-    <groupId>org.apache.poi</groupId>
-    <artifactId>poi</artifactId>
-    <version>5.0.0</version>
-</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.0.0</version>
+		</dependency>
 	</dependencies>
-	<repositories>
-		<repository>
-			<id>openkm.com</id>
-			<name>OpenKM Maven Repository</name>
-			<url>https://maven.openkm.com</url>
-		</repository>
-	</repositories>
-
-
-
 
 	<build>
 		<!-- <finalName>adminAPIV1.0</finalName> -->
@@ -304,7 +275,8 @@
 					<prefix>git</prefix>
 					<verbose>false</verbose>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
-					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+					<generateGitPropertiesFilename>
+						${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
 					<format>json</format>
 					<gitDescribe>
 						<skip>true</skip>
@@ -345,13 +317,14 @@
 						<id>properties-updated</id>
 						<configuration>
 							<target>
-								<echo>
-									concatinating properties file ${target-properties} and
-									${source-properties}
-									<!-- $${server-hostname} $${server-port} ${server-id} $${server-username} 
+								<echo> concatinating properties file
+									${target-properties} and
+									${source-properties} <!-- $${server-hostname} $${server-port}
+									${server-id} $${server-username} 
 										$${server-password} -->
 								</echo>
-								<concat destfile="${target-properties}" append="yes"
+								<concat destfile="${target-properties}"
+									append="yes"
 									force="yes">
 									<fileset file="${source-properties}">
 									</fileset>
@@ -389,17 +362,17 @@
 				</executions>
 			</plugin> -->
 			<plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <filtering>true</filtering>
-                            <directory>src/packaging/</directory>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<webResources>
+						<resource>
+							<filtering>true</filtering>
+							<directory>src/packaging/</directory>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<reporting>
@@ -412,13 +385,17 @@
 		</plugins>
 	</reporting>
 	<!-- <repositories> <repository> <id>spring-snapshots</id> <name>Spring 
-		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots> <enabled>true</enabled> 
+		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots>
+	<enabled>true</enabled> 
 		</snapshots> </repository> <repository> <id>spring-milestones</id> <name>Spring 
 		Milestones</name> <url>https://repo.spring.io/milestone</url> <snapshots> 
 		<enabled>false</enabled> </snapshots> </repository> </repositories> -->
-	<!-- <pluginRepositories> <pluginRepository> <id>spring-snapshots</id> <name>Spring 
-		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots> <enabled>true</enabled> 
+	<!-- <pluginRepositories> <pluginRepository> <id>spring-snapshots</id>
+	<name>Spring 
+		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots>
+	<enabled>true</enabled> 
 		</snapshots> </pluginRepository> <pluginRepository> <id>spring-milestones</id> 
 		<name>Spring Milestones</name> <url>https://repo.spring.io/milestone</url> 
-		<snapshots> <enabled>false</enabled> </snapshots> </pluginRepository> </pluginRepositories> -->
+		<snapshots> <enabled>false</enabled> </snapshots> </pluginRepository>
+	</pluginRepositories> -->
 </project>
