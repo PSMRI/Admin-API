@@ -58,7 +58,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.iemr.admin.controller.blocking.Blocking_Controller;
+import com.iemr.admin.controller.blocking.BlockingController;
 import com.iemr.admin.controller.provideronboard.ProviderOnBoardController;
 import com.iemr.admin.data.provideronboard.M_UserservicerolemappingForRole;
 import com.iemr.admin.data.provideronboard.ServiceProvider_Model;

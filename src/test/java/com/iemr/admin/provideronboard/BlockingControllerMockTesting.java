@@ -45,7 +45,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
 import org.springframework.test.web.servlet.MockMvc;
 
 //import com.github.springtestdbunit.DbUnitTestExecutionListener;
-import com.iemr.admin.controller.blocking.Blocking_Controller;
+import com.iemr.admin.controller.blocking.BlockingController;
 import com.iemr.admin.controller.provideronboard.ProviderOnBoardController;
 import com.iemr.admin.service.blocking.Blocking_Service;
 import com.iemr.admin.service.provideronboard.ServiceProvider_ServiceImpl;
@@ -67,7 +67,7 @@ public class BlockingControllerMockTesting {
 	
 	
 	
-	private Blocking_Controller controllerMock;
+	private BlockingController controllerMock;
 	
 	private Blocking_Service serviceMock;
 	
@@ -86,7 +86,7 @@ public void initialize()
 	
 	
 serviceMock = spy(Blocking_Service.class);
-controllerMock = spy(new Blocking_Controller());
+controllerMock = spy(new BlockingController());
 controllerMock.setServiceProvider_ServiceImpl(serviceMock);
 
 }

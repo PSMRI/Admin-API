@@ -44,18 +44,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.iemr.admin.utils.CryptoUtil;
 import com.iemr.admin.utils.config.ConfigProperties;
 
-
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", basePackages = { "com.iemr.admin.*" })
 public class DBConfig {
 
-
 	Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 	@Autowired
 	private CryptoUtil cryptoUtil;
-	
+
 	@Primary
 	@Bean(name = "dataSource")
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -94,7 +92,5 @@ public class DBConfig {
 			@Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
 		return new JpaTransactionManager(entityManagerFactory);
 	}
-
-	
 
 }

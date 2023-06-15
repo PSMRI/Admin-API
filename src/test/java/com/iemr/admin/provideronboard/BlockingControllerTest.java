@@ -37,7 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.iemr.admin.controller.blocking.Blocking_Controller;
+import com.iemr.admin.controller.blocking.BlockingController;
 import com.iemr.admin.data.blocking.M_Providerservicemapping_Blocking;
 import com.iemr.admin.exceptionhandler.DataNotFound;
 
@@ -54,7 +54,7 @@ public class BlockingControllerTest {
 	  
 	  
 	 @Autowired
-	 private Blocking_Controller blockingcontroller;
+	 private BlockingController blockingcontroller;
 	 
 	 
   @MockBean
@@ -108,7 +108,7 @@ private static ArrayList<M_Providerservicemapping_Blocking> m_problocking;
 		   data1.add(data);
 		  // }
 	  
-		   blockingcontroller=mock(Blocking_Controller.class);
+		   blockingcontroller=mock(BlockingController.class);
 	  
 	  when(blockingcontroller.getMappedServiceLinesAndStatetoProvider("")).thenReturn(data1.toString());
 	  

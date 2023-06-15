@@ -102,15 +102,11 @@
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0</version>
 		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/com.sun.jersey.contribs/jersey-multipart -->
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-multipart</artifactId>
 			<version>1.18</version>
 		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-multipart -->
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-multipart</artifactId>
@@ -131,7 +127,6 @@
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.6.1</version>
-			<!-- <version>2.7.0</version> -->
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
@@ -144,7 +139,6 @@
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>2.6.1</version>
-			<!-- <version>2.7.0</version> -->
 			<scope>compile</scope>
 			<exclusions>
 				<exclusion>
@@ -197,9 +191,6 @@
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session</artifactId>
 		</dependency>
-
-
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -208,24 +199,20 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<!-- <scope>provided</scope> <optional>true</optional> -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-jdk8</artifactId>
 			<version>${org.mapstruct.version}</version>
-			<!-- <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct-processor</artifactId>
 			<version>${org.mapstruct.version}</version>
-			<!-- <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -234,14 +221,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>5.0.4.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 			<version>5.0.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
@@ -250,7 +235,6 @@
 	</dependencies>
 
 	<build>
-		<!-- <finalName>adminAPIV1.0</finalName> -->
 		<finalName>adminapi-v1.0</finalName>
 		<plugins>
 			<plugin>
@@ -319,7 +303,8 @@
 							<target>
 								<echo> concatinating properties file
 									${target-properties} and
-									${source-properties} <!-- $${server-hostname} $${server-port}
+									${source-properties} <!--
+									$${server-hostname} $${server-port}
 									${server-id} $${server-username} 
 										$${server-password} -->
 								</echo>
@@ -341,26 +326,6 @@
 					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.wildfly.plugins</groupId>
-				<artifactId>wildfly-maven-plugin</artifactId>
-				<version>1.2.1.Final</version>
-				<configuration>
-					<id>${server-id}</id>
-					<hostname>$${server-hostname}</hostname>
-					<port>$${server-port}</port>
-					<username>admin</username>
-					<password>ad@min123</password>					
-				</configuration>
-				<executions>
-					<execution>
-						<phase>install</phase>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin> -->
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.6</version>
@@ -384,18 +349,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	<!-- <repositories> <repository> <id>spring-snapshots</id> <name>Spring 
-		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots>
-	<enabled>true</enabled> 
-		</snapshots> </repository> <repository> <id>spring-milestones</id> <name>Spring 
-		Milestones</name> <url>https://repo.spring.io/milestone</url> <snapshots> 
-		<enabled>false</enabled> </snapshots> </repository> </repositories> -->
-	<!-- <pluginRepositories> <pluginRepository> <id>spring-snapshots</id>
-	<name>Spring 
-		Snapshots</name> <url>https://repo.spring.io/snapshot</url> <snapshots>
-	<enabled>true</enabled> 
-		</snapshots> </pluginRepository> <pluginRepository> <id>spring-milestones</id> 
-		<name>Spring Milestones</name> <url>https://repo.spring.io/milestone</url> 
-		<snapshots> <enabled>false</enabled> </snapshots> </pluginRepository>
-	</pluginRepositories> -->
 </project>

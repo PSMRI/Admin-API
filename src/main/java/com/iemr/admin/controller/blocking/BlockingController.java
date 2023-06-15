@@ -24,7 +24,6 @@ package com.iemr.admin.controller.blocking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,41 +48,31 @@ import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
 @RestController
-public class Blocking_Controller
-{
+public class BlockingController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 	@Autowired
 	private BlockingInter blockingInter;
 
 	@Autowired
-	public void setServiceProvider_ServiceImpl(BlockingInter blockingInter)
-	{
+	public void setServiceProvider_ServiceImpl(BlockingInter blockingInter) {
 		this.blockingInter = blockingInter;
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/blockProvider1", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String blockProvider1(@RequestBody String providerBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/blockProvider1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String blockProvider1(@RequestBody String providerBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
-			
+		try {
 
-			M_Serviceprovider_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerBlocking, M_Serviceprovider_Blocking.class);
-			T_Serviceproviderdetail tproviderDetails =
-					InputMapper.gson().fromJson(providerBlocking, T_Serviceproviderdetail.class);
+			M_Serviceprovider_Blocking providerDetails = InputMapper.gson().fromJson(providerBlocking,
+					M_Serviceprovider_Blocking.class);
+			T_Serviceproviderdetail tproviderDetails = InputMapper.gson().fromJson(providerBlocking,
+					T_Serviceproviderdetail.class);
 
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			M_Serviceprovider_Blocking getProviderDetails =
-					blockingInter.getProviderDetailsById(providerDetails.getServiceProviderID());
+			M_Serviceprovider_Blocking getProviderDetails = blockingInter
+					.getProviderDetailsById(providerDetails.getServiceProviderID());
 			T_Serviceproviderdetail saveDetails = new T_Serviceproviderdetail();
 			saveDetails.setServiceProviderID(getProviderDetails.getServiceProviderID());
 			saveDetails.setServiceProviderName(getProviderDetails.getServiceProviderName());
@@ -113,72 +102,41 @@ public class Blocking_Controller
 			saveDetails.setLastModDate(getProviderDetails.getLastModDate());
 			T_Serviceproviderdetail datasaved = blockingInter.saveData(saveDetails);
 			getProviderDetails.setStatusID(providerDetails.getStatusID());
-			M_Serviceprovider_Blocking blockprovider = blockingInter.blockServiceProvider(getProviderDetails);
+			blockingInter.blockServiceProvider(getProviderDetails);
 
 			tproviderDetails.setPreviousStatusID(getProviderDetails.getStateID());
 
-			// getprov
-
-			// T_Serviceproviderdetail
-			// saveblockingDetails=blockingInter.saveDetails(getProviderDetails);
-
-			/*
-			 * ArrayList<M_UserServiceRoleMapping2> data = employeeMasterInter.getEmployeeDetails(
-			 * m_UserServiceRoleMapping.getRoleID(), m_UserServiceRoleMapping.getProviderServiceMapID());
-			 */
-
-			/*
-			 * ArrayList<M_UserServiceRoleMapping2> data = employeeMasterInter.getEmployeeDetails();
-			 */
-
-			// M_User1 deleted1 = employeeMasterInter.saveEditData(deletedata);
 			response.setResponse(datasaved.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
 			response.setError(e);
-
 		}
-
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/blockProvider", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String blockProvider(@RequestBody String providerBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/blockProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String blockProvider(@RequestBody String providerBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerBlocking, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(providerBlocking, T_Providerservicemappingdetail.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(providerBlocking,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson().fromJson(providerBlocking,
+					T_Providerservicemappingdetail.class);
 
-			ArrayList<M_Providerservicemapping_Blocking> getProviderStatus1 =
-					blockingInter.getProviderStatus(providerDetails.getServiceProviderID());
+			ArrayList<M_Providerservicemapping_Blocking> getProviderStatus1 = blockingInter
+					.getProviderStatus(providerDetails.getServiceProviderID());
 
 			blockingInter.blockProvider(providerDetails.getServiceProviderID(), providerDetails.getStatusID());
 
 			T_Providerservicemappingdetail resDataMap = null;
 			List<T_Providerservicemappingdetail> resList = new ArrayList<T_Providerservicemappingdetail>();
-			int x = 0;
-			for (M_Providerservicemapping_Blocking obj : getProviderStatus1)
-			{
-
-				// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
-
+			for (M_Providerservicemapping_Blocking obj : getProviderStatus1) {
 				resDataMap = new T_Providerservicemappingdetail();
 
 				resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
@@ -202,45 +160,35 @@ public class Blocking_Controller
 				resList.add(resDataMap);
 
 			}
-			// }
 			ArrayList<T_Providerservicemappingdetail> data = blockingInter.savetpsmd(resList);
 
 			response.setResponse(data.toString());
-			// response.setResponse(datasaved.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = { "/blockProviderByServiceId" }, method = { RequestMethod.POST },
-			produces =
-	{ "application/json" }, headers = "Authorization")
-	public String blockProviderByServiceId(@RequestBody String blockProviderByServiceId)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = { "/blockProviderByServiceId" }, method = { RequestMethod.POST }, produces = {
+			"application/json" }, headers = "Authorization")
+	public String blockProviderByServiceId(@RequestBody String blockProviderByServiceId) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(blockProviderByServiceId, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(blockProviderByServiceId, T_Providerservicemappingdetail.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(blockProviderByServiceId,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson()
+					.fromJson(blockProviderByServiceId, T_Providerservicemappingdetail.class);
 
-			ArrayList<M_Providerservicemapping_Blocking> getProviderStatus2 =
-					blockingInter.getProviderStatusByProviderAndServiceId(providerDetails.getServiceProviderID(),
+			ArrayList<M_Providerservicemapping_Blocking> getProviderStatus2 = blockingInter
+					.getProviderStatusByProviderAndServiceId(providerDetails.getServiceProviderID(),
 							providerDetails.getServiceID());
 
 			blockingInter.blockProviderByProviderIdAndServiceId(providerDetails.getServiceProviderID(),
@@ -248,11 +196,7 @@ public class Blocking_Controller
 
 			T_Providerservicemappingdetail resDataMap = null;
 			List<T_Providerservicemappingdetail> resList = new ArrayList<T_Providerservicemappingdetail>();
-			int x = 0;
-			for (M_Providerservicemapping_Blocking obj : getProviderStatus2)
-			{
-
-				// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
+			for (M_Providerservicemapping_Blocking obj : getProviderStatus2) {
 
 				resDataMap = new T_Providerservicemappingdetail();
 
@@ -276,191 +220,141 @@ public class Blocking_Controller
 				resDataMap.setModifiedBy(obj.getModifiedBy());
 				resList.add(resDataMap);
 			}
-			// }
 			ArrayList<T_Providerservicemappingdetail> data = blockingInter.savetpsmd(resList);
 
 			response.setResponse(data.toString());
-			// response.setResponse(datasaved.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getProviderStatus", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getProviderStatus(@RequestBody String getProviderStatus)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getProviderStatus", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getProviderStatus(@RequestBody String getProviderStatus) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(getProviderStatus, M_Providerservicemapping_Blocking.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(getProviderStatus,
+					M_Providerservicemapping_Blocking.class);
 
-			ArrayList<V_Showproviderservicemapping> getProviderStatus1 =
-					blockingInter.getProviderStatus1(providerDetails.getServiceProviderID());
+			ArrayList<V_Showproviderservicemapping> getProviderStatus1 = blockingInter
+					.getProviderStatus1(providerDetails.getServiceProviderID());
 
 			response.setResponse(getProviderStatus1.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
-	
-	
-	
+
 	@CrossOrigin()
-	@RequestMapping(value = "/getProviderStatus1", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getProviderStatus1(@RequestBody String getProviderStatus)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getProviderStatus1", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getProviderStatus1(@RequestBody String getProviderStatus) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(getProviderStatus, M_Providerservicemapping_Blocking.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(getProviderStatus,
+					M_Providerservicemapping_Blocking.class);
 
-			ArrayList<V_Showproviderservicemapping> getProviderStatus1 =
-					blockingInter.getProviderStatus2(providerDetails.getServiceProviderID());
+			ArrayList<V_Showproviderservicemapping> getProviderStatus1 = blockingInter
+					.getProviderStatus2(providerDetails.getServiceProviderID());
 
 			response.setResponse(getProviderStatus1.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
-	
-	
-	
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getServiceLinesUsingProvider", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getServiceLiensUsingProvider(@RequestBody String getServiceLiensUsingProvider)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getServiceLinesUsingProvider", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getServiceLiensUsingProvider(@RequestBody String getServiceLiensUsingProvider) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(getServiceLiensUsingProvider, M_Providerservicemapping_Blocking.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
+					.fromJson(getServiceLiensUsingProvider, M_Providerservicemapping_Blocking.class);
 
-			ArrayList<M_Providerservicemapping_Blocking> getServiceLiensUsingProvider4 =
-					blockingInter.getServiceLiensUsingProvider(providerDetails.getServiceProviderID());
+			ArrayList<M_Providerservicemapping_Blocking> getServiceLiensUsingProvider4 = blockingInter
+					.getServiceLiensUsingProvider(providerDetails.getServiceProviderID());
 
 			response.setResponse(getServiceLiensUsingProvider4.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getProviderStatusByProviderAndServiceId", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String getProviderStatusByProviderAndServiceId(@RequestBody String getProviderStatusByProviderAndServiceId)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getProviderStatusByProviderAndServiceId", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getProviderStatusByProviderAndServiceId(@RequestBody String getProviderStatusByProviderAndServiceId) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
 					.fromJson(getProviderStatusByProviderAndServiceId, M_Providerservicemapping_Blocking.class);
 
-			ArrayList<V_Showproviderservicemapping> getProviderStatus2 =
-					blockingInter.getProviderStatusByProviderAndServiceId2(providerDetails.getServiceProviderID(),
+			ArrayList<V_Showproviderservicemapping> getProviderStatus2 = blockingInter
+					.getProviderStatusByProviderAndServiceId2(providerDetails.getServiceProviderID(),
 							providerDetails.getServiceID());
 
 			response.setResponse(getProviderStatus2.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/blockProviderByService", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String blockProviderByService(@RequestBody String providerServiceBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/blockProviderByService", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String blockProviderByService(@RequestBody String providerServiceBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerServiceBlocking, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(providerServiceBlocking, T_Providerservicemappingdetail.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(providerServiceBlocking,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson()
+					.fromJson(providerServiceBlocking, T_Providerservicemappingdetail.class);
 
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			M_Providerservicemapping_Blocking getProviderSDetails =
-					blockingInter.getProviderServiceMappingDetails(providerDetails.getServiceProviderID(),
-							providerDetails.getStateID(), providerDetails.getServiceID());
+			M_Providerservicemapping_Blocking getProviderSDetails = blockingInter.getProviderServiceMappingDetails(
+					providerDetails.getServiceProviderID(), providerDetails.getStateID(),
+					providerDetails.getServiceID());
 
 			blockingInter.blockProviderByService(providerDetails.getServiceProviderID(), providerDetails.getStateID(),
 					providerDetails.getServiceID(), providerDetails.getStatusID());
@@ -487,78 +381,56 @@ public class Blocking_Controller
 
 			response.setResponse(res.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getProviderStatusByService", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getProviderStatusByService(@RequestBody String providerServiceBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getProviderStatusByService", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getProviderStatusByService(@RequestBody String providerServiceBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerServiceBlocking, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(providerServiceBlocking, T_Providerservicemappingdetail.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(providerServiceBlocking,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson()
+					.fromJson(providerServiceBlocking, T_Providerservicemappingdetail.class);
 
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			ArrayList<V_Showproviderservicemapping> getProviderSDetails =
-					blockingInter.getProviderServiceMappingDetails2(providerDetails.getServiceProviderID(),
+			ArrayList<V_Showproviderservicemapping> getProviderSDetails = blockingInter
+					.getProviderServiceMappingDetails2(providerDetails.getServiceProviderID(),
 							providerDetails.getStateID(), providerDetails.getServiceID());
 
 			response.setResponse(getProviderSDetails.toString());
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/blockProviderByState", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String blockProviderByState(@RequestBody String providerStateBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/blockProviderByState", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String blockProviderByState(@RequestBody String providerStateBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerStateBlocking, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(providerStateBlocking, T_Providerservicemappingdetail.class);
-
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(providerStateBlocking,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson().fromJson(providerStateBlocking,
+					T_Providerservicemappingdetail.class);
 
 			List<M_Providerservicemapping_Blocking> getPsmdforSate = blockingInter.getProviderStateMappingDetails(
 					providerDetails.getServiceProviderID(), providerDetails.getStateID());
@@ -568,11 +440,7 @@ public class Blocking_Controller
 
 			T_Providerservicemappingdetail resDataMap = null;
 			List<T_Providerservicemappingdetail> resList = new ArrayList<T_Providerservicemappingdetail>();
-			int x = 0;
-			for (M_Providerservicemapping_Blocking obj : getPsmdforSate)
-			{
-
-				// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
+			for (M_Providerservicemapping_Blocking obj : getPsmdforSate) {
 
 				resDataMap = new T_Providerservicemappingdetail();
 
@@ -597,75 +465,55 @@ public class Blocking_Controller
 				resList.add(resDataMap);
 
 			}
-			// }
 			ArrayList<T_Providerservicemappingdetail> data = blockingInter.savetpsmd(resList);
 
 			response.setResponse(data.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getProviderStatusByState", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getProviderStatusByState(@RequestBody String providerStateBlocking)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getProviderStatusByState", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getProviderStatusByState(@RequestBody String providerStateBlocking) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking providerDetails =
-					InputMapper.gson().fromJson(providerStateBlocking, M_Providerservicemapping_Blocking.class);
-			T_Providerservicemappingdetail tproviderserviceDetails =
-					InputMapper.gson().fromJson(providerStateBlocking, T_Providerservicemappingdetail.class);
-
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
+			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson().fromJson(providerStateBlocking,
+					M_Providerservicemapping_Blocking.class);
+			T_Providerservicemappingdetail tproviderserviceDetails = InputMapper.gson().fromJson(providerStateBlocking,
+					T_Providerservicemappingdetail.class);
 
 			ArrayList<V_Showproviderservicemapping> getPsmdforSate = blockingInter.getProviderStateMappingDetails1(
 					providerDetails.getServiceProviderID(), providerDetails.getStateID());
 
 			response.setResponse(getPsmdforSate.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/blockUser", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String blockUser(@RequestBody String blockUser)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/blockUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String blockUser(@RequestBody String blockUser) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			UserForBlocking blockUser1 = InputMapper.gson().fromJson(blockUser, UserForBlocking.class);
 
@@ -691,37 +539,28 @@ public class Blocking_Controller
 			tuserDetails.setUpdatedStatusID(userDetails.getUpdatedStatusID());
 			tuserDetails.setCreatedBy(userData.getCreatedBy());
 			tuserDetails.setModifiedBy(userData.getModifiedBy());
-			// tuserDetails.setProcessed(userData.getp);
 
-			T_Userdetail saveData = blockingInter.saveUserDetails(tuserDetails);
+			blockingInter.saveUserDetails(tuserDetails);
 
 			response.setResponse("jai");
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getStatus", headers = "Authorization", method = { RequestMethod.POST },
-			produces =
-	{ "application/json" })
-	public String getStatus(@RequestBody String getStatus)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String getStatus(@RequestBody String getStatus) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Status1 blockUser = InputMapper.gson().fromJson(getStatus, M_Status1.class);
 
@@ -729,222 +568,132 @@ public class Blocking_Controller
 
 			response.setResponse(statusData.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/addProviderStateAndServiceLines", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String ProviderStateAndServiceLines(@RequestBody String ProviderStateAndServiceLines)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/addProviderStateAndServiceLines", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String ProviderStateAndServiceLines(@RequestBody String ProviderStateAndServiceLines) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking[] ps =
-					InputMapper.gson().fromJson(ProviderStateAndServiceLines, M_Providerservicemapping_Blocking[].class);
+			M_Providerservicemapping_Blocking[] ps = InputMapper.gson().fromJson(ProviderStateAndServiceLines,
+					M_Providerservicemapping_Blocking[].class);
 
 			List<M_Providerservicemapping_Blocking> providerDetails1 = Arrays.asList(ps);
 
 			BlockingTO[] blockingto1 = InputMapper.gson().fromJson(ProviderStateAndServiceLines, BlockingTO[].class);
 
 			List<BlockingTO> blockingto2 = Arrays.asList(blockingto1);
-			// T_Providerservicemappingdetail tproviderserviceDetails =
-			// InputMapper.gson().fromJson(ProviderStateAndServiceLines,
-			// T_Providerservicemappingdetail.class);
-
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			// List<M_Providerservicemapping_Blocking>
-			// getPsmdforSate=blockingInter.getProviderStateMappingDetails(providerDetails.getServiceProviderID(),providerDetails.getStateID());
-
-			// blockingInter.blockProviderByState(providerDetails.getServiceProviderID(),providerDetails.getStateID(),providerDetails.getStatusID());
 			M_Providerservicemapping_Blocking resDataMap = null;
 			List<M_Providerservicemapping_Blocking> resList = new ArrayList<M_Providerservicemapping_Blocking>();
 
 			int providerDetailsIndex = 0;
 			Integer[] stateIDs = null;
-			for (BlockingTO blockingto : blockingto2)
-			{
+			for (BlockingTO blockingto : blockingto2) {
 				stateIDs = blockingto.getStateID1();
 				M_Providerservicemapping_Blocking providerDetails = providerDetails1.get(providerDetailsIndex);
-				/*
-				 * for(M_Providerservicemapping_Blocking providerDetails:providerDetails1){ for(int
-				 * i=0;i<ServiceID.length;i++){
-				 * 
-				 * //for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
-				 * 
-				 * resDataMap=new M_Providerservicemapping_Blocking();
-				 * 
-				 * //resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
-				 * resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
-				 * resDataMap.setServiceID(ServiceID[i]); resDataMap.setStateID(providerDetails.getStateID());
-				 * resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-				 * resDataMap.setStatusID(providerDetails.getStatusID());
-				 * 
-				 * // resList.add(resDataMap);
-				 * 
-				 * resList.add(resDataMap);
-				 * 
-				 * } }
-				 */
+				if (stateIDs.length > 0) {
 
-				// for(M_Providerservicemapping_Blocking providerDetails:providerDetails1){
-				if (stateIDs.length > 0)
-				{
-
-					for (int statesIndex = 0; statesIndex < stateIDs.length; statesIndex++)
-					{
-						// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
+					for (int statesIndex = 0; statesIndex < stateIDs.length; statesIndex++) {
 						resDataMap = new M_Providerservicemapping_Blocking();
-						// resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
 						resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
 						resDataMap.setServiceID(providerDetails.getServiceID());
 						resDataMap.setStateID(stateIDs[statesIndex]);
 						resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-						// resDataMap.setStatusID(providerDetails.getStatusID());
 						resDataMap.setStatusID(providerDetails.getStatusID());
-						// resList.add(resDataMap);
-
 						resList.add(resDataMap);
 
 					}
-					// }
-					// x++;
-				} else if (stateIDs.length == 0)
-				{
+				} else if (stateIDs.length == 0) {
 					resDataMap = new M_Providerservicemapping_Blocking();
-					// resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
 					resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
 					resDataMap.setServiceID(providerDetails.getServiceID());
 					resDataMap.setStateID(providerDetails.getStateID());
 					resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-					// resDataMap.setStatusID(providerDetails.getStatusID());
 					resDataMap.setStatusID(providerDetails.getStatusID());
-					// resList.add(resDataMap);
 					resList.add(resDataMap);
 
 				}
 				providerDetailsIndex++;
 			}
 
-			// }
 			ArrayList<M_Providerservicemapping_Blocking> data = blockingInter.AddServiceProvider(resList);
 
 			response.setResponse(data.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
-
-	// this i have to implement when requeired becouse bipin sir said don't change any thing in provider
+	// this i have to implement when requeired becouse bipin sir said don't change
+	// any thing in provider
 
 	@CrossOrigin()
-	@RequestMapping(value = "/deleteProviderStateAndServiceLines", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String deleteProviderStateAndServiceLines(@RequestBody String deleteProviderStateAndServiceLines)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/deleteProviderStateAndServiceLines", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String deleteProviderStateAndServiceLines(@RequestBody String deleteProviderStateAndServiceLines) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
 					.fromJson(deleteProviderStateAndServiceLines, M_Providerservicemapping_Blocking.class);
 
 			BlockingTO blockingto = InputMapper.gson().fromJson(deleteProviderStateAndServiceLines, BlockingTO.class);
-			// T_Providerservicemappingdetail tproviderserviceDetails =
-			// InputMapper.gson().fromJson(ProviderStateAndServiceLines,
-			// T_Providerservicemappingdetail.class);
-
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			// List<M_Providerservicemapping_Blocking>
-			// getPsmdforSate=blockingInter.getProviderStateMappingDetails(providerDetails.getServiceProviderID(),providerDetails.getStateID());
-
-			// blockingInter.blockProviderByState(providerDetails.getServiceProviderID(),providerDetails.getStateID(),providerDetails.getStatusID());
 			Integer[] ServiceID = blockingto.getServiceID1();
 
 			M_Providerservicemapping_Blocking resDataMap = null;
 			List<M_Providerservicemapping_Blocking> resList = new ArrayList<M_Providerservicemapping_Blocking>();
 
-			for (int i = 0; i < ServiceID.length; i++)
-			{
-
-				// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
+			for (int i = 0; i < ServiceID.length; i++) {
 
 				resDataMap = new M_Providerservicemapping_Blocking();
 
-				// resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
 				resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
 				resDataMap.setServiceID(ServiceID[i]);
 				resDataMap.setStateID(providerDetails.getStateID());
 				resDataMap.setCreatedBy(providerDetails.getCreatedBy());
 				resDataMap.setStatusID(providerDetails.getStatusID());
 
-				// resList.add(resDataMap);
-
 				resList.add(resDataMap);
 			}
-			// }
 			ArrayList<M_Providerservicemapping_Blocking> data = blockingInter.AddServiceProvider(resList);
 
 			response.setResponse(data.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/createCitMappingwithServiceLines", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String createCitMappingwithServiceLines(@RequestBody String createCitMappingwithServiceLines)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/createCitMappingwithServiceLines", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String createCitMappingwithServiceLines(@RequestBody String createCitMappingwithServiceLines) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking[] providerDetails = InputMapper.gson()
 					.fromJson(createCitMappingwithServiceLines, M_Providerservicemapping_Blocking[].class);
@@ -954,249 +703,167 @@ public class Blocking_Controller
 
 			response.setResponse(data.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/getMappedServiceLinesAndStatetoProvider", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, consumes = { "application/json" }, produces = { "application/json" })
-	public String getMappedServiceLinesAndStatetoProvider(@RequestBody String getMappedServiceLinesAndStatetoProvider)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/getMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
+			RequestMethod.POST }, consumes = { "application/json" }, produces = { "application/json" })
+	public String getMappedServiceLinesAndStatetoProvider(@RequestBody String getMappedServiceLinesAndStatetoProvider) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
 					.fromJson(getMappedServiceLinesAndStatetoProvider, M_Providerservicemapping_Blocking.class);
 
-			ArrayList<M_Providerservicemapping_Blocking> getServiceLiensUsingProvider4 =
-					blockingInter.getServiceLiensUsingProvider1(providerDetails);
+			ArrayList<M_Providerservicemapping_Blocking> getServiceLiensUsingProvider4 = blockingInter
+					.getServiceLiensUsingProvider1(providerDetails);
 
 			response.setResponse(getServiceLiensUsingProvider4.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
 
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/mapServiceLinesAndStatetoProvider", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String mapProviderAndServiceLines(@RequestBody String mapProviderAndServiceLines)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/mapServiceLinesAndStatetoProvider", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String mapProviderAndServiceLines(@RequestBody String mapProviderAndServiceLines) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
-			M_Providerservicemapping_Blocking[] ps =
-					InputMapper.gson().fromJson(mapProviderAndServiceLines, M_Providerservicemapping_Blocking[].class);
+			M_Providerservicemapping_Blocking[] ps = InputMapper.gson().fromJson(mapProviderAndServiceLines,
+					M_Providerservicemapping_Blocking[].class);
 
 			List<M_Providerservicemapping_Blocking> providerDetails1 = Arrays.asList(ps);
 
 			BlockingTO[] blockingto1 = InputMapper.gson().fromJson(mapProviderAndServiceLines, BlockingTO[].class);
 
 			List<BlockingTO> blockingto2 = Arrays.asList(blockingto1);
-			// T_Providerservicemappingdetail tproviderserviceDetails =
-			// InputMapper.gson().fromJson(ProviderStateAndServiceLines,
-			// T_Providerservicemappingdetail.class);
-
-			// M_Serviceprovider_Blocking providerDetails =
-			// InputMapper.gson().toj(providerBlocking,M_Serviceprovider_Blocking.class);
-
-			// List<M_Providerservicemapping_Blocking>
-			// getPsmdforSate=blockingInter.getProviderStateMappingDetails(providerDetails.getServiceProviderID(),providerDetails.getStateID());
-
-			// blockingInter.blockProviderByState(providerDetails.getServiceProviderID(),providerDetails.getStateID(),providerDetails.getStatusID());
 			M_Providerservicemapping_Blocking resDataMap = null;
 			List<M_Providerservicemapping_Blocking> resList = new ArrayList<M_Providerservicemapping_Blocking>();
 
 			int providerDetailsIndex = 0;
 			Integer[] stateIDs = null;
-			for (BlockingTO blockingto : blockingto2)
-			{
+			for (BlockingTO blockingto : blockingto2) {
 				stateIDs = blockingto.getStateID1();
 				M_Providerservicemapping_Blocking providerDetails = providerDetails1.get(providerDetailsIndex);
-				/*
-				 * for(M_Providerservicemapping_Blocking providerDetails:providerDetails1){ for(int
-				 * i=0;i<ServiceID.length;i++){
-				 * 
-				 * //for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
-				 * 
-				 * resDataMap=new M_Providerservicemapping_Blocking();
-				 * 
-				 * //resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
-				 * resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
-				 * resDataMap.setServiceID(ServiceID[i]); resDataMap.setStateID(providerDetails.getStateID());
-				 * resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-				 * resDataMap.setStatusID(providerDetails.getStatusID());
-				 * 
-				 * // resList.add(resDataMap);
-				 * 
-				 * resList.add(resDataMap);
-				 * 
-				 * } }
-				 */
 
-				// for(M_Providerservicemapping_Blocking providerDetails:providerDetails1){
-				if (stateIDs.length > 0)
-				{
+				if (stateIDs.length > 0) {
 
-					for (int statesIndex = 0; statesIndex < stateIDs.length; statesIndex++)
-					{
-						// for(int i=0; i < obj.getProviderServiceMapID().SIZE;i++ ){
+					for (int statesIndex = 0; statesIndex < stateIDs.length; statesIndex++) {
 						resDataMap = new M_Providerservicemapping_Blocking();
-						// resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
 						resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
 						resDataMap.setServiceID(providerDetails.getServiceID());
 						resDataMap.setStateID(stateIDs[statesIndex]);
 						resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-						// resDataMap.setStatusID(providerDetails.getStatusID());
 						resDataMap.setStatusID(1);
-						// resList.add(resDataMap);
 
 						resList.add(resDataMap);
 
 					}
-					// }
-					// x++;
-				} else if (stateIDs.length == 0)
-				{
+				} else if (stateIDs.length == 0) {
 					resDataMap = new M_Providerservicemapping_Blocking();
-					// resDataMap.setProviderServiceMapID(obj.getProviderServiceMapID());
 					resDataMap.setServiceProviderID(providerDetails.getServiceProviderID());
 					resDataMap.setServiceID(providerDetails.getServiceID());
 					resDataMap.setStateID(providerDetails.getStateID());
 					resDataMap.setCreatedBy(providerDetails.getCreatedBy());
-					// resDataMap.setStatusID(providerDetails.getStatusID());
 					resDataMap.setStatusID(1);
-					// resList.add(resDataMap);
 					resList.add(resDataMap);
 
 				}
 				providerDetailsIndex++;
 			}
 
-			// }
 			ArrayList<M_Providerservicemapping_Blocking> data = blockingInter.AddServiceProvider(resList);
 
 			response.setResponse(data.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/editMappedServiceLinesAndStatetoProvider", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String editMappedServiceLinesAndStatetoProvider(@RequestBody String editMappedServiceLinesAndStatetoProvider)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/editMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String editMappedServiceLinesAndStatetoProvider(
+			@RequestBody String editMappedServiceLinesAndStatetoProvider) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
 					.fromJson(editMappedServiceLinesAndStatetoProvider, M_Providerservicemapping_Blocking.class);
 
-			M_Providerservicemapping_Blocking getProviderData =
-					blockingInter.getDataByProviderServiceMapId(providerDetails.getProviderServiceMapID());
+			M_Providerservicemapping_Blocking getProviderData = blockingInter
+					.getDataByProviderServiceMapId(providerDetails.getProviderServiceMapID());
 			getProviderData.setServiceProviderID(providerDetails.getServiceProviderID());
 			getProviderData.setServiceID(providerDetails.getServiceID());
 			getProviderData.setStateID(providerDetails.getStateID());
-			//getProviderData.setStatusID(providerDetails.getStatusID());
 			getProviderData.setModifiedBy(providerDetails.getModifiedBy());
 
-			M_Providerservicemapping_Blocking updatedData = blockingInter.updateProviderData(getProviderData);
+			blockingInter.updateProviderData(getProviderData);
 
 			response.setResponse(getProviderData.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
 
 	@CrossOrigin()
-	@RequestMapping(value = "/deleteMappedServiceLinesAndStatetoProvider", headers = "Authorization",
-			method =
-	{ RequestMethod.POST }, produces = { "application/json" })
-	public String
-			deleteMappedServiceLinesAndStatetoProvider(@RequestBody String deleteMappedServiceLinesAndStatetoProvider)
-	{
-		// JSONObject requestOBJ = new JSONObject(providerBlocking);
+	@RequestMapping(value = "/deleteMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String deleteMappedServiceLinesAndStatetoProvider(
+			@RequestBody String deleteMappedServiceLinesAndStatetoProvider) {
 		OutputResponse response = new OutputResponse();
 
-		try
-		{
+		try {
 
 			M_Providerservicemapping_Blocking providerDetails = InputMapper.gson()
 					.fromJson(deleteMappedServiceLinesAndStatetoProvider, M_Providerservicemapping_Blocking.class);
 
-			M_Providerservicemapping_Blocking getProviderData =
-					blockingInter.getDataByProviderServiceMapId(providerDetails.getProviderServiceMapID());
+			M_Providerservicemapping_Blocking getProviderData = blockingInter
+					.getDataByProviderServiceMapId(providerDetails.getProviderServiceMapID());
 			getProviderData.setDeleted(providerDetails.getDeleted());
 
-			M_Providerservicemapping_Blocking updatedData = blockingInter.updateProviderData(getProviderData);
+			blockingInter.updateProviderData(getProviderData);
 
 			response.setResponse(getProviderData.toString());
 
-		} catch (Exception e)
-		{
-			
-			logger.error("Unexpected error:" , e);
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
 			response.setError(e);
 
 		}
-		/**
-		 * sending the response...
-		 */
 		return response.toString();
 
 	}
