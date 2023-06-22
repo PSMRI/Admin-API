@@ -24,12 +24,14 @@ package com.iemr.admin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
 import com.iemr.admin.utils.IEMRApplBeans;
 import com.iemr.admin.utils.config.ConfigProperties;
 
 @SpringBootApplication
+@EnableCaching(proxyTargetClass = true)
 public class RoleMasterApplication {
 
 	public static void main(String[] args) {
