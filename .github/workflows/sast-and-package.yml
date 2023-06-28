@@ -3,7 +3,7 @@ on:
   push:
     branches: [ "master","develop" ]
    
-   env:
+env:
   ENV_VAR: test
    
 jobs:
@@ -33,8 +33,7 @@ jobs:
         languages: Java    
         
     - name: Build with Maven
-    run: mvn clean install -DENV_VAR=${{ env.ENV_VAR }}
-      
+      run: mvn clean install -DENV_VAR=${{ env.ENV_VAR }}
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:
