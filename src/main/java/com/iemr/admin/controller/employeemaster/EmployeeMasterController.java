@@ -2401,6 +2401,11 @@ public class EmployeeMasterController {
 			usrRole.setProviderServiceMapID(pre.getProviderServiceMapID());
 			usrRole.setWorkingLocationID(pre.getWorkingLocationID());
 			usrRole.setModifiedBy(pre.getModifiedBy());
+			usrRole.setBlockID(pre.getBlockID());
+			usrRole.setBlockName(pre.getBlockName());
+			usrRole.setVillageID(pre.getVillageID());
+			usrRole.setVillageName(pre.getVillageName());
+
 			
 			if(pre.getInbound() != null) {
 				usrRole.setInbound(pre.getInbound());
