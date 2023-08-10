@@ -117,7 +117,7 @@ public interface EmployeeMasterInter {
 
 	String createAgent(String agentID, String st);
 
-	void createUserByCzentrix(M_User1 user, String authToken);
+	void createUserByCallCentre(M_User1 user, String authToken);
 
 	Boolean checkingEmpDetails(String userName, String aadhaarNo, String getpAN, String employeeID,
 			String healthProfessionalID);
@@ -174,7 +174,7 @@ public interface EmployeeMasterInter {
 
 	ArrayList<M_UserLangMapping> getMappedLanguge(Integer serviceProviderID);
 
-	void updateUserInCzentrix(String userName, String ctiRole, String authToken);
+	void updateUserInCallCentre(String userName, String ctiRole, String authToken);
 
 	ArrayList<M_User1> getEmployeeByDesiganationID(Integer designationID, Integer serviceProviderID);
 

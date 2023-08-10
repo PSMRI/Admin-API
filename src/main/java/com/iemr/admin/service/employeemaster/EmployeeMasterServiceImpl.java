@@ -438,7 +438,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 				}
 			}
 			if (update) {
-				updateUserInCzentrix(userName, role, authToken);
+				updateUserInCallCentre(userName, role, authToken);
 			}
 		}
 	}
@@ -657,7 +657,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		logger.info("EmployeeMasterServiceImpl.createAgent - start");
 		String AgentsAPIURL = "";
 		AgentsAPIURL = configProperties.getPropertyByName("Agents-api-url");
-		String ctiServer = configProperties.getPropertyByName("czentrix-server-ip");
+		String ctiServer = configProperties.getPropertyByName("callcentre-server-ip");
 		AgentsAPIURL = AgentsAPIURL.replace("AGENTID", agentID).replace("AGENTNAME", st).replace("CTI_SERVER",
 				ctiServer);
 		// .replace("CAMPAIGN_NAME", ctiCampaignName);
@@ -671,8 +671,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Async
 	@Override
-	public void createUserByCzentrix(M_User1 user, String authToken) {
-		logger.info("EmployeeMasterServiceImpl.createUserByCzentrix - start");
+	public void createUserByCallCentre(M_User1 user, String authToken) {
+		logger.info("EmployeeMasterServiceImpl.createUserByCallCentre - start");
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
 			String ctiServer = configProperties.getPropertyByName("common-url");
@@ -699,13 +699,13 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			logger.info("UserCreateAPIURL -> " + UserCreateAPIURL);
 			httpUtils.post(UserCreateAPIURL, request.toString(), headers);
 		}
-		logger.info("EmployeeMasterServiceImpl.createUserByCzentrix - finish");
+		logger.info("EmployeeMasterServiceImpl.createUserByCallCentre - finish");
 	}
 
 	@Async
 	@Override
-	public void updateUserInCzentrix(String userName, String ctiRole, String authToken) {
-		logger.info("EmployeeMasterServiceImpl.updateUserInCzentrix - start");
+	public void updateUserInCallCentre(String userName, String ctiRole, String authToken) {
+		logger.info("EmployeeMasterServiceImpl.updateUserInCallCentre - start");
 
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
@@ -717,10 +717,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			request.put("role", ctiRole);
 			HttpUtils httpUtils = new HttpUtils();
 			headers.put("Authorization", authToken);
-			logger.info("updateUserInCzentrixURL -> " + UserCreateAPIURL);
+			logger.info("updateUserInCallCentreURL -> " + UserCreateAPIURL);
 			httpUtils.post(UserCreateAPIURL, request.toString(), headers);
 		}
-		logger.info("EmployeeMasterServiceImpl.updateUserInCzentrix - finish");
+		logger.info("EmployeeMasterServiceImpl.updateUserInCallCentre - finish");
 	}
 
 	@Override
