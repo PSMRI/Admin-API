@@ -671,8 +671,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Async
 	@Override
-	public void createUserByCallCentre(M_User1 user, String authToken) {
-		logger.info("EmployeeMasterServiceImpl.createUserByCallCentre - start");
+	public void createUserInCallCentre(M_User1 user, String authToken) {
+		logger.info("EmployeeMasterServiceImpl.createUserInCallCentre - start");
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
 			String ctiServer = configProperties.getPropertyByName("common-url");
@@ -699,7 +699,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			logger.info("UserCreateAPIURL -> " + UserCreateAPIURL);
 			httpUtils.post(UserCreateAPIURL, request.toString(), headers);
 		}
-		logger.info("EmployeeMasterServiceImpl.createUserByCallCentre - finish");
+		logger.info("EmployeeMasterServiceImpl.createUserInCallCentre - finish");
 	}
 
 	@Async

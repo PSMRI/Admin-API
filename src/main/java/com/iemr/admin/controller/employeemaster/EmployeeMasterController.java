@@ -1434,7 +1434,7 @@ public class EmployeeMasterController {
 
 				demogdata.add(dmData);
 				x++;
-				employeeMasterInter.createUserByCallCentre(m_user, authToken);
+				employeeMasterInter.createUserInCallCentre(m_user, authToken);
 			}
 
 			ArrayList<M_UserDemographics> newlyCreatedDemographicsDetails = employeeMasterInter

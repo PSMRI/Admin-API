@@ -117,7 +117,7 @@ public interface EmployeeMasterInter {
 
 	String createAgent(String agentID, String st);
 
-	void createUserByCallCentre(M_User1 user, String authToken);
+	void createUserInCallCentre(M_User1 user, String authToken);
 
 	Boolean checkingEmpDetails(String userName, String aadhaarNo, String getpAN, String employeeID,
 			String healthProfessionalID);
