@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.repo.fetosensemaster;
+package com.iemr.admin.repo.foetalmonitormaster;
 
 import java.util.ArrayList;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,29 +29,30 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import com.iemr.admin.data.fetosensemaster.M_Fetosense;
+
+import com.iemr.admin.data.foetalmonitormaster.M_FoetalMonitor;
 
 @Repository
 @RestResource(exported = false)
-public interface FetosenseRepository extends CrudRepository<M_Fetosense, Integer> {
+public interface FoetalMonitorRepository extends CrudRepository<M_FoetalMonitor, Integer> {
 	
-	@Query("SELECT F FROM M_Fetosense F WHERE fetosenseTestID = :fetosenseTestID")
-	public M_Fetosense getByFetosenseTestID(@Param("fetosenseTestID") Integer fetosenseTestID);
+	@Query("SELECT F FROM M_FoetalMonitor F WHERE foetalMonitorTestID = :foetalMonitorTestID")
+	public M_FoetalMonitor getByFoetalMonitorTestID(@Param("foetalMonitorTestID") Integer foetalMonitorTestID);
 
-	@Query("SELECT F FROM M_Fetosense F WHERE F.providerServiceMapID = :psmID")
-	public ArrayList<M_Fetosense> getByProviderServiceMapID(@Param("psmID") Integer psmID);
+	@Query("SELECT F FROM M_FoetalMonitor F WHERE F.providerServiceMapID = :psmID")
+	public ArrayList<M_FoetalMonitor> getByProviderServiceMapID(@Param("psmID") Integer psmID);
 	
 	@Modifying
 	@Transactional
-	@Query(" UPDATE M_Fetosense SET testName = :testName, testDesc = :testDesc, "
-			+ "modifiedBy = :modifiedBy WHERE fetosenseTestID = :fetosenseTestID ")
-	public Integer updateFetosenseDetails(@Param("fetosenseTestID") Integer fetosenseTestID,
+	@Query(" UPDATE M_FoetalMonitor SET testName = :testName, testDesc = :testDesc, "
+			+ "modifiedBy = :modifiedBy WHERE foetalMonitorTestID = :foetalMonitorTestID ")
+	public Integer updateFoetalMonitorDetails(@Param("foetalMonitorTestID") Integer foetalMonitorTestID,
 			@Param("testName") String testName, @Param("testDesc") String testDesc,
 			@Param("modifiedBy") String modifiedBy);
 
 	@Modifying
 	@Transactional
-	@Query("UPDATE M_Fetosense SET deleted = :status WHERE fetosenseTestID = :fetosenseTestID")
-	public int updateFetosenseStatus(@Param("fetosenseTestID") Integer fetosenseTestID, @Param("status") Boolean status);
+	@Query("UPDATE M_FoetalMonitor SET deleted = :status WHERE foetalMonitorTestID = :foetalMonitorTestID")
+	public int updateFoetalMonitorStatus(@Param("foetalMonitorTestID") Integer foetalMonitorTestID, @Param("status") Boolean status);
 }
 	

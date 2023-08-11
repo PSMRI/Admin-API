@@ -119,24 +119,22 @@ public interface VanMasterRepository extends CrudRepository<M_Van, Integer>{
 //	List<Objects[]> getNonMappedAvailableVans(@Param("parkingPlaceID")String parkingPlaceID, @Param("vanTypeID")String vanTypeID,@Param("providerServiceMapID") Integer providerServiceMapID);
 
 	/***
-	 * @author DU20091017
-	 * @param vanfetosenseIDmapped
+	 * @param vanfoetalMonitorIDmapped
 	 * @param vanID
 	 * @return
-	 * created to update the van and fetosenseDeviceID mapping 
+	 * created to update the van and FoetalMonitorDeviceID mapping 
 	 */
 	@Modifying
 	@Transactional
-	@Query("UPDATE M_Van mv SET mv.vanfetosenseIDmapped = :vanfetosenseIDmapped WHERE mv.vanID = :vanID ")
-	public int updateVanFetosenesmapping(@Param("vanfetosenseIDmapped") Boolean vanfetosenseIDmapped, @Param("vanID") Integer vanID);
+	@Query("UPDATE M_Van mv SET mv.vanfoetalMonitorIDmapped = :vanfoetalMonitorIDmapped WHERE mv.vanID = :vanID ")
+	public int updateVanFoetalMonitorsmapping(@Param("vanfoetalMonitorIDmapped") Boolean vanfoetalMonitorIDmapped, @Param("vanID") Integer vanID);
 	
 	/***
-	 * @author DU20091017
 	 * @param providerServiceMapID
 	 * @return
 	 */
 	@Query("Select mv.vanID, mv.vehicalNo,mv.vanName from M_Van mv WHERE mv.providerServiceMapID = :providerServiceMapID "
-			+ " and mv.vanTypeID = :vanTypeID and mv.parkingPlaceID = :parkingPlaceID and mv.vanfetosenseIDmapped = false")
+			+ " and mv.vanTypeID = :vanTypeID and mv.parkingPlaceID = :parkingPlaceID and mv.vanfoetalMonitorIDmapped = false")
 	public ArrayList<Object[]> getVanIDNotMappedWithDevice(@Param("vanTypeID") Integer vanTypeID,
 			@Param("parkingPlaceID") Integer parkingPlaceID,@Param("providerServiceMapID") Integer providerServiceMapID);
 	

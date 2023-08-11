@@ -19,206 +19,139 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.data.fetosensemaster;
+package com.iemr.admin.data.foetalmonitormaster;
 
 import java.sql.Timestamp;
-
+import java.util.ArrayList;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
 import com.google.gson.annotations.Expose;
 
 @Entity
-@Table(name = "m_vanfetosensedeviceidmapping")
-public class FetosenseDeviceID {
-
+@Table(name = "m_fetosensetests")
+public class M_FoetalMonitor {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Expose
-	@Column(name = "VfdID")
-	private Long VfdID;
-
+	@Column(name = "fetosensetestid")
+	private Integer foetalMonitorTestID;
 	@Expose
-	@Column(name = "devicename")
-	private String deviceName;
-
+	@Column(name = "TestName")
+	private String testName;
 	@Expose
-	@Column(name = "deviceID")
-	private String deviceID;
-
-	@Expose
-	@Column(name = "vanID")
-	private Integer vanID;	
-
-	@Expose
-	@Column(name = "parkingplaceID")
-	private Integer parkingPlaceID;
-	
-	@Expose
-	@Column(name = "vanTypeID")
-	private Integer vanTypeID;
-	
-	@Expose
-	@Column(name = "vanName")
-	private String vanName;
-
-	@Expose
-	@Column(name = "ProviderServiceMapID")
-	private Integer providerServiceMapID;	
-	
-	@Expose
-	@Column(name = "deactivated",insertable = false, updatable = true)
-	private Boolean deactivated;	
-	
-	
+	@Column(name = "TestDesc")
+	private String testDesc;
 	@Expose
 	@Column(name = "Deleted", insertable = false, updatable = true)
 	private Boolean deleted;
-
 	@Expose
-	@Column(name = "Processed", insertable = false, updatable = false)
+	@Column(name = "Processed", insertable = false)
 	private String processed;
-
 	@Expose
 	@Column(name = "CreatedBy")
 	private String createdBy;
-
 	@Expose
 	@Column(name = "CreatedDate", insertable = false, updatable = false)
 	private Timestamp createdDate;
-
 	@Expose
 	@Column(name = "ModifiedBy")
 	private String modifiedBy;
-
 	@Expose
 	@Column(name = "LastModDate", insertable = false, updatable = false)
 	private Timestamp lastModDate;
+	@Expose
+	@Column(name = "ProviderServiceMapID")
+	private Integer providerServiceMapID;
 	
-
-	public Long getVfdID() {
-		return VfdID;
+	public Integer getFoetalMonitorTestID() {
+		return foetalMonitorTestID;
 	}
-
-	public void setVfdID(Long vfdID) {
-		VfdID = vfdID;
+	public void setFoetalMonitorTestID(Integer foetalMonitorTestID) {
+		this.foetalMonitorTestID = foetalMonitorTestID;
 	}
-
-	public String getDeviceName() {
-		return deviceName;
+	public String getTestName() {
+		return testName;
 	}
-
-	public void setDeviceName(String deviceName) {
-		this.deviceName = deviceName;
+	public void setTestName(String testName) {
+		this.testName = testName;
 	}
-
-	public String getDeviceID() {
-		return deviceID;
+	public String getTestDesc() {
+		return testDesc;
 	}
-
-	public void setDeviceID(String deviceID) {
-		this.deviceID = deviceID;
+	public void setTestDesc(String testDesc) {
+		this.testDesc = testDesc;
 	}
-
-	public Integer getVanID() {
-		return vanID;
-	}
-
-	public void setVanID(Integer vanID) {
-		this.vanID = vanID;
-	}
-
-	public Integer getProviderServiceMapID() {
-		return providerServiceMapID;
-	}
-
-	public void setProviderServiceMapID(Integer providerServiceMapID) {
-		this.providerServiceMapID = providerServiceMapID;
-	}
-
-	public Boolean getDeactivated() {
-		return deactivated;
-	}
-
-	public void setDeactivated(Boolean deactivated) {
-		this.deactivated = deactivated;
-	}
-
 	public Boolean getDeleted() {
 		return deleted;
 	}
-
 	public void setDeleted(Boolean deleted) {
 		this.deleted = deleted;
 	}
-
-	public String getProcessed() {
-		return processed;
-	}
-
-	public void setProcessed(String processed) {
-		this.processed = processed;
-	}
-
 	public String getCreatedBy() {
 		return createdBy;
 	}
-
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-
 	public Timestamp getCreatedDate() {
 		return createdDate;
 	}
-
 	public void setCreatedDate(Timestamp createdDate) {
 		this.createdDate = createdDate;
 	}
-
 	public String getModifiedBy() {
 		return modifiedBy;
 	}
-
 	public void setModifiedBy(String modifiedBy) {
 		this.modifiedBy = modifiedBy;
 	}
-
 	public Timestamp getLastModDate() {
 		return lastModDate;
 	}
-
 	public void setLastModDate(Timestamp lastModDate) {
 		this.lastModDate = lastModDate;
 	}
-
-	public Integer getParkingPlaceID() {
-		return parkingPlaceID;
+	public Integer getProviderServiceMapID() {
+		return providerServiceMapID;
 	}
-
-	public void setParkingPlaceID(Integer parkingPlaceID) {
-		this.parkingPlaceID = parkingPlaceID;
+	public void setProviderServiceMapID(Integer providerServiceMapID) {
+		this.providerServiceMapID = providerServiceMapID;
 	}
-
-	public Integer getVanTypeID() {
-		return vanTypeID;
+	
+	public M_FoetalMonitor() {
+		
 	}
-
-	public void setVanTypeID(Integer vanTypeID) {
-		this.vanTypeID = vanTypeID;
+	
+	public M_FoetalMonitor(Integer foetalMonitorTestID, String testName, String testDesc, 
+			Integer providerServiceMapID, Boolean deleted, String processed, String createdBy,
+			Timestamp createdDate, String modifiedBy, Timestamp lastModDate) {
+		super();
+		this.foetalMonitorTestID = foetalMonitorTestID;
+		this.testName = testName;
+		this.testDesc = testDesc;
+		this.providerServiceMapID = providerServiceMapID;
+		this.deleted = deleted;
+		this.processed = processed;
+		this.createdBy = createdBy;
+		this.createdDate = createdDate;
+		this.modifiedBy = modifiedBy;
+		this.lastModDate = lastModDate;
 	}
-
-	public String getVanName() {
-		return vanName;
+	
+	public static M_FoetalMonitor getFoetalMonitorTestsMaster(ArrayList<Object[]> obj) {
+		if (obj != null && obj.size() > 0) {
+			Object[] obj1 = obj.get(0);
+			M_FoetalMonitor tmpOBJ = new M_FoetalMonitor((Integer) obj1[0], (String) obj1[1], (String) obj1[2],
+					(Integer) obj1[3], (Boolean) obj1[4], (String) obj1[5],
+					(String) obj1[6], (Timestamp) obj1[7], (String) obj1[8], (Timestamp) obj1[9]);
+			return tmpOBJ;
+		} else {
+			return null;
+		}
 	}
-
-	public void setVanName(String vanName) {
-		this.vanName = vanName;
-	}
-
 }
