@@ -832,7 +832,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	// temp code gievn because =, reset password code change
 	public String generateStrongPassword(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		int iterations = 1000;
+		int iterations = 1001;
 		char[] chars = password.toCharArray();
 		byte[] salt = getSalt();
 
