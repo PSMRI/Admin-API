@@ -47,7 +47,7 @@ public interface UserRepo extends CrudRepository<M_UserTemp, Long> {
 			+ " and scrn.ScreenName=:screenName group by usr.UserID ", nativeQuery = true)
 	ArrayList<M_UserTemp> getUserTM(@Param("serviceproviderID")Integer serviceproviderID,@Param("screenName") String screenName);
 
-	@Query("select new M_UserTemp( u,swy.userSwymedMapID) from M_UserTemp u left join u.userSwymed swy where swy.userSwymedMapID is null "
+	@Query("select new M_UserTemp( u,swy.userVideoConsultationMapID) from M_UserTemp u left join u.userVideoConsultation swy where swy.userVideoConsultationMapID is null "
 			+ " and u.ServiceProviderID=:serviceproviderID and u.designationID=:designationID and u.Deleted=false")
-	ArrayList<M_UserTemp> getunmappedSwymedUser(@Param("serviceproviderID")Integer serviceproviderID,@Param("designationID")Integer designationID);
+	ArrayList<M_UserTemp> getunmappedVideoConsultationUser(@Param("serviceproviderID")Integer serviceproviderID,@Param("designationID")Integer designationID);
 }

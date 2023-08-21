@@ -49,7 +49,7 @@ public class OutputResponse
 	public static final int CODE_EXCEPTION = 5005;
 	public static final int ENVIRONMENT_EXCEPTION = 5006;
 	public static final int PARSE_EXCEPTION = 5007;
-	public static final int SWYMED_EXCEPTION = 5010;
+	public static final int VIDEOCONSULTATION_EXCEPTION = 5010;
 
 	@Expose
 	private int statusCode = GENERIC_FAILURE;
@@ -100,9 +100,9 @@ public class OutputResponse
 				status = "User login failed";
 				errorMessage = thrown.getMessage();
 				break;
-			case "SwyMedException":
-				this.statusCode = SWYMED_EXCEPTION;
-				status = "Swymed failed";
+			case "VideoConsultationException":
+				this.statusCode = VIDEOCONSULTATION_EXCEPTION;
+				status = "VideoConsultation failed";
 				errorMessage = thrown.getMessage();
 				break;
 			case "JSONException":

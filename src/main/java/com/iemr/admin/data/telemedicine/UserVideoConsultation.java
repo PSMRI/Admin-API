@@ -42,31 +42,31 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "m_userswymedmapping")
-public class UserSwymed {
+public class UserVideoConsultation {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Expose
 	@Column(name = "UserSwymedMapID")
-	private Long userSwymedMapID;
+	private Long userVideoConsultationMapID;
 
 	@Expose
 	@Column(name = "userID")
 	private Long userID;
 	@Expose
 	@Column(name = "SwymedID")
-	private Long swymedID;
+	private Long videoConsultationID;
 	@Expose
 	@Column(name = "SwymedPassword")
-	private String swymedPassword;
+	private String videoConsultationPassword;
 	
 	@Expose
 	@Column(name = "SwymedEmailID")
-	private String swymedEmailID;
+	private String videoConsultationEmailID;
 	
 	@Expose
 	@Column(name = "SwymedDomain")
-	private String swymedDomain;
+	private String videoConsultationDomain;
 
 	@Expose
 	@Column(name = "Deleted", insertable = false, updatable = true)
@@ -114,18 +114,18 @@ public class UserSwymed {
 		return outputMapper.gson().toJson(this);
 	}
 	
-	public UserSwymed(){
+	public UserVideoConsultation(){
 		
 	}
 	
 	
-	public UserSwymed(UserSwymed us,String userName,String designationName,Boolean userDeleted,Integer designationID){
-		this.userSwymedMapID=us.userSwymedMapID;
+	public UserVideoConsultation(UserVideoConsultation us,String userName,String designationName,Boolean userDeleted,Integer designationID){
+		this.userVideoConsultationMapID=us.userVideoConsultationMapID;
 		 this.userID=us.userID;
-		 this.swymedID=us.swymedID;
-		 this.swymedPassword=us.swymedPassword;
-		 this.swymedEmailID=us.swymedEmailID;
-		 this.swymedDomain=us.swymedDomain;
+		 this.videoConsultationID=us.videoConsultationID;
+		 this.videoConsultationPassword=us.videoConsultationPassword;
+		 this.videoConsultationEmailID=us.videoConsultationEmailID;
+		 this.videoConsultationDomain=us.videoConsultationDomain;
 		 this.Deleted=us.Deleted;
 		 this.CreatedBy=us.CreatedBy;
 		 this.CreatedDate=us.CreatedDate;

@@ -67,15 +67,15 @@ public class M_Van {
 
 	@Expose
 	@Column(name = "SwymedDomain")
-	private String swymedDomain;
+	private String videoConsultationDomain;
 
 	@Expose
 	@Column(name = "SwymedID")
-	private String swymedID;
+	private String videoConsultationID;
 
 	@Expose
 	@Column(name = "SwymedEmailID")
-	private String swymedEmail;
+	private String videoConsultationEmail;
 
 	@Expose
 	@OneToOne(fetch = FetchType.LAZY)
@@ -119,16 +119,7 @@ public class M_Van {
 	@Transient
 	String stateName;
 
-//	@Expose
-//	@Column(name="DistrictID")
-//	private Integer districtID;
-//	@Expose
-//	@OneToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(updatable = false, insertable = false, name = "districtID")
-//	private M_District m_district;
-//	@Expose
-//	@Transient
-//	String districtName;
+
 
 	@Expose
 	@Column(name = "ParkingPlaceID")
@@ -172,14 +163,10 @@ public class M_Van {
 	@Column(name = "LastModDate", insertable = false, updatable = false)
 	private Date lastModDate;
 
-	// created for van spoke mapping
 	@Expose
 	@Column(name = "vanSpokeMapped", insertable = false, updatable = false)
 	private Boolean vanSpokeMapped;
 
-	/***
-	 * @author DU20091017 creating mapping of vanID and foetalMonitorID
-	 */
 	@Expose
 	@Column(name = "vanfetosenseIDmapped", insertable = false, updatable = false)
 	private Boolean vanfoetalMonitorIDmapped;
@@ -190,8 +177,8 @@ public class M_Van {
 
 	public M_Van(Integer vanID, String vanName, String vehicalNo, Integer vanTypeID, String vanType, Boolean deleted,
 			Integer providerServiceMapID, Integer countryID, String countryName, Integer stateID, String stateName,
-			Integer parkingPlaceID, String parkingPlaceName, Integer districtBlockID, String swymedDomain,
-			String swymedID, String swymedEmail) {
+			Integer parkingPlaceID, String parkingPlaceName, Integer districtBlockID, String videoConsultationDomain,
+			String videoConsultationID, String videoConsultationEmail) {
 		super();
 		this.vanID = vanID;
 		this.vanName = vanName;
@@ -207,15 +194,15 @@ public class M_Van {
 		this.parkingPlaceName = parkingPlaceName;
 		this.deleted = deleted;
 		this.districtBlockID = districtBlockID;
-		this.swymedDomain = swymedDomain;
-		this.swymedEmail = swymedEmail;
-		this.swymedID = swymedID;
+		this.videoConsultationDomain = videoConsultationDomain;
+		this.videoConsultationEmail = videoConsultationEmail;
+		this.videoConsultationID = videoConsultationID;
 	}
 
 	public M_Van(Integer vanID, String vanName, String vehicalNo, Integer vanTypeID, String vanType, Boolean deleted,
 			Integer providerServiceMapID, Integer countryID, String countryName, Integer stateID, String stateName,
-			Integer parkingPlaceID, String parkingPlaceName, Integer districtBlockID, String swymedDomain,
-			String swymedID, String swymedEmail, boolean vanSpokeMapped) {
+			Integer parkingPlaceID, String parkingPlaceName, Integer districtBlockID, String videoConsultationDomain,
+			String videoConsultationID, String videoConsultationEmail, boolean vanSpokeMapped) {
 		super();
 		this.vanID = vanID;
 		this.vanName = vanName;
@@ -231,9 +218,9 @@ public class M_Van {
 		this.parkingPlaceName = parkingPlaceName;
 		this.deleted = deleted;
 		this.districtBlockID = districtBlockID;
-		this.swymedDomain = swymedDomain;
-		this.swymedEmail = swymedEmail;
-		this.swymedID = swymedID;
+		this.videoConsultationDomain = videoConsultationDomain;
+		this.videoConsultationEmail = videoConsultationEmail;
+		this.videoConsultationID = videoConsultationID;
 		this.vanSpokeMapped = vanSpokeMapped;
 	}
 

@@ -23,14 +23,14 @@ package com.iemr.admin.service.telemedicine;
 
 import java.util.HashMap;
 
-import com.iemr.admin.utils.exception.SwyMedException;
+import com.iemr.admin.utils.exception.VideoConsultationException;
 
-public interface SwymedAPIInter {
+public interface VideoConsultationAPIInter {
 
-	Long createUser(HashMap<String,String> obj) throws SwyMedException;
+	Long createUser(HashMap<String,String> obj) throws VideoConsultationException;
 
-	Long editUser(HashMap<String, String> obj, Long long1, String string) throws SwyMedException;
+	Long editUser(HashMap<String, String> obj, Long long1, String string) throws VideoConsultationException;
 
-//	Long activateUser(HashMap<String, String> obj) throws SwyMedException;
+//	Long activateUser(HashMap<String, String> obj) throws VideoConsultationException;
 
 }

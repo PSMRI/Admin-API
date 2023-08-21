@@ -24,23 +24,23 @@ package com.iemr.admin.service.telemedicine;
 import java.util.List;
 
 import com.iemr.admin.data.telemedicine.M_UserTemp;
-import com.iemr.admin.data.telemedicine.SwymedDomain;
-import com.iemr.admin.data.telemedicine.UserSwymed;
-import com.iemr.admin.utils.exception.SwyMedException;
+import com.iemr.admin.data.telemedicine.VideoConsultationDomain;
+import com.iemr.admin.data.telemedicine.UserVideoConsultation;
+import com.iemr.admin.utils.exception.VideoConsultationException;
 
-public interface SwymedInter {
+public interface VideoConsultationInter {
 
 	List<M_UserTemp> getunmappedUser(Integer serviceproviderID, Integer designationID);
 
-	UserSwymed createUser(UserSwymed userSwymed) throws SwyMedException;
+	UserVideoConsultation createUser(UserVideoConsultation userVideoConsultation) throws VideoConsultationException;
 
-	List<UserSwymed> fetchmappedUser(Integer serviceproviderID);
+	List<UserVideoConsultation> fetchmappedUser(Integer serviceproviderID);
 
-	UserSwymed editUser(UserSwymed userSwymed) throws SwyMedException;
+	UserVideoConsultation editUser(UserVideoConsultation userVideoConsultation) throws VideoConsultationException;
 
-	UserSwymed deleteUser(Long userSwymedMapID, Boolean deletedflag, String modifiedBy) throws SwyMedException;
+	UserVideoConsultation deleteUser(Long userVideoConsultationMapID, Boolean deletedflag, String modifiedBy) throws VideoConsultationException;
 
-	List<SwymedDomain> getdomain(Integer serviceproviderID);
+	List<VideoConsultationDomain> getdomain(Integer serviceproviderID);
 
 
 }

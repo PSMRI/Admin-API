@@ -39,15 +39,15 @@ import lombok.Data;
 @Entity
 @Table(name="m_swymeddomain")
 @Data
-public class SwymedDomain {
+public class VideoConsultationDomain {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Expose
 	@Column(name="SwymedDomainID")
-	private Integer swymedDomainID;
+	private Integer videoConsultationDomainID;
 	@Expose
 	@Column(name="SwymedDoamin")
-	private String swymedDoamin;
+	private String videoConsultationDoamin;
 	@Expose
 	@Column(name="ServiceProviderID")
 	private Integer serviceProviderID;

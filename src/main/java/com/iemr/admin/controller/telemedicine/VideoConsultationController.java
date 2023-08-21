@@ -34,28 +34,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.telemedicine.M_UserTemp;
-import com.iemr.admin.data.telemedicine.SwymedDomain;
-import com.iemr.admin.data.telemedicine.UserSwymed;
-import com.iemr.admin.service.telemedicine.SwymedInter;
+import com.iemr.admin.data.telemedicine.VideoConsultationDomain;
+import com.iemr.admin.data.telemedicine.UserVideoConsultation;
+import com.iemr.admin.service.telemedicine.VideoConsultationInter;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping(value = "/swymed")
-public class SwyMedController {
+public class VideoConsultationController {
 
 	@Autowired
-	private SwymedInter swymedInter;
+	private VideoConsultationInter videoConsultationInter;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-	/*
-	 * This api is for fetching All doctors/Nurse / TC Specialist by designation
-	 * those who have not recieved their swymedids.
-	 * 
-	 * 
-	 */
+	
 	@CrossOrigin()
 	@ApiOperation(value = "Get unmapped user", consumes = "application/json", produces = "application/json")
 	@RequestMapping(value = "/getunmappedUser/{serviceproviderID}/{designationID}", headers = "Authorization", method = {
@@ -67,7 +62,7 @@ public class SwyMedController {
 
 		try {
 
-			List<M_UserTemp> createdData = swymedInter.getunmappedUser(serviceproviderID, designationID);
+			List<M_UserTemp> createdData = videoConsultationInter.getunmappedUser(serviceproviderID, designationID);
 
 			response.setResponse(createdData.toString());
 
@@ -86,13 +81,13 @@ public class SwyMedController {
 	@ApiOperation(value = "Create user", consumes = "application/json", produces = "application/json")
 	@RequestMapping(value = "/createUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
-	public String createUserTM(@RequestBody UserSwymed userSwymed) {
+	public String createUserTM(@RequestBody UserVideoConsultation userVideoConsultation) {
 
 		OutputResponse response = new OutputResponse();
 
 		try {
 
-			UserSwymed createdData = swymedInter.createUser(userSwymed);
+			UserVideoConsultation createdData = videoConsultationInter.createUser(userVideoConsultation);
 
 			response.setResponse(createdData.toString());
 
@@ -112,13 +107,13 @@ public class SwyMedController {
 	@ApiOperation(value = "Edit user", consumes = "application/json", produces = "application/json")
 	@RequestMapping(value = "/editUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
-	public String editUser(@RequestBody UserSwymed userSwymed) {
+	public String editUser(@RequestBody UserVideoConsultation userVideoConsultation) {
 
 		OutputResponse response = new OutputResponse();
 
 		try {
 
-			UserSwymed createdData = swymedInter.editUser(userSwymed);
+			UserVideoConsultation createdData = videoConsultationInter.editUser(userVideoConsultation);
 
 			response.setResponse(createdData.toString());
 
@@ -135,16 +130,16 @@ public class SwyMedController {
 
 	@CrossOrigin()
 	@ApiOperation(value = "Delete user", consumes = "application/json", produces = "application/json")
-	@RequestMapping(value = "/deleteUser/{userSwymedMapID}/{deletedflag}/{ModifiedBy}", headers = "Authorization", method = {
+	@RequestMapping(value = "/deleteUser/{userVideoConsultationMapID}/{deletedflag}/{ModifiedBy}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
 	public String createUserTM(@PathVariable("ModifiedBy") String modifiedBy,
-			@PathVariable("userSwymedMapID") Long userSwymedMapID, @PathVariable("deletedflag") Boolean deletedflag) {
+			@PathVariable("userVideoConsultationMapID") Long userVideoConsultationMapID, @PathVariable("deletedflag") Boolean deletedflag) {
 
 		OutputResponse response = new OutputResponse();
 
 		try {
 
-			UserSwymed createdData = swymedInter.deleteUser(userSwymedMapID, deletedflag, modifiedBy);
+			UserVideoConsultation createdData = videoConsultationInter.deleteUser(userVideoConsultationMapID, deletedflag, modifiedBy);
 
 			response.setResponse(createdData.toString());
 
@@ -169,7 +164,7 @@ public class SwyMedController {
 
 		try {
 
-			List<UserSwymed> createdData = swymedInter.fetchmappedUser(serviceproviderID);
+			List<UserVideoConsultation> createdData = videoConsultationInter.fetchmappedUser(serviceproviderID);
 
 			response.setResponse(createdData.toString());
 
@@ -194,7 +189,7 @@ public class SwyMedController {
 
 		try {
 
-			List<SwymedDomain> createdData = swymedInter.getdomain(serviceproviderID);
+			List<VideoConsultationDomain> createdData = videoConsultationInter.getdomain(serviceproviderID);
 
 			response.setResponse(createdData.toString());
 

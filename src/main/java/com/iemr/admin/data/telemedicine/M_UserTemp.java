@@ -92,7 +92,7 @@ public class M_UserTemp {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "UserID", insertable = false, updatable = false)
 	@Expose
-	private UserSwymed userSwymed;
+	private UserVideoConsultation userVideoConsultation;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "DesignationID", insertable = false, updatable = false)
@@ -104,7 +104,7 @@ public class M_UserTemp {
 
 	@Transient
 	@Expose
-	private Long userSwymedMapID;
+	private Long userVideoConsultationMapID;
 
 	@Override
 	public String toString() {
@@ -115,7 +115,7 @@ public class M_UserTemp {
 
 	}
 
-	public M_UserTemp(M_UserTemp user, Long userSwymedMapID) {
+	public M_UserTemp(M_UserTemp user, Long userVideoConsultationMapID) {
 		this.userID = user.userID;
 		this.FirstName = user.FirstName;
 		this.LastName = user.LastName;
@@ -124,6 +124,6 @@ public class M_UserTemp {
 		this.designationID = user.designationID;
 		this.ServiceProviderID = user.ServiceProviderID;
 		this.Deleted = user.Deleted;
-		this.userSwymedMapID = userSwymedMapID;
+		this.userVideoConsultationMapID = userVideoConsultationMapID;
 	}
 }

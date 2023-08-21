@@ -19,23 +19,33 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.repo.telemedicine;
+package com.iemr.admin.utils.exception;
 
-import java.util.List;
+public class VideoConsultationException extends Exception
+{
+	private static final long serialVersionUID = 1L;
+	private String message = null;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
-import org.springframework.stereotype.Repository;
+	public VideoConsultationException(String message, Throwable cause)
+	{
+		super(message);
+		this.message = message;
+		super.setStackTrace(cause.getStackTrace());
+	}
 
-import com.iemr.admin.data.telemedicine.UserSwymed;
+	public VideoConsultationException(String message)
+	{
+		super(message);
+		this.message = message;
+	}
 
-@Repository
-@RestResource(exported = false)
-public interface UserSwymedRepo extends CrudRepository<UserSwymed, Long> {
+	public String toString()
+	{
+		return this.message;
+	}
 
-	@Query("select new UserSwymed(us,u.UserName,desc1.designationName,u.Deleted,desc1.designationID) from UserSwymed us left join us.user u  left join u.designation desc1 where u.ServiceProviderID=:serviceproviderID ")
-	List<UserSwymed> fetchmappedUser(@Param("serviceproviderID")Integer serviceproviderID);
-
+	public String getMessage()
+	{
+		return this.message;
+	}
 }

@@ -81,7 +81,7 @@ public interface VanMasterRepository extends CrudRepository<M_Van, Integer>{
 	List<M_Van> findByFacilityIDAndDeleted(Integer fac,Boolean delete);
 	
 	@Query("SELECT v.vanID, v.vanName, v.vehicalNo, v.vanTypeID, vt.vanType, v.deleted, v.providerServiceMapID, v.countryID, "
-			+ "c.countryName, v.stateID, s.stateName, v.parkingPlaceID, pp.parkingPlaceName,pp.districtBlockID,v.swymedDomain,v.swymedID,v.swymedEmail,v.vanSpokeMapped "
+			+ "c.countryName, v.stateID, s.stateName, v.parkingPlaceID, pp.parkingPlaceName,pp.districtBlockID,v.videoConsultationDomain,v.videoConsultationID,v.videoConsultationEmail,v.vanSpokeMapped "
 			+ " FROM M_Van v "
 			+ " LEFT JOIN v.m_vanType vt "
 			+ " LEFT JOIN v.m_parkingplace pp"
@@ -104,19 +104,7 @@ public interface VanMasterRepository extends CrudRepository<M_Van, Integer>{
 	@Modifying
 	@Query("update M_Van v set v.vanSpokeMapped=:vanSpokeMapped, v.modifiedBy=:modifiedBy where v.vanID =:vanID")
 	int updateVanSpokeMapping(@Param("vanID")Integer vanID, @Param("vanSpokeMapped")Boolean vanSpokeMapped, @Param("modifiedBy")String modifiedBy);
-//	
-//	@Query("SELECT v.vanID, v.vanName, v.vehicalNo, v.vanTypeID, vt.vanType, v.deleted, v.providerServiceMapID, v.countryID, "
-//			+ "c.countryName, v.stateID, s.stateName, v.parkingPlaceID, pp.parkingPlaceName,pp.districtBlockID,v.swymedDomain,v.swymedID,v.swymedEmail "
-//			+ " FROM M_Van v "
-//			+ " LEFT JOIN v.m_vanType vt "
-//			+ " LEFT JOIN v.m_parkingplace pp"
-//			+ " LEFT JOIN v.m_country c"
-//			+ " LEFT JOIN v.state s"
-//			+ " LEFT JOIN v.m_providerServiceMapping p "
-//			+ " where (v.parkingPlaceID IS NULL or cast(v.parkingPlaceID as string) like :parkingPlaceID)"
-//			+ " AND (v.vanTypeID IS NULL or cast(v.vanTypeID as string) like :vanTypeID) "
-//			+ " AND p.providerServiceMapID =:providerServiceMapID and v.vanSpokeMapped is false")
-//	List<Objects[]> getNonMappedAvailableVans(@Param("parkingPlaceID")String parkingPlaceID, @Param("vanTypeID")String vanTypeID,@Param("providerServiceMapID") Integer providerServiceMapID);
+
 
 	/***
 	 * @param vanfoetalMonitorIDmapped

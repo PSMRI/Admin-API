@@ -145,9 +145,9 @@ public class VanMasterController {
 			vanData.setVehicalNo(vanMaster.getVehicalNo());
 			vanData.setVanTypeID(vanMaster.getVanTypeID());
 			vanData.setModifiedBy(vanMaster.getModifiedBy());
-			vanData.setSwymedDomain(vanMaster.getSwymedDomain());
-			vanData.setSwymedEmail(vanMaster.getSwymedEmail());
-			vanData.setSwymedID(vanMaster.getSwymedID());
+			vanData.setVideoConsultationDomain(vanMaster.getVideoConsultationDomain());
+			vanData.setVideoConsultationEmail(vanMaster.getVideoConsultationEmail());
+			vanData.setVideoConsultationID(vanMaster.getVideoConsultationID());
 
 			M_Van updatedData = vanMasterServiceImpl.updateVanData(vanData);
 

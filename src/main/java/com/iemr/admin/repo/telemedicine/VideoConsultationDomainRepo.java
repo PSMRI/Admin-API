@@ -19,33 +19,22 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.utils.exception;
+package com.iemr.admin.repo.telemedicine;
 
-public class SwyMedException extends Exception
-{
-	private static final long serialVersionUID = 1L;
-	private String message = null;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.stereotype.Repository;
 
-	public SwyMedException(String message, Throwable cause)
-	{
-		super(message);
-		this.message = message;
-		super.setStackTrace(cause.getStackTrace());
-	}
+import com.iemr.admin.data.telemedicine.VideoConsultationDomain;
 
-	public SwyMedException(String message)
-	{
-		super(message);
-		this.message = message;
-	}
+@Repository
+@RestResource(exported = false)
+public interface VideoConsultationDomainRepo extends CrudRepository<VideoConsultationDomain, Integer> {
 
-	public String toString()
-	{
-		return this.message;
-	}
+	
+  
 
-	public String getMessage()
-	{
-		return this.message;
-	}
+	
+	
+
 }
