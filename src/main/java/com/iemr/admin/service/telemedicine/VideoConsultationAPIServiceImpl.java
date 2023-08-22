@@ -42,10 +42,10 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 
 	Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 	private static HttpUtils httpUtils = new HttpUtils();
-	private String videoConsultationauth = ConfigProperties.getPropertyByName("videoConsultation-apikey");
-	private String videoConsultation_base_url = ConfigProperties.getPropertyByName("videoConsultation-base-url");
-	private String videoConsultation_createuser = ConfigProperties.getPropertyByName("videoConsultation-createuser-url");
-	private String videoConsultation_edituser = ConfigProperties.getPropertyByName("videoConsultation-edituser-url");
+	private String videoConsultationAuth = ConfigProperties.getPropertyByName("videoConsultation-apikey");
+	private String videoConsultationBaseUrl = ConfigProperties.getPropertyByName("videoConsultation-base-url");
+	private String videoConsultationCreateUser = ConfigProperties.getPropertyByName("videoConsultation-createuser-url");
+	private String videoConsultationEditUser = ConfigProperties.getPropertyByName("videoConsultation-edituser-url");
 	private InputMapper inputMapper = new InputMapper();
 	ObjectMapper mapper = new ObjectMapper();
 
@@ -57,8 +57,8 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 
 		String result;
 		HashMap<String, Object> header = new HashMap<>();
-		if (videoConsultationauth != null) {
-			header.put("X-APIkey-Header", videoConsultationauth);
+		if (videoConsultationAuth != null) {
+			header.put("X-APIkey-Header", videoConsultationAuth);
 		}
 		header.put("Content-Type", "application/json");
 		String input = "{}";
@@ -71,7 +71,7 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 			e.printStackTrace();
 		}
 
-		result = httpUtils.post(videoConsultation_createuser.replace("videoConsultation-base-url", videoConsultation_base_url), input, header);
+		result = httpUtils.post(videoConsultationCreateUser.replace("videoConsultation-base-url", videoConsultationBaseUrl), input, header);
 		OutputResponse identityResponse = inputMapper.gson().fromJson(result, OutputResponse.class);
 		logger.info(result);
 		JsonObject responseObj = (JsonObject) parser.parse(result);
@@ -88,13 +88,13 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 
 		String result;
 		HashMap<String, Object> header = new HashMap<>();
-		if (videoConsultationauth != null) {
-			header.put("X-APIkey-Header", videoConsultationauth);
+		if (videoConsultationAuth != null) {
+			header.put("X-APIkey-Header", videoConsultationAuth);
 		}
 		header.put("Content-Type", "application/json");
 
 		StringBuilder url = new StringBuilder();
-		url.append(videoConsultation_edituser.replace("videoConsultation-base-url", videoConsultation_base_url));
+		url.append(videoConsultationEditUser.replace("videoConsultation-base-url", videoConsultationBaseUrl));
 		url.append("/");
 		url.append(videoConsultationID.toString());
 		url.append("/");
