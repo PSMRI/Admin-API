@@ -42,7 +42,7 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(value = "/swymed")
+@RequestMapping(value = "/videoConsultation")
 public class VideoConsultationController {
 
 	@Autowired
