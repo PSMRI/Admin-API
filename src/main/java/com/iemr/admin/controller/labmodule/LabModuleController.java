@@ -69,6 +69,12 @@ public class LabModuleController {
 	public void setMastersCreationServiceImpl(MastersCreationServiceImpl mastersCreationServiceImpl) {
 		this.mastersCreationServiceImpl = mastersCreationServiceImpl;
 	}
+	
+	@Autowired
+	public void setMastersFetchingServiceImpl(MastersFetchingServiceImpl mastersFetchingServiceImpl) {
+		this.mastersFetchingServiceImpl = mastersFetchingServiceImpl;
+	}
+
 
 	@CrossOrigin
 	@ApiOperation(value = "Create procedure master by provider admin", consumes = "application/json", produces = "application/json")
