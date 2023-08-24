@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.controller.drugstrangth;
+package com.iemr.admin.controller.drugstrength;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-public class DrugSrangth {
+public class DrugSrength {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 	@Autowired
 	private DrugStrangthInter durgStrangthInter;
