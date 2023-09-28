@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -83,5 +84,14 @@ public class IOTController {
 
 		return response.toString();
 
+	}
+	
+	@Value("${IOT_API}")
+    private String IOT_API;
+
+	@ApiOperation(value = "Get IOT URL")
+	@RequestMapping(value = "/getIOTURL", method = RequestMethod.GET, headers = "Authorization")
+	public String getIOT_API() {
+		return IOT_API;
 	}
 }
