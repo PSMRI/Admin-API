@@ -38,8 +38,8 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping("/iotController")
-public class IOTController {
+@RequestMapping("/diagnostics")
+public class SmartDiagnosticsController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -47,8 +47,8 @@ public class IOTController {
 	IOTService iotService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get IOT procedure", consumes = "application/json", produces = "application/json")
-	@RequestMapping(value = "/getIOTProcedure", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Get diagnostic test procedure details", consumes = "application/json", produces = "application/json")
+	@RequestMapping(value = "/getDiagnosticProcedure", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTProcedure() {
 		OutputResponse response = new OutputResponse();
 		logger.info("getIOTProcedure request : {}");
@@ -67,8 +67,8 @@ public class IOTController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get IOT component", consumes = "application/json", produces = "application/json")
-	@RequestMapping(value = "/getIOTComponent", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
+	@ApiOperation(value = "Get diagnostic procedure component details", consumes = "application/json", produces = "application/json")
+	@RequestMapping(value = "/getDiagnosticProcedureComponent", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTComponent() {
 		OutputResponse response = new OutputResponse();
 		logger.info("getIOTComponent request : {}");
@@ -86,12 +86,12 @@ public class IOTController {
 
 	}
 	
-	@Value("${IOT_API}")
-    private String IOT_API;
+	@Value("${biological-screening-device-url}")
+	private String biologicalScreeningDeviceUrl ;
 
-	@ApiOperation(value = "Get IOT URL")
-	@RequestMapping(value = "/getIOTURL", method = RequestMethod.GET, headers = "Authorization")
-	public String getIOT_API() {
-		return IOT_API;
+	@ApiOperation(value = "Get the physiological and biological rapid screening device URL")
+	@RequestMapping(value = "/biologicalScreeningDevice", method = RequestMethod.GET, headers = "Authorization")
+	public String getBiologicalScreeningDeviceUrl() {
+		return biologicalScreeningDeviceUrl;
 	}
 }
