@@ -67,7 +67,7 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 			input = mapper.writeValueAsString(obj);
 
 		} catch (JsonProcessingException e) {
-			logger.error("Error while creating  Drugtype Controller data:" + e);
+			logger.error("Error:" + e);
 
 		}
 
@@ -106,7 +106,7 @@ public class VideoConsultationAPIServiceImpl implements VideoConsultationAPIInte
 			input = mapper.writeValueAsString(obj);
 
 		} catch (JsonProcessingException e) {
-			logger.error("Error while creating  Drugtype Controller data:" + e);
+			logger.error("Error" + e);
 
 		}
 
