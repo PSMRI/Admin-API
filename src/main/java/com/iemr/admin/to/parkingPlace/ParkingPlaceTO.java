@@ -23,10 +23,10 @@ package com.iemr.admin.to.parkingPlace;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
 import com.iemr.admin.data.parkingPlace.M_Parkingplace;
 import com.iemr.admin.data.userParkingPlaceMap.M_UserParkingPlaceMap;
+
+import jakarta.persistence.Transient;
 
 
 public class ParkingPlaceTO {

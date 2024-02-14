@@ -59,7 +59,7 @@ public class MastersMappingServiceImpl implements MastersMappingService {
 			Integer x = procedureComponentMappingRepo.softDeleteProcCompMapping(pcmOBJ.getProcedureID(),
 					pcmOBJ.getCreatedBy());
 			ArrayList<ProcedureComponentMapping> pcmListRS = (ArrayList<ProcedureComponentMapping>) procedureComponentMappingRepo
-					.save(pcmList);
+					.saveAll(pcmList);
 			if (pcmList.size() == pcmListRS.size()) {
 				ArrayList<Object[]> tempListRS = procedureComponentMappingRepo
 						.getProcedureComponentMappingListForProcedureID(pcmOBJ.getProcedureID());

@@ -84,7 +84,7 @@ public class VanServicePointMappingServiceImpl implements VanServicePointMapping
 			List<M_VanServicePointMap> vanServicePointMappings) {
 
 		ArrayList<M_VanServicePointMap> allData = (ArrayList<M_VanServicePointMap>) vanServicePointMappingRepository
-				.save(vanServicePointMappings);
+				.saveAll(vanServicePointMappings);
 
 		return allData;
 	}

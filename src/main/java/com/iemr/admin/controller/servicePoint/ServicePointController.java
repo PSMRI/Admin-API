@@ -40,8 +40,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/servicePointMaster")
@@ -51,10 +53,10 @@ public class ServicePointController {
 	private ServicePointServiceImpl ServicePointServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store service point details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/create/servicePoints", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveServicePoint(
-			@ApiParam(value = "{\"servicePointName\":\"string\", \"servicePointDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"servicePointHQAddress\":\"string\", "
+			@Param(value = "{\"servicePointName\":\"string\", \"servicePointDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"servicePointHQAddress\":\"string\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", \"districtBlockID\":\"integer\", \"districtBranchID\":\"integer\", "
 					+ " \"createdBy\":\"string\", \"deleted\":\"boolean\"}") @RequestBody String ServicePointMaster)
 			throws IEMRException {
@@ -76,10 +78,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service point details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service point details")
 	@RequestMapping(value = "/get/servicePoints", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePoints(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String ServicePointMaster)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String ServicePointMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -99,10 +101,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove service point", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove service point")
 	@RequestMapping(value = "/remove/servicePoint", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteServicePoint(
-			@ApiParam(value = "{\"servicePointID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String ServicePointMaster)
+			@Param(value = "{\"servicePointID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String ServicePointMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -126,10 +128,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit service point", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit service point")
 	@RequestMapping(value = "/edit/servicePoint", headers = "Authorization", method = { RequestMethod.POST })
 	public String editServicePoint(
-			@ApiParam(value = "{\"servicePointID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String ServicePointMaster)
+			@Param(value = "{\"servicePointID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String ServicePointMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -159,11 +161,11 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store service point details by village map", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store service point details by village map")
 	@RequestMapping(value = "/create/servicePointVillageMaps", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String saveServicePointVillageMap(
-			@ApiParam(value = "{\"ServicePointID\":\"integer\", \"DistrictBranchID\":\"integer\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"ServicePointID\":\"integer\", \"DistrictBranchID\":\"integer\", \"providerServiceMapID\":\"integer\", "
 					+ "\"createdBy\":\"string\"}") @RequestBody String servicePointVillageMap)
 			throws IEMRException {
 
@@ -184,10 +186,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service point details by village map", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service point details by village map")
 	@RequestMapping(value = "/get/servicePointVillageMaps", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePointVillageMaps(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"servicePointID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String servicePointVillageMap)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"servicePointID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String servicePointVillageMap)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -208,11 +210,11 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove service point by village map", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove service point by village map")
 	@RequestMapping(value = "/remove/servicePointVillageMap", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String deleteServicePointVillageMap(
-			@ApiParam(value = "{\"servicePointVillageMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String servicePointVillageMap)
+			@Param(value = "{\"servicePointVillageMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String servicePointVillageMap)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -237,10 +239,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit service point by village map", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit service point by village map")
 	@RequestMapping(value = "/edit/servicePointVillageMap", headers = "Authorization", method = { RequestMethod.POST })
 	public String editServicePointVillageMap(
-			@ApiParam(value = "{\"servicePointVillageMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String servicePointVillageMap)
+			@Param(value = "{\"servicePointVillageMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String servicePointVillageMap)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -267,10 +269,10 @@ public class ServicePointController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get unmapped villages", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get unmapped villages")
 	@RequestMapping(value = "/get/unmappedvillages", headers = "Authorization", method = { RequestMethod.POST })
 	public String unmappedvillages(
-			@ApiParam(value = "{\"districtBlockID\":\"integer\", \"providerServiceMapID\":\"integer\"}") @RequestBody String servicePointVillageMap)
+			@Param(value = "{\"districtBlockID\":\"integer\", \"providerServiceMapID\":\"integer\"}") @RequestBody String servicePointVillageMap)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();

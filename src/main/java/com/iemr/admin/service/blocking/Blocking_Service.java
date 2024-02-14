@@ -139,7 +139,7 @@ public class Blocking_Service implements BlockingInter
 	public ArrayList<T_Providerservicemappingdetail> savetpsmd(List<T_Providerservicemappingdetail> resList)
 	{
 		ArrayList<T_Providerservicemappingdetail> data5 =
-				(ArrayList<T_Providerservicemappingdetail>) t_ProviderservicemappingdetailRepo.save(resList);
+				(ArrayList<T_Providerservicemappingdetail>) t_ProviderservicemappingdetailRepo.saveAll(resList);
 		return data5;
 	}
 
@@ -272,7 +272,7 @@ public class Blocking_Service implements BlockingInter
 			AddServiceProvider(List<M_Providerservicemapping_Blocking> resList)
 	{
 		ArrayList<M_Providerservicemapping_Blocking> data =
-				(ArrayList<M_Providerservicemapping_Blocking>) mProviderservicemappingBlockingRepo.save(resList);
+				(ArrayList<M_Providerservicemapping_Blocking>) mProviderservicemappingBlockingRepo.saveAll(resList);
 		return data;
 	}
 
@@ -363,7 +363,7 @@ public class Blocking_Service implements BlockingInter
 	@Override
 	public M_Providerservicemapping_Blocking getDataByProviderServiceMapId(Integer providerServiceMapID)
 	{
-		M_Providerservicemapping_Blocking data = mProviderservicemappingBlockingRepo.findOne(providerServiceMapID);
+		M_Providerservicemapping_Blocking data = mProviderservicemappingBlockingRepo.findByProviderServiceMapID(providerServiceMapID);
 		return data;
 	}
 

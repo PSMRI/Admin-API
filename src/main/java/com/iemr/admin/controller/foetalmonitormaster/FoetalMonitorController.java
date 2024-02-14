@@ -41,8 +41,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @CrossOrigin
@@ -53,7 +55,7 @@ public class FoetalMonitorController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@CrossOrigin
-	@ApiOperation(value = "Create foetal monitor test master by provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create foetal monitor test master by provider admin")
 	@RequestMapping(value = { "/createFetosenseTestMaster" }, method = { RequestMethod.POST })
 	public String createFoetalMonitorTestMaster(@RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
@@ -70,7 +72,7 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch foetal monitor tests master for provider-service-map-id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch foetal monitor tests master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchFetosenseTestMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchFoetalMonitorTestMaster(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -88,9 +90,9 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update foetal monitor tests master for a particular procedure", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update foetal monitor tests master for a particular procedure")
 	@RequestMapping(value = { "/updateFetosenseTestMaster" }, method = { RequestMethod.POST })
-	public String updateProcedureMaster(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			String s = foetalMonitorService.updateFoetalMonitorTestMaster(requestOBJ);
@@ -106,9 +108,9 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update procedure status for enable or disable", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update procedure status for enable or disable")
 	@RequestMapping(value = { "/updateFetosenseTestMasterStatus" }, method = { RequestMethod.POST })
-	public String updateProcedureStatus(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateProcedureStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			JSONObject jsnOBJ = new JSONObject(requestOBJ);
@@ -131,10 +133,10 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "To save foetal monitor device id")
+	@Operation(summary = "To save foetal monitor device id")
 	@RequestMapping(value = "/createFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveFoetalMonitorDeviceID(
-			@ApiParam("[\r\n" + "  {\r\n" + "    \"deviceID\": \"String\",\r\n" + "    \"deviceName\": \"String\",\r\n"
+			@Param("[\r\n" + "  {\r\n" + "    \"deviceID\": \"String\",\r\n" + "    \"deviceName\": \"String\",\r\n"
 					+ "    \"providerServiceMapID\": Integer,\r\n" + "    \"createdBy\": \"String\"\r\n"
 					+ "  }]") @RequestBody ArrayList<FoetalMonitorDeviceID> requestObj,
 			@RequestHeader(value = "Authorization") String authorization) {
@@ -161,10 +163,10 @@ public class FoetalMonitorController {
 	 * @return
 	 */
 	@CrossOrigin
-	@ApiOperation(value = "To save mapping of van id and foetal monitor device id")
+	@Operation(summary = "To save mapping of van id and foetal monitor device id")
 	@RequestMapping(value = "/mapping/vanIDAndDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveVanIDandDeviceIDMapping(
-			@ApiParam("\r\n" + "{\r\n" + "      \"spokeID\":this.spokeID,\r\n"
+			@Param("\r\n" + "{\r\n" + "      \"spokeID\":this.spokeID,\r\n"
 					+ "      \"deviceID\": this.deviceID,\r\n"
 					+ "      \"providerServiceMapID\": this.providerServiceMapID,\r\n"
 					+ "      \"createdBy\": this.commonDataService.uname\r\n" + " \r\n" + "  }\r\n"
@@ -187,10 +189,10 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Provides the foetal monitor device id")
+	@Operation(summary = "Provides the foetal monitor device id")
 	@RequestMapping(value = "/fetch/fetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getFoetalMonitorDeviceID(
-			@ApiParam("{ 'providerServiceMapID': Integer }") @RequestBody String requestObj) {
+			@Param("{ 'providerServiceMapID': Integer }") @RequestBody String requestObj) {
 
 		logger.info("Request Object for getting foetal monitor DeviceID - " + requestObj);
 		OutputResponse output = new OutputResponse();
@@ -211,10 +213,10 @@ public class FoetalMonitorController {
 	 * @return
 	 */
 	@CrossOrigin
-	@ApiOperation(value = "Provides the van id and foetal monitor device id")
+	@Operation(summary = "Provides the van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/vanIDAndFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getVanIDAndDeviceID(
-			@ApiParam("\r\n" + "{\"parkingPlaceID\" : Integer,\r\n" + "                    \"vanTypeID\" : Integer,\r\n"
+			@Param("\r\n" + "{\"parkingPlaceID\" : Integer,\r\n" + "                    \"vanTypeID\" : Integer,\r\n"
 					+ "                    \"providerServiceMapID\" : Integer\r\n" + "                  };\r\n"
 					+ "") @RequestBody String requestObj) {
 
@@ -235,10 +237,10 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Provides the worklist of van id and foetal monitor device id")
+	@Operation(summary = "Provides the worklist of van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/mappingWorklist", method = RequestMethod.POST, headers = "Authorization")
 	public String getMappedWorklist(
-			@ApiParam("\r\n" + "{\"parkingPlaceID\" : Integer,\r\n" + "                    \"vanTypeID\" : Integer,\r\n"
+			@Param("\r\n" + "{\"parkingPlaceID\" : Integer,\r\n" + "                    \"vanTypeID\" : Integer,\r\n"
 					+ "                    \"providerServiceMapID\" : Integer\r\n" + "                  };\r\n"
 					+ "") @RequestBody String requestObj) {
 		logger.info("Request Object for getting van ID and foetal monitor DeviceID - " + requestObj);
@@ -256,10 +258,10 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update device id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update device id")
 	@RequestMapping(value = "/update/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String updateFoetalMonitorDeviceID(
-			@ApiParam("" + "{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
+			@Param("" + "{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
 					+ "        \"deviceID\": \"String\",\r\n" + "        \"vanID\": \"Integer\",\r\n"
 					+ "        \"parkingPlaceID\": \"Integer\",\r\n" + "        \"vanTypeID\": \"Integer\",\r\n"
 					+ "        \"vanName\": \"String\",\r\n" + "        \"providerServiceMapID\": \"Integer\",\r\n"
@@ -290,10 +292,10 @@ public class FoetalMonitorController {
 	 * @return
 	 */
 	@CrossOrigin
-	@ApiOperation(value = "Delete foetal monitor device id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete foetal monitor device id")
 	@RequestMapping(value = "/delete/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String deleteFoetalMonitorDeviceID(
-			@ApiParam("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
+			@Param("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
 					+ "        \"deviceID\": \"String\",\r\n" + "        \"vanID\": \"Integer\",\r\n"
 					+ "        \"parkingPlaceID\": \"Integer\",\r\n" + "        \"vanTypeID\": \"Integer\",\r\n"
 					+ "        \"vanName\": \"String\",\r\n" + "        \"providerServiceMapID\": \"Integer\",\r\n"
@@ -317,10 +319,10 @@ public class FoetalMonitorController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update van id and foetal monitor device id mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update van id and foetal monitor device id mapping")
 	@RequestMapping(value = "/update/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String updateMapping(
-			@ApiParam("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
+			@Param("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "        \"deviceName\": \"String\",\r\n"
 					+ "        \"deviceID\": \"String\",\r\n" + "        \"vanID\": \"Integer\",\r\n"
 					+ "        \"parkingPlaceID\": \"Integer\",\r\n" + "        \"vanTypeID\": \"Integer\",\r\n"
 					+ "        \"vanName\": \"String\",\r\n" + "        \"providerServiceMapID\": \"Integer\",\r\n"
@@ -349,10 +351,10 @@ public class FoetalMonitorController {
 	 * @return
 	 */
 	@CrossOrigin
-	@ApiOperation(value = "Deactivate van id and foetal monitor device id mapping ", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Deactivate van id and foetal monitor device id mapping ")
 	@RequestMapping(value = "/delete/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String deleteVanIDAndFoetalMonitorDeviceID(
-			@ApiParam("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "  \"vanID\": \"Integer\",\r\n"
+			@Param("{\r\n" + "        \"VfdID\": \"Integer\",\r\n" + "  \"vanID\": \"Integer\",\r\n"
 					+ "  \"deactivated\": \"Boolean\", \r\n" + "}") @RequestBody String requestObj,
 			@RequestHeader(value = "Authorization") String Authorization) {
 		OutputResponse response = new OutputResponse();

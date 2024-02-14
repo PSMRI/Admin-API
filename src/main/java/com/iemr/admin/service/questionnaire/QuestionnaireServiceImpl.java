@@ -73,7 +73,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				options.setProviderServiceMapID(questionnaireDetail.getProviderServiceMapID());
 				options.setQuestionID(questionnaireDetail.getQuestionID());
 			}
-			questionnaireValuesRepository.save(QuestionValues);
+			questionnaireValuesRepository.saveAll(QuestionValues);
 			Count++;
 		}
 

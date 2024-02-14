@@ -39,7 +39,8 @@ import com.iemr.admin.service.supplier.SupplierInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class SupplierMasterController {
@@ -49,7 +50,7 @@ public class SupplierMasterController {
 	private SupplierInter supplierInter;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create supplier", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create supplier")
 	@RequestMapping(value = "/createSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createSupplier(@RequestBody String createSupplier) {
@@ -70,7 +71,7 @@ public class SupplierMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get supplier", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get supplier")
 	@RequestMapping(value = "/getSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getSupplier(@RequestBody String getSupplier) {
@@ -88,7 +89,7 @@ public class SupplierMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit supplier", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit supplier")
 	@RequestMapping(value = "/editSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editSupplier(@RequestBody String editSupplier) {
@@ -127,7 +128,7 @@ public class SupplierMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete supplier", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete supplier")
 	@RequestMapping(value = "/deleteSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String deleteSupplier(@RequestBody String deleteSupplier) {
@@ -149,7 +150,7 @@ public class SupplierMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Check supplier code", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Check supplier code")
 	@RequestMapping(value = "/checkSupplierCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String checkSupplierCode(@RequestBody String deleteSupplier) {

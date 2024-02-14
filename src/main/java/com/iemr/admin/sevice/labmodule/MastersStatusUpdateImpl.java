@@ -180,7 +180,7 @@ public class MastersStatusUpdateImpl implements MasterStatusUpdate {
 								.getComponentResultMapList(compOptList, cmOBJ.getProviderServiceMapID(),
 										cmOBJ.getModifiedBy(), cmOBJ.getTestComponentID());
 						ArrayList<ComponentResultMap> comResultMapObjListRS = (ArrayList<ComponentResultMap>) componentResultMapRepo
-								.save(comResultMapObjList);
+								.saveAll(comResultMapObjList);
 						if (comResultMapObjList.size() == comResultMapObjListRS.size()) {
 							ArrayList<Object[]> componentDetailsRS = componentMasterRepo
 									.getComponentDetailsByCompID(cmOBJ.getTestComponentID());

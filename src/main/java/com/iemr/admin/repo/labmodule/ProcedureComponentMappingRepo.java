@@ -27,7 +27,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +38,6 @@ import com.iemr.admin.data.labmodule.ProcedureComponentMapping;
  *
  */
 @Repository
-@RestResource(exported = false)
 public interface ProcedureComponentMappingRepo extends CrudRepository<ProcedureComponentMapping, Integer> {
 	@Query("SELECT distinct pcm.procedureID, pcm.testComponentID, pm.procedureName, pm.procedureDesc, cm.testComponentName, "
 			+ " pcm.createdBy, cm.testComponentDesc "

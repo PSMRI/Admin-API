@@ -36,8 +36,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 public class CalibrationController {
@@ -51,11 +53,11 @@ public class CalibrationController {
 	 * @return CalibrationStripMasterData
 	 */
 	@CrossOrigin()
-	@ApiOperation(value = "Create calibration strip", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create calibration strip")
 	@RequestMapping(value = "/createCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createCalibrationStrip(
-			@ApiParam(value = "{\"stripCode\":\"String\",\"expiryDate\":\"Timestamp\",\"providerServiceMapID\":\"Integer\",\"createdBy\":\"String\"}") @RequestBody String request) {
+			@Param(value = "{\"stripCode\":\"String\",\"expiryDate\":\"Timestamp\",\"providerServiceMapID\":\"Integer\",\"createdBy\":\"String\"}") @RequestBody String request) {
 
 		OutputResponse response = new OutputResponse();
 		logger.info("Request object for Calibration strip master creation :" + request);
@@ -84,11 +86,11 @@ public class CalibrationController {
 	 * @return CalibrationStripList
 	 */
 	@CrossOrigin()
-	@ApiOperation(value = "Fetch calibration strip", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch calibration strip")
 	@RequestMapping(value = "/fetchCalibrationStrips", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String fetchCalibrationStrips(
-			@ApiParam(value = "{\"providerServiceMapID\":\"Integer\"}") @RequestBody String request) {
+			@Param(value = "{\"providerServiceMapID\":\"Integer\"}") @RequestBody String request) {
 
 		OutputResponse response = new OutputResponse();
 		logger.info("Request object for fetching Calibration strip :" + request);
@@ -112,11 +114,11 @@ public class CalibrationController {
 	 * @return Response
 	 */
 	@CrossOrigin()
-	@ApiOperation(value = "Delete calibration strip", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete calibration strip")
 	@RequestMapping(value = "/deleteCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteCalibrationStrip(
-			@ApiParam(value = "{\"deleted\":\"Boolean\",\"CalibrationStripID\":\"Integer\"}") @RequestBody String request) {
+			@Param(value = "{\"deleted\":\"Boolean\",\"CalibrationStripID\":\"Integer\"}") @RequestBody String request) {
 
 		OutputResponse response = new OutputResponse();
 		logger.info("Request object to delete Calibration data :" + request);
@@ -140,11 +142,11 @@ public class CalibrationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update calibration strip", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update calibration strip")
 	@RequestMapping(value = "/updateCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateCalibrationStrip(
-			@ApiParam(value = "{\"stripCode\":\"String\",\"expiryDate\":\"Timestamp\",\"providerServiceMapID\":\"Integer\",\"createdBy\":\"String\"}") @RequestBody String request) {
+			@Param(value = "{\"stripCode\":\"String\",\"expiryDate\":\"Timestamp\",\"providerServiceMapID\":\"Integer\",\"createdBy\":\"String\"}") @RequestBody String request) {
 
 		OutputResponse response = new OutputResponse();
 		logger.info("Request object for updating Calibration strip data :" + request);

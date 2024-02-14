@@ -35,11 +35,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iemr.admin.data.rolemaster.M_Role;
+import com.iemr.admin.data.rolemaster.RoleMaster;
 import com.iemr.admin.data.rolemaster.M_Screen;
 import com.iemr.admin.data.rolemaster.M_UserservicerolemappingForRoleProviderAdmin;
 import com.iemr.admin.data.rolemaster.RoleScreenMapping;
-import com.iemr.admin.data.rolemaster.ServiceMaster;
+import com.iemr.admin.data.rolemaster.ServiceMasterRole;
 import com.iemr.admin.data.rolemaster.StateServiceMapping;
 import com.iemr.admin.repository.rolemaster.RoleScreenMappingRepo;
 import com.iemr.admin.service.rolemaster.Role_MasterInter;
@@ -48,7 +48,8 @@ import com.iemr.admin.to.rolemaster.RoleMasterTO1;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class RoleMasterController {
@@ -64,7 +65,7 @@ public class RoleMasterController {
 	private Integer serviceMapid;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/state", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String searchRole(@RequestBody String stateserviceMapping1) {
@@ -100,7 +101,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service by service provider id and state id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service by service provider id and state id")
 	@RequestMapping(value = "m/role/service", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getService(@RequestBody String stateserviceMapping1) {
@@ -136,7 +137,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service by provider id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service by provider id")
 	@RequestMapping(value = "m/role/serviceNew", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getServiceByProviderId(@RequestBody String stateserviceMapping1) {
@@ -173,7 +174,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get state by provider id and service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get state by provider id and service id")
 	@RequestMapping(value = "m/role/stateNew", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getStateByProviderIdAndServiceID(@RequestBody String stateserviceMapping1) {
@@ -214,7 +215,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/search", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllRole(@RequestBody String stateserviceMapping1) {
@@ -226,7 +227,7 @@ public class RoleMasterController {
 
 			StateServiceMapping stateserviceMapping = InputMapper.gson().fromJson(stateserviceMapping1,
 					StateServiceMapping.class);
-			ServiceMaster stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMaster.class);
+			ServiceMasterRole stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMasterRole.class);
 
 			logger.debug("converting into json to gson" + stateserviceMapping1);
 
@@ -247,7 +248,7 @@ public class RoleMasterController {
 
 			Map<String, Object> resMap = null;
 			List<Map<String, Object>> resList = new ArrayList<>();
-			ArrayList<M_Role> rolesData = roleMasterInter.getProStateServRoles(tempProSerStatMapID);
+			ArrayList<RoleMaster> rolesData = roleMasterInter.getProStateServRoles(tempProSerStatMapID);
 
 			logger.info("" + serviceMapid);
 
@@ -266,7 +267,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/searchNew", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllRoleNew(@RequestBody String stateserviceMapping1) {
@@ -278,9 +279,9 @@ public class RoleMasterController {
 
 			StateServiceMapping stateserviceMapping = InputMapper.gson().fromJson(stateserviceMapping1,
 					StateServiceMapping.class);
-			ServiceMaster stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMaster.class);
+			ServiceMasterRole stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMasterRole.class);
 
-			ArrayList<M_Role> rolesData = roleMasterInter
+			ArrayList<RoleMaster> rolesData = roleMasterInter
 					.getProStateServRoles(stateserviceMapping.getProviderServiceMapID());
 
 			logger.info("" + serviceMapid);
@@ -301,7 +302,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all roles", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all roles")
 	@RequestMapping(value = "m/role/searchV1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllRoles(@RequestBody String stateserviceMapping1) {
@@ -311,8 +312,8 @@ public class RoleMasterController {
 
 		try {
 
-			M_Role roleSearch = InputMapper.gson().fromJson(stateserviceMapping1, M_Role.class);
-			ArrayList<M_Role> rolesData = roleMasterInter.getProStateServRolesV1(roleSearch.getProviderServiceMapID());
+			RoleMaster roleSearch = InputMapper.gson().fromJson(stateserviceMapping1, RoleMaster.class);
+			ArrayList<RoleMaster> rolesData = roleMasterInter.getProStateServRolesV1(roleSearch.getProviderServiceMapID());
 			logger.info("" + serviceMapid);
 			response.setResponse(rolesData.toString());
 
@@ -329,7 +330,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save role")
 	@RequestMapping(value = "m/role/addRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String saveRole(@RequestBody String mRole1) {
@@ -338,14 +339,14 @@ public class RoleMasterController {
 		logger.debug("getAll Role request is " + mRole1);
 		try {
 
-			M_Role[] mRoles = InputMapper.gson().fromJson(mRole1, M_Role[].class);
-			List<M_Role> mRole = Arrays.asList(mRoles);
+			RoleMaster[] mRoles = InputMapper.gson().fromJson(mRole1, RoleMaster[].class);
+			List<RoleMaster> mRole = Arrays.asList(mRoles);
 			logger.debug("getting role request is " + mRole1);
 
 			RoleMasterTO[] mRoles2 = InputMapper.gson().fromJson(mRole1, RoleMasterTO[].class);
 			List<RoleMasterTO> rsmList = Arrays.asList(mRoles2);
 
-			List<M_Role> mrolelist = roleMasterInter.addRole(mRole);
+			List<RoleMaster> mrolelist = roleMasterInter.addRole(mRole);
 			tempRajeev(mrolelist, rsmList);
 
 			response.setResponse(mrolelist.toString());
@@ -361,7 +362,7 @@ public class RoleMasterController {
 		return response.toString();
 	}
 
-	public void tempRajeev(List<M_Role> mrolelist, List<RoleMasterTO> rsmList) {
+	public void tempRajeev(List<RoleMaster> mrolelist, List<RoleMasterTO> rsmList) {
 		int x = 0;
 		RoleScreenMapping rsmOBJ;
 		List<RoleScreenMapping> rsmList1 = new ArrayList<>();
@@ -381,7 +382,7 @@ public class RoleMasterController {
 
 				x++;
 			}
-			List<RoleScreenMapping> rsmList2 = (List<RoleScreenMapping>) roleScreenMappingRepo.save(rsmList1);
+			List<RoleScreenMapping> rsmList2 = (List<RoleScreenMapping>) roleScreenMappingRepo.saveAll(rsmList1);
 
 		} else {
 
@@ -389,7 +390,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit role")
 	@RequestMapping(value = "m/role/editRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editRole(@RequestBody String mRole1) {
@@ -398,7 +399,7 @@ public class RoleMasterController {
 		logger.debug(" get edit request is" + mRole1);
 		try {
 
-			M_Role mRole = InputMapper.gson().fromJson(mRole1, M_Role.class);
+			RoleMaster mRole = InputMapper.gson().fromJson(mRole1, RoleMaster.class);
 			logger.debug(" converting into json to gson" + mRole1);
 
 			RoleScreenMapping mRoles2 = InputMapper.gson().fromJson(mRole1, RoleScreenMapping.class);
@@ -408,7 +409,7 @@ public class RoleMasterController {
 			 * storing into the editdata ...
 			 */
 
-			M_Role editdata = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
+			RoleMaster editdata = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
 			logger.debug(" calling method for getting role based on role id" + mRole.getRoleID());
 
 			editdata.setRoleName(mRole.getRoleName());
@@ -419,7 +420,7 @@ public class RoleMasterController {
 			 * variable..
 			 */
 
-			M_Role role = roleMasterInter.modifydata(editdata);
+			RoleMaster role = roleMasterInter.modifydata(editdata);
 
 			String screenMapping = roleMasterInter.settingScreenId(mRoles2.getsRSMappingID(), mRoles2.getScreenID());
 
@@ -436,7 +437,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete role")
 	@RequestMapping(value = "m/role/deleteRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteRole(@RequestBody String mRole1) {
@@ -444,9 +445,9 @@ public class RoleMasterController {
 		OutputResponse response = new OutputResponse();
 		try {
 
-			M_Role mRole = InputMapper.gson().fromJson(mRole1, M_Role.class);
+			RoleMaster mRole = InputMapper.gson().fromJson(mRole1, RoleMaster.class);
 
-			M_Role deleteData = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
+			RoleMaster deleteData = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
 
 			deleteData.setDeleted(mRole.getDeleted());
 
@@ -470,7 +471,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search feature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search feature")
 	@RequestMapping(value = "m/searchFeature", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String searchFeature(@RequestBody String Feature) {
@@ -508,7 +509,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete feature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete feature")
 	@RequestMapping(value = "m/deleteFeature", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String deleteFeature(@RequestBody String mRole1) {
@@ -522,7 +523,7 @@ public class RoleMasterController {
 			 * storing into the deleteddata ...
 			 */
 
-			M_Role deleteData = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
+			RoleMaster deleteData = roleMasterInter.getRoleByRoleId(mRole.getRoleID());
 			/**
 			 * setting the data into deletedata and seving into the table..
 			 */
@@ -548,7 +549,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get role data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get role data")
 	@RequestMapping(value = "m/role/search1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllRole1(@RequestBody String stateserviceMapping1) {
@@ -560,7 +561,7 @@ public class RoleMasterController {
 
 			StateServiceMapping stateserviceMapping = InputMapper.gson().fromJson(stateserviceMapping1,
 					StateServiceMapping.class);
-			ServiceMaster stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMaster.class);
+			ServiceMasterRole stateserviceMapping3 = InputMapper.gson().fromJson(stateserviceMapping1, ServiceMasterRole.class);
 			logger.debug("converting into json to gson" + stateserviceMapping1);
 
 			/**
@@ -591,7 +592,7 @@ public class RoleMasterController {
 
 			Map<String, Object> resMap = null;
 			List<Map<String, Object>> resList = new ArrayList<>();
-			ArrayList<M_Role> rolesData = roleMasterInter.getProStateServRoles1(tempProSerStatMapID);
+			ArrayList<RoleMaster> rolesData = roleMasterInter.getProStateServRoles1(tempProSerStatMapID);
 
 			logger.info("" + serviceMapid);
 
@@ -610,7 +611,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit role feature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit role feature")
 	@RequestMapping(value = "/mapExterafeature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editRolefeature(@RequestBody String editRolefeature) {
@@ -642,16 +643,16 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search TM role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search TM role")
 	@RequestMapping(value = "/searchRoleTM", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String searchRoleTM(@RequestBody String stateserviceMapping1) {
 		OutputResponse response = new OutputResponse();
 		logger.debug(" get edit request is" + stateserviceMapping1);
 		try {
-			M_Role roleSearch = InputMapper.gson().fromJson(stateserviceMapping1, M_Role.class);
+			RoleMaster roleSearch = InputMapper.gson().fromJson(stateserviceMapping1, RoleMaster.class);
 
-			List<M_Role> mRoles3 = roleMasterInter.getRoleMasterTM(roleSearch.getProviderServiceMapID());
+			List<RoleMaster> mRoles3 = roleMasterInter.getRoleMasterTM(roleSearch.getProviderServiceMapID());
 
 			response.setResponse(mRoles3.toString());
 
@@ -665,7 +666,7 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all active role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all active role")
 	@RequestMapping(value = "m/role/search/active", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllRoleActive(@RequestBody String stateserviceMapping1) {
@@ -678,7 +679,7 @@ public class RoleMasterController {
 			StateServiceMapping stateserviceMapping = InputMapper.gson().fromJson(stateserviceMapping1,
 					StateServiceMapping.class);
 
-			ArrayList<M_Role> rolesData = roleMasterInter
+			ArrayList<RoleMaster> rolesData = roleMasterInter
 					.getProStateServRolesActive(stateserviceMapping.getProviderServiceMapID());
 
 			logger.info("" + serviceMapid);
@@ -698,17 +699,17 @@ public class RoleMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Configure wrap up time", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Configure wrap up time")
 	@RequestMapping(value = "m/role/configWrap", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
-	public String configWrapUptime(@RequestBody M_Role role) {
+	public String configWrapUptime(@RequestBody RoleMaster role) {
 
 		OutputResponse response = new OutputResponse();
 		logger.debug(" getting role Search request is" + role);
 
 		try {
 
-			M_Role rolesData = roleMasterInter.configWrapUpTime(role);
+			RoleMaster rolesData = roleMasterInter.configWrapUpTime(role);
 
 			logger.info("" + rolesData);
 

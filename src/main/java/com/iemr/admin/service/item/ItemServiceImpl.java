@@ -122,40 +122,15 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public List<ItemMaster> addAllItemMaster(List<ItemMaster> itemMaster) {
 		// TODO Auto-generated method stub
-		return (List<ItemMaster>) itemRepo.save(itemMaster);
+		return (List<ItemMaster>) itemRepo.saveAll(itemMaster);
 	}
 
-	// @Override
-	// public List<M_ItemIssueConfig>
-	// addAllItemIssueConfig(List<M_ItemIssueConfig> itemMaster) {
-	// // TODO Auto-generated method stub
-	// return (List<M_ItemIssueConfig>) itemIssueRepo.save(itemMaster);
-	// };
-	//
-	// public M_ItemIssueConfig updateItemIssueConfig(M_ItemIssueConfig
-	// itemMaster) {
-	// // TODO Auto-generated method stub
-	// return (M_ItemIssueConfig) itemIssueRepo.save(itemMaster);
-	// }
-	//
-	// @Override
-	// public M_ItemIssueConfig findItemIssueConfig(Integer itemIssueConfigID) {
-	// // TODO Auto-generated method stub
-	// return itemIssueRepo.findOne(itemIssueConfigID);
-	// }
-	//
-	// @Override
-	// public List<M_ItemIssueConfig>
-	// findItemIssueConfigProviderServiceMapID(Integer providerServiceMapID) {
-	// // TODO Auto-generated method stub
-	// return itemIssueRepo.findByProviderServiceMapID(providerServiceMapID);
-	// }
-
+	
 	@Override
 	public ItemMaster getItemMasterByID(Integer itemMasterID) {
 		// TODO Auto-generated method stub
 
-		return itemRepo.findOne(itemMasterID);
+		return itemRepo.findByItemID(itemMasterID);
 	}
 
 	public ItemMaster getItemMasterCatByID(Integer itemMasterID) {
@@ -204,13 +179,13 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public M_ItemCategory getItemCategory(Integer catID) {
 		// TODO Auto-generated method stub
-		return itemCategoryRepo.findOne(catID);
+		return itemCategoryRepo.findByItemCategoryID(catID);
 	}
 
 	@Override
 	public Integer createItemCategories(List<M_ItemCategory> itemCategories) {
 		Integer categoryId = 0;
-		List<M_ItemCategory> categories = (List<M_ItemCategory>) itemCategoryRepo.save(itemCategories);
+		List<M_ItemCategory> categories = (List<M_ItemCategory>) itemCategoryRepo.saveAll(itemCategories);
 		if (null != categories && categories.size() > 0) {
 			categoryId = categories.get(0).getItemCategoryID();
 		}
@@ -237,7 +212,7 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public Integer createItemForms(List<M_ItemForm> itemForms) {
 		Integer itemFormID = 0;
-		List<M_ItemForm> forms = (List<M_ItemForm>) itemFormRepo.save(itemForms);
+		List<M_ItemForm> forms = (List<M_ItemForm>) itemFormRepo.saveAll(itemForms);
 		if (null != forms && forms.size() > 0) {
 			itemFormID = forms.get(0).getItemFormID();
 		}
@@ -262,7 +237,7 @@ public class ItemServiceImpl implements ItemService {
 	@Override
 	public Integer createRoutes(List<M_Route> routes) {
 		Integer routeID = 0;
-		List<M_Route> routeList = (List<M_Route>) routeRepo.save(routes);
+		List<M_Route> routeList = (List<M_Route>) routeRepo.saveAll(routes);
 		if (null != routeList && routeList.size() > 0) {
 			routeID = routeList.get(0).getRouteID();
 		}

@@ -146,7 +146,7 @@ public class USRAgentMappingServiceImpl implements USRAgentMappingService
 					requestObj.getCti_CampaignName(), requestObj.getIsAvailable());
 		} else if (requestObj.getCti_CampaignName() != null)
 		{
-			resultSet = usrAgentMappingRepository.getAllAgentIds(requestObj.getProviderServiceMapID(),
+			resultSet = usrAgentMappingRepository.getAllAgentId(requestObj.getProviderServiceMapID(),
 					requestObj.getCti_CampaignName());
 		} else
 		{

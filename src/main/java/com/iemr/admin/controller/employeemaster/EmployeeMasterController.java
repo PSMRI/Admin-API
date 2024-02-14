@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,12 +70,12 @@ import com.iemr.admin.to.employeemaster.UserTO;
 import com.iemr.admin.to.employeemaster.UserTO1;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 
 @PropertySource("classpath:application.properties")
 
@@ -86,8 +85,8 @@ public class EmployeeMasterController {
 	@Autowired
 	private M_DesignationInter m_DesignationInter;
 
-	ClientConfig config = new DefaultClientConfig();
-	Client client = Client.create(config);
+	ClientConfig config = new ClientConfig();
+	Client client = ClientBuilder.newClient(config);
 
 	private InputMapper inputMapper = new InputMapper();
 
@@ -109,7 +108,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all role")
 	@RequestMapping(value = "/m/getAllRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllRole(@RequestBody String getAllRole) {
@@ -149,7 +148,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee")
 	@RequestMapping(value = "/m/SearchEmployee", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee(@RequestBody String searchEmployee) {
@@ -192,7 +191,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 1", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 1")
 	@RequestMapping(value = "/m/SearchEmployee1", headers = "Authorization", method = RequestMethod.POST, produces = "application/json")
 	public String searchEmployee1(@RequestBody String searchEmployee1) {
 
@@ -234,7 +233,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 2", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 2")
 	@RequestMapping(value = "/m/SearchEmployee2", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee2(@RequestBody String searchEmployee1) {
@@ -281,7 +280,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 3", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 3")
 	@RequestMapping(value = "/m/SearchEmployee3", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee3(@RequestBody String searchEmployee1) {
@@ -321,7 +320,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 4", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 4")
 	@RequestMapping(value = "/m/SearchEmployee4", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee4(@RequestBody String searchEmployee1) {
@@ -359,7 +358,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 5", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 5")
 	@RequestMapping(value = "/m/SearchEmployee5", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee5(@RequestBody String searchEmployee1) {
@@ -385,7 +384,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 6", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 6")
 	@RequestMapping(value = "/m/SearchEmployee6", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee6(@RequestBody String searchEmployee1) {
@@ -413,7 +412,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 7", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 7")
 	@RequestMapping(value = "/m/SearchEmployee7", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee7(@RequestBody String searchEmployee1) {
@@ -440,7 +439,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 8", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 8")
 	@RequestMapping(value = "/m/SearchEmployee8", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee8(@RequestBody String searchEmployee1) {
@@ -467,7 +466,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee 9", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee 9")
 	@RequestMapping(value = "/m/SearchEmployee9", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee9(@RequestBody String searchEmployee1) {
@@ -493,7 +492,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search employee filter", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search employee filter")
 	@RequestMapping(value = "/m/SearchEmployeeFilter", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchEmployee10(@RequestBody String searchEmployee1) {
@@ -520,7 +519,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get agent id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get agent id")
 	@RequestMapping(value = "/getAgentID", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAgentID(@RequestBody String addEmployee) {
@@ -536,7 +535,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Add employee", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Add employee")
 	@RequestMapping(value = "/m/AddEmployee", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String addEmployee(@RequestBody String addEmployee, HttpServletRequest request) {
@@ -648,7 +647,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit employee", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit employee")
 	@RequestMapping(value = "/m/editEmployee", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editEmployee(@RequestBody String editEmployee) {
@@ -719,7 +718,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete employee", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete employee")
 	@RequestMapping(value = "/m/deleteEmployee", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteEmployee(@RequestBody String deleteEmployee) {
@@ -750,7 +749,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "All title", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "All title")
 	@RequestMapping(value = "/m/AllTitle", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllTitle(@RequestBody String getAllTitle) {
@@ -774,7 +773,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all gender", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all gender")
 	@RequestMapping(value = "/m/AllGender", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllGender(@RequestBody String getAllGender) {
@@ -800,7 +799,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all location", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all location")
 	@RequestMapping(value = "/m/location/getAlllocation22", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAlllocation(@RequestBody String getAlllocation) {
@@ -861,7 +860,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Find employee by name", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Find employee by name")
 	@RequestMapping(value = "/m/FindEmployeeByName", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String FindEmployeeName(@RequestBody String FindEmployee) {
@@ -889,7 +888,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Qualification", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Qualification")
 	@RequestMapping(value = "/m/Qualification", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String Qualification(@RequestBody String Qualification) {
@@ -918,7 +917,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Find employee details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Find employee details")
 	@RequestMapping(value = "/m/FindEmployeeDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String checkingEmpDetails(@RequestBody String FindEmployeeDetails) {
@@ -949,7 +948,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update employer role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update employer role")
 	@RequestMapping(value = "/m/updateEmployeeRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateEmployee(@RequestBody String updateEmployee) {
@@ -998,7 +997,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete employer role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete employer role")
 	@RequestMapping(value = "/m/deleteEmployeeRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteEmployeeRole(@RequestBody String deleteEmployeeRole) {
@@ -1036,7 +1035,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get designation", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get designation")
 	@RequestMapping(value = "/m/getDesignation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getDesignation(@RequestBody String getDesignation) {
@@ -1065,7 +1064,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get employee by designation", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get employee by designation")
 	@RequestMapping(value = "/m/getEmployeeByDesignation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getEmployeeByDesignation(@RequestBody String getDesignation) {
@@ -1096,9 +1095,9 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get available agent ids", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get available agent ids")
 	@RequestMapping(value = "/getAvailableAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getAvailableAgentIds(@ApiParam("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
+	public String getAvailableAgentIds(@Param("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
 			+ "\"cti_CampaignName\":\"String - Campaign Name\"}") @RequestBody String request) {
 		OutputResponse response = new OutputResponse();
 		logger.info("getAvailableAgentIds request is " + request);
@@ -1113,10 +1112,10 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create USR agent mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create USR agent mapping")
 	@RequestMapping(value = "/createUSRAgentMapping", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String createUSRAgentMapping(
-			@ApiParam("[{\"agentID\":\"AgentID as a string\", \"agentPassword\":\"Agent password as a String\", "
+			@Param("[{\"agentID\":\"AgentID as a string\", \"agentPassword\":\"Agent password as a String\", "
 					+ "\"providerServiceMapID\":\"Integer - Provider service Map ID\", "
 					+ "\"cti_CampaignName\":\"String: campaign name as in CTI\", "
 					+ "\"createdBy\":\"String: User name\"},...]") @RequestBody String request) {
@@ -1133,9 +1132,9 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get available campaigns", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get available campaigns")
 	@RequestMapping(value = "/getAvailableCampaigns", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getAvailableCampaigns(@ApiParam("{\"providerServiceMapID\":\"Integer: provider service map ID\", "
+	public String getAvailableCampaigns(@Param("{\"providerServiceMapID\":\"Integer: provider service map ID\", "
 			+ "\"serviceName\":\"Optional - String - service name\"}") @RequestBody String request) {
 		OutputResponse response = new OutputResponse();
 		logger.info("getAvailableCampaigns request is " + request);
@@ -1150,9 +1149,9 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update agent ids", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update agent ids")
 	@RequestMapping(value = "/updateAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String updateAgentIds(@ApiParam("{\"isAvailable\":\"Boolean - is agent ID available for future use\", "
+	public String updateAgentIds(@Param("{\"isAvailable\":\"Boolean - is agent ID available for future use\", "
 			+ "\"usrMappingID\":\"Integer - user service role mapping id if isavailable is sent as false\", "
 			+ "\"usrAgentMappingID\": \"Integer\"}") @RequestBody String request) {
 		OutputResponse response = new OutputResponse();
@@ -1168,7 +1167,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "User role and cti mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "User role and cti mapping")
 	@RequestMapping(value = "/usrRoleAndCtiMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String usrRoleAndCtiMapping(@RequestBody String usrRoleAndCtiMapping) {
@@ -1195,7 +1194,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Find employee details by user name", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Find employee details by user name")
 	@RequestMapping(value = "/m/FindEmployeeDetailsByUserName", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String FindEmployeeDetailsByUserName(@RequestBody String FindEmployeeDetailsByUserName) {
@@ -1223,7 +1222,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Reset user password", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Reset user password")
 	@RequestMapping(value = "/m/ResetUserPassword", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String ResetUserPassword(@RequestBody String ResetUserPassword) {
@@ -1251,7 +1250,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create provider admin")
 	@RequestMapping(value = "/createProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createProviderAdmin(@RequestBody String createProviderAdmin) {
@@ -1281,7 +1280,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider admin")
 	@RequestMapping(value = "/getProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderAdmin(@RequestBody String getProviderAdmin) {
@@ -1309,7 +1308,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit provider admin")
 	@RequestMapping(value = "/editProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editProviderAdmin(@RequestBody String editProviderAdmin) {
@@ -1352,7 +1351,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete provider admin")
 	@RequestMapping(value = "/deleteProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteProviderAdmin(@RequestBody String deleteProviderAdmin) {
@@ -1384,7 +1383,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create new user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create new user")
 	@RequestMapping(value = "/createNewUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createNewUser(@RequestBody String createNewUser, HttpServletRequest request) {
@@ -1454,7 +1453,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit user details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit user details")
 	@RequestMapping(value = "/editUserDetails", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editUserDetails(@RequestBody String editUserDetails) {
@@ -1528,7 +1527,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Deleted user details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Deleted user details")
 	@RequestMapping(value = "/deletedUserDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deletedUserDetails(@RequestBody String deletedUserDetails, HttpServletRequest httpRequest) {
@@ -1565,7 +1564,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search mapped language by user id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search mapped language by user id")
 	@RequestMapping(value = "/searchMappedLanguageByUserId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchMappedLanguageByUserId(@RequestBody String searchMappedLanguageByUserId) {
@@ -1594,7 +1593,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user mapped language", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user mapped language")
 	@RequestMapping(value = "/getUserMappedLanguage", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getUserMappedLanguage(@RequestBody String getUserMappedLanguage) {
@@ -1622,7 +1621,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "User language mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "User language mapping")
 	@RequestMapping(value = "/userLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String UserLangMapping(@RequestBody String deletedUserDetails) {
@@ -1682,7 +1681,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update user language mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update user language mapping")
 	@RequestMapping(value = "/updateUserLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateUserLanguageMapping(@RequestBody String updateUserLanguageMapping) {
@@ -1723,7 +1722,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete user language mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete user language mapping")
 	@RequestMapping(value = "/deleteUserLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String UserLanguageMapping(@RequestBody String deleteUserLanguageMapping) {
@@ -1753,7 +1752,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "User role mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "User role mapping")
 	@RequestMapping(value = "/userRoleMapping", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String UserRoleMapping(@RequestBody String userRoleMapping, HttpServletRequest request) {
@@ -1811,7 +1810,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "User role mappings", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "User role mappings")
 	@RequestMapping(value = "/userRoleMappings", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 
@@ -1878,7 +1877,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update user role mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update user role mapping")
 	@RequestMapping(value = "/updateUserRoleMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateUserRoleMapping(@RequestBody String updateUserRoleMapping, HttpServletRequest request) {
@@ -1933,7 +1932,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete user role mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete user role mapping")
 	@RequestMapping(value = "/deleteUserRoleMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteUserRoleMapping(@RequestBody String deletedUserRoleMapping, HttpServletRequest request) {
@@ -1966,7 +1965,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user role mapped", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user role mapped")
 	@RequestMapping(value = "/getUserRoleMapped", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getUserRoleMapped(@RequestBody String getUserRoleMapped) {
@@ -1996,7 +1995,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search mapped role by name or user id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search mapped role by name or user id")
 	@RequestMapping(value = "/searchMappedRoleByNameorUserId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String searchMappedRoleByNameorUserId(@RequestBody String searchMappedRoleByNameorUserId) {
@@ -2025,7 +2024,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Complete user detail", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Complete user detail")
 	@RequestMapping(value = "/completeUserDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String completeUserDetails(@RequestBody String completeUserDetails) {
@@ -2052,7 +2051,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get religion", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get religion")
 	@RequestMapping(value = "/getReligion", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getReligion(@RequestBody String getReligion) {
@@ -2079,7 +2078,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get community", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get community")
 	@RequestMapping(value = "/getCommunity", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getCommunity(@RequestBody String getCommunity) {
@@ -2106,9 +2105,9 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all agent ids", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all agent ids")
 	@RequestMapping(value = "/getAllAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String getAllAgentIds(@ApiParam("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
+	public String getAllAgentIds(@Param("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
 			+ "\"cti_CampaignName\":\"Optional String - Campaign Name\", "
 			+ "\"isAvailable\":\"Optional boolean - availability status\"}") @RequestBody String request) {
 		OutputResponse response = new OutputResponse();
@@ -2124,9 +2123,9 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update CTI campaign name mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update CTI campaign name mapping")
 	@RequestMapping(value = "/updateCTICampaignNameMapping", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String updateCTICampaignNameMapping(@ApiParam("{\"cti_CampaignName\":\"String new campaign name\", "
+	public String updateCTICampaignNameMapping(@Param("{\"cti_CampaignName\":\"String new campaign name\", "
 			+ "\"usrAgentMappingID\": \"Integer\"}") @RequestBody String request) {
 		OutputResponse response = new OutputResponse();
 		logger.debug("updateCTICampaignNameMapping request is " + request);
@@ -2141,7 +2140,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user role TM", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user role TM")
 	@RequestMapping(value = "/getUserRoleTM", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getUserRoleTM(@RequestBody String getCommunity) {
@@ -2169,7 +2168,7 @@ public class EmployeeMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete user role mapping TM", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete user role mapping TM")
 	@RequestMapping(value = "/deleteUserRoleMappingTM", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteUserRoleMappingTM(@RequestBody String deletedUserRoleMapping, HttpServletRequest request) {

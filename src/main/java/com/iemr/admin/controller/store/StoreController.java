@@ -42,7 +42,8 @@ import com.iemr.admin.service.store.StoreService;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class StoreController {
@@ -52,7 +53,7 @@ public class StoreController {
 	private StoreService storeService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create store")
 	@RequestMapping(value = "/createStore", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createStore(@RequestBody String store) {
@@ -80,7 +81,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit store")
 	@RequestMapping(value = "/editStore", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editStore(@RequestBody String store) {
@@ -115,7 +116,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all store")
 	@RequestMapping(value = "/getAllStore/{providerServiceMapID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllStore(@PathVariable("providerServiceMapID") Integer providerServiceMapID) {
@@ -137,7 +138,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get main facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get main facility")
 	@RequestMapping(value = "/getMainFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getMainFacility(@RequestBody String getMainFacility) {
@@ -162,7 +163,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get sub facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get sub facility")
 	@RequestMapping(value = "/getsubFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getsubFacility(@RequestBody String getMainFacility) {
@@ -187,7 +188,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete store")
 	@RequestMapping(value = "/deleteStore", headers = "Authorization", method = {
 
 			RequestMethod.POST }, produces = { "application/json" })
@@ -214,7 +215,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Map store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Map store")
 	@RequestMapping(value = "/mapStore", headers = "Authorization", method = {
 
 			RequestMethod.POST }, produces = { "application/json" })
@@ -241,7 +242,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete map store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete map store")
 	@RequestMapping(value = "/deleteMapStore", headers = "Authorization", method = {
 
 			RequestMethod.POST }, produces = { "application/json" })
@@ -268,7 +269,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get map store", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get map store")
 	@RequestMapping(value = "/getMapStore", headers = "Authorization", method = {
 
 			RequestMethod.POST }, produces = { "application/json" })
@@ -295,7 +296,7 @@ public class StoreController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Check store code", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Check store code")
 	@RequestMapping(value = "/checkStoreCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String checkStoreCode(@RequestBody String deleteManufacturer) {

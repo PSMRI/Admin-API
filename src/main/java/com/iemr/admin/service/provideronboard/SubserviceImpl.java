@@ -44,7 +44,7 @@ public class SubserviceImpl implements SubServiceInter {
 
 	@Override
 	public ArrayList<M_Subservice> saveSubList(List<M_Subservice> resList) {
-		ArrayList<M_Subservice> data=(ArrayList<M_Subservice>) subserviceMasterRepo.save(resList);
+		ArrayList<M_Subservice> data=(ArrayList<M_Subservice>) subserviceMasterRepo.saveAll(resList);
 		return data;
 	}
 

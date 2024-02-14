@@ -36,8 +36,10 @@ import com.iemr.admin.to.villageMaster.VillageMasterTO;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/villageMaster")
@@ -47,10 +49,10 @@ public class VillageMasterController {
 	private VillageMasterServiceImpl villageMasterServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store village details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store village details")
 	@RequestMapping(value = "/save/VillageDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVillageDetails(
-			@ApiParam(value = "{\"blockID\":\"Integer\", \"panchayatName\":\"String\", \"villageName\":\"String\", \"habitat\":\"String\", \"pinCode\":\"String\","
+			@Param(value = "{\"blockID\":\"Integer\", \"panchayatName\":\"String\", \"villageName\":\"String\", \"habitat\":\"String\", \"pinCode\":\"String\","
 					+ "\"govVillageID\":\"Integer\", \"govSubDistrictID\":\"Integer\", \"deleted\":\"Boolean\", \"blockName\":\"String\", \"createdBy\":\"String\"}") @RequestBody String villageMaster) {
 
 		OutputResponse output = new OutputResponse();
@@ -69,9 +71,9 @@ public class VillageMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get village details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get village details")
 	@RequestMapping(value = "/get/Villages", headers = "Authorization", method = { RequestMethod.POST })
-	public String getVillages(@ApiParam(value = "{\"blockID\":\"Integer\"}") @RequestBody String villageMaster) {
+	public String getVillages(@Param(value = "{\"blockID\":\"Integer\"}") @RequestBody String villageMaster) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -89,10 +91,10 @@ public class VillageMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove village", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove village")
 	@RequestMapping(value = "/remove/village", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVillage(
-			@ApiParam(value = "{\"districtBranchID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String villageData) {
+			@Param(value = "{\"districtBranchID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String villageData) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -115,10 +117,10 @@ public class VillageMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update village details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update village details")
 	@RequestMapping(value = "/update/villageData", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateVillageData(
-			@ApiParam(value = "{\"districtBranchID\":\"Integer\",\"blockID\":\"Integer\", \"panchayatName\":\"String\", \"villageName\":\"String\", \"habitat\":\"String\", "
+			@Param(value = "{\"districtBranchID\":\"Integer\",\"blockID\":\"Integer\", \"panchayatName\":\"String\", \"villageName\":\"String\", \"habitat\":\"String\", "
 					+ "\"pinCode\":\"String\", \"govVillageID\":\"Integer\", \"govSubDistrictID\":\"Integer\", \"modifiedBy\":\"String\"}") @RequestBody String villageData) {
 
 		OutputResponse output = new OutputResponse();

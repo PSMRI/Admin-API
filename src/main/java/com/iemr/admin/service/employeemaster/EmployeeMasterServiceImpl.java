@@ -300,14 +300,14 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public ArrayList<M_UserLangMapping> mapLanguage(List<M_UserLangMapping> resList) {
-		ArrayList<M_UserLangMapping> reslist = (ArrayList<M_UserLangMapping>) m_UserLangMappingRepo.save(resList);
+		ArrayList<M_UserLangMapping> reslist = (ArrayList<M_UserLangMapping>) m_UserLangMappingRepo.saveAll(resList);
 		return reslist;
 	}
 
 	@Override
 	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) {
 		ArrayList<M_UserServiceRoleMapping2> reslist = (ArrayList<M_UserServiceRoleMapping2>) employeeMasterRepo
-				.save(resList1);
+				.saveAll(resList1);
 		if (ENABLE_CTI_USER_CREATION) {
 			updateSupervisorRoleInCTI(resList1, authToken);
 		}
@@ -379,13 +379,13 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		Map<Integer, UserServiceLine> userServiceLineMap = new HashMap<Integer, UserServiceLine>();
 		Set<Integer> providerMapIds = new HashSet<Integer>();
 		for (M_UserServiceRoleMapping2 userRole : resList1) {
-			userRole.setmRole(roleRepo.findOne(userRole.getRoleID()));
+			userRole.setmRole(roleRepo.findByRoleID(userRole.getRoleID()));
 			if (userRole.getmRole().getRoleName().equalsIgnoreCase("supervisor")) {
 				if (!userServiceLineMap.containsKey(userRole.getUserID())) {
 					userServiceLineMap.put(userRole.getUserID(), new UserServiceLine());
 				}
 				userServiceLineMap.get(userRole.getUserID()).serviceLines.add(providerServiceMappingRepo
-						.findOne(userRole.getProviderServiceMapID()).getM_ServicemasterForBlocking().getServiceName());
+						.findByProviderServiceMapID(userRole.getProviderServiceMapID()).getM_ServicemasterForBlocking().getServiceName());
 				userServiceLineMap.get(userRole.getUserID()).providerServiceMapIDs
 						.add(userRole.getProviderServiceMapID());
 				userServiceLineMap.get(userRole.getUserID()).userName = employeeMasterRepoo
@@ -738,7 +738,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	@Override
 	public ArrayList<M_UserServiceRoleMapping2> mapRoleUpdation(List<M_UserServiceRoleMapping2> resList1) {
 		ArrayList<M_UserServiceRoleMapping2> data = (ArrayList<M_UserServiceRoleMapping2>) employeeMasterRepo
-				.save(resList1);
+				.saveAll(resList1);
 		return data;
 	}
 
@@ -787,7 +787,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			}
 		}
 
-		ArrayList<M_User1> data = (ArrayList<M_User1>) employeeMasterRepoo.save(providerAdminData);
+		ArrayList<M_User1> data = (ArrayList<M_User1>) employeeMasterRepoo.saveAll(providerAdminData);
 		return data;
 	}
 
@@ -801,7 +801,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public M_User1 getProviderAdminForEdit(Integer userID) {
-		M_User1 getDataFromTable = employeeMasterRepoo.findOne(userID);
+		M_User1 getDataFromTable = employeeMasterRepoo.findByUserID(userID);
 		return getDataFromTable;
 	}
 
@@ -825,7 +825,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			}
 		}
 
-		ArrayList<M_User1> saveDataintoDB = (ArrayList<M_User1>) employeeMasterRepoo.save(newUserData);
+		ArrayList<M_User1> saveDataintoDB = (ArrayList<M_User1>) employeeMasterRepoo.saveAll(newUserData);
 
 		return saveDataintoDB;
 	}
@@ -865,13 +865,13 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	@Override
 	public ArrayList<M_UserDemographics> SaveDemographics(ArrayList<M_UserDemographics> demogdata) {
 		ArrayList<M_UserDemographics> saveDataintoDB = (ArrayList<M_UserDemographics>) m_UserDemographicsRepo
-				.save(demogdata);
+				.saveAll(demogdata);
 		return saveDataintoDB;
 	}
 
 	@Override
 	public M_User1 editData(Integer userID) {
-		M_User1 data = employeeMasterRepoo.findOne(userID);
+		M_User1 data = employeeMasterRepoo.findByUserID(userID);
 		return data;
 	}
 
@@ -889,7 +889,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public M_UserLangMapping updateLangMapping(Integer userLangID) {
-		M_UserLangMapping data = m_UserLangMappingRepo.findOne(userLangID);
+		M_UserLangMapping data = m_UserLangMappingRepo.findByUserLangID(userLangID);
 		return data;
 	}
 
@@ -901,7 +901,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public M_UserServiceRoleMapping2 getDataUsrId(Integer uSRMappingID) {
-		M_UserServiceRoleMapping2 data = employeeMasterRepo.findOne(uSRMappingID);
+		M_UserServiceRoleMapping2 data = employeeMasterRepo.findByUSRMappingID(uSRMappingID);
 		return data;
 	}
 
@@ -1120,10 +1120,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			throw new Exception("Invalid activation flag");
 		}
 
-		M_UserServiceRoleMapping2 data = employeeMasterRepo.findOne(uSRMappingID.getuSRMappingID());
+		M_UserServiceRoleMapping2 data = employeeMasterRepo.findByUSRMappingID(uSRMappingID.getuSRMappingID());
 
 		M_Providerservicemapping_Blocking psm = mProviderservicemappingBlockingRepo
-				.findOne(data.getProviderServiceMapID());
+				.findByProviderServiceMapID(data.getProviderServiceMapID());
 
 		if (psm.getServiceID() == null || psm.getServiceID() != 4) {
 			throw new Exception("API valid only for TM service Line");

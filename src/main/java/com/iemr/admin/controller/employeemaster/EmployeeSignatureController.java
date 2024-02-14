@@ -42,7 +42,8 @@ import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @PropertySource("classpath:application.properties")
 
@@ -58,7 +59,7 @@ public class EmployeeSignatureController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@CrossOrigin()
-	@ApiOperation(value = "Upload", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Upload")
 	@RequestMapping(value = "/upload", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String uploadFile(@RequestBody EmployeeSignature emp) {
@@ -83,7 +84,7 @@ public class EmployeeSignatureController {
 	}
 
 	@CrossOrigin(origins = "*", exposedHeaders = { HttpHeaders.CONTENT_DISPOSITION, "filename" })
-	@ApiOperation(value = "User id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "User id")
 	@RequestMapping(value = "/{userID}", headers = "Authorization", method = { RequestMethod.GET })
 	public ResponseEntity<byte[]> fetchFile(@PathVariable("userID") Long userID) throws Exception {
 		OutputResponse response = new OutputResponse();
@@ -110,7 +111,7 @@ public class EmployeeSignatureController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Sign exist file", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Sign exist file")
 	@RequestMapping(value = "/signexist/{userID}", headers = "Authorization", method = { RequestMethod.GET })
 	public String existFile(@PathVariable("userID") Long userID) throws Exception {
 		OutputResponse response = new OutputResponse();

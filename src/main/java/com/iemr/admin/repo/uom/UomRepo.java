@@ -27,13 +27,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.uom.M_Uom;
 
 @Repository
-@RestResource(exported = false)
 public interface UomRepo extends CrudRepository<M_Uom, Integer> {
 
 	
@@ -44,6 +42,7 @@ public interface UomRepo extends CrudRepository<M_Uom, Integer> {
 	@Query("SELECT u FROM M_Uom u WHERE u.uOMID=:uOMID")
 	M_Uom geteditedData(@Param("uOMID")Integer uOMID);
 	
-	List<M_Uom> findByUOMCodeAndProviderServiceMapID(String code,Integer serviceID);
+	@Query("SELECT u FROM M_Uom u WHERE u.uOMCode=:uOMCode And u.providerServiceMapID = :providerServiceMapID")
+	List<M_Uom> findByUOMCodeAndProviderServiceMapID(String uOMCode,Integer providerServiceMapID);
 
 }

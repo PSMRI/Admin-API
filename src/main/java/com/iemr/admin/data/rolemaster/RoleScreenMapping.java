@@ -21,23 +21,21 @@
 */
 package com.iemr.admin.data.rolemaster;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "m_servicerolescreenmapping")
@@ -80,7 +78,7 @@ public class RoleScreenMapping {
 	/**
 	 * @return the m_role
 	 */
-	public M_Role getM_role() {
+	public RoleMaster getM_role() {
 		return m_role;
 	}
 
@@ -88,7 +86,7 @@ public class RoleScreenMapping {
 	 * @param m_role
 	 *            the m_role to set
 	 */
-	public void setM_role(M_Role m_role) {
+	public void setM_role(RoleMaster m_role) {
 		this.m_role = m_role;
 	}
 
@@ -112,7 +110,7 @@ public class RoleScreenMapping {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RoleID", insertable = false, updatable = false)
 	@Expose
-	private M_Role m_role;
+	private RoleMaster m_role;
 
 	
 

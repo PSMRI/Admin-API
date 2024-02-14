@@ -39,7 +39,7 @@ public class UomServiceImpl implements UomInter {
 	@Override
 	public ArrayList<M_Uom> createDrugtypeData(List<M_Uom> saveUomData) {
 		
-		ArrayList<M_Uom> saveData=(ArrayList<M_Uom>) uomRepo.save(saveUomData);
+		ArrayList<M_Uom> saveData=(ArrayList<M_Uom>) uomRepo.saveAll(saveUomData);
 		if(saveData.size()>0)
 			return saveData;
 		return null;

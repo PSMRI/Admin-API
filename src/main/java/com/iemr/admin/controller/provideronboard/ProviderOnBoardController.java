@@ -94,8 +94,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 public class ProviderOnBoardController {
@@ -158,7 +160,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create and map provder", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create and map provder")
 	@RequestMapping(value = "/providerCreationAndMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String providerCreationAndMapping(@RequestBody String comingRequest) {
@@ -271,7 +273,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update provider")
 	@RequestMapping(value = "/updateProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String updateProvider(@RequestBody String comingRequest) {
@@ -325,7 +327,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service line", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service line")
 	@RequestMapping(value = "/getServiceline", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getServiceLine(@RequestBody String serviceline) {
@@ -354,7 +356,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all provider name", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all provider name")
 	@RequestMapping(value = "/getAllProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getAllProviderName(@RequestBody String getServiceProvider) {
@@ -383,7 +385,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider name", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider name")
 	@RequestMapping(value = "/checkProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getProviderName(@RequestBody String getServiceProvider) {
@@ -418,7 +420,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service provider id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service provider id")
 	@RequestMapping(value = "/getServiceProviderid", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderId(@RequestBody String getServiceProviderId) {
@@ -449,7 +451,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save call type data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save call type data")
 	@RequestMapping(value = "/m/saveCalltypedata", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveCallTypeData(@RequestBody String saveCalltypeData) {
@@ -510,7 +512,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create call type data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create call type data")
 	@RequestMapping(value = "/m/createCalltypedata", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createCalltypeData(@RequestBody String createCalltypedata) {
@@ -541,7 +543,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get call type data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get call type data")
 	@RequestMapping(value = "/m/getCalltypedata", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getCallTypeData(@RequestBody String saveCalltypeData) {
@@ -570,7 +572,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update call type data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update call type data")
 	@RequestMapping(value = "/m/updateCalltypedata", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateCallTypeData(@RequestBody String updateCalltypeData) {
@@ -612,7 +614,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete call type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete call type")
 	@RequestMapping(value = "/m/deleteCalltype", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteCallType(@RequestBody String deleteCalltype) {
@@ -644,7 +646,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save sub service data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save sub service data")
 	@RequestMapping(value = "/m/saveSubserviceData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveSubServiceData(@RequestBody String SubserviceData) {
@@ -700,7 +702,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Find sub service name by map id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Find sub service name by map id")
 	@RequestMapping(value = "/m/FindSubSerive", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String FindSubSeriveNameByMapId(@RequestBody String FindSubSeriveName) {
@@ -730,7 +732,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get sub service name", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get sub service name")
 	@RequestMapping(value = "/m/getSubSerive", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getSubSeriveName(@RequestBody String getSubSeriveName) {
@@ -760,7 +762,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update sub service", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update sub service")
 	@RequestMapping(value = "/m/updateSubSerive", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateSubSerive(@RequestBody String updateSubSeriveName) {
@@ -794,7 +796,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete sub service", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete sub service")
 	@RequestMapping(value = "/m/deleteSubSerive", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteSubSerive(@RequestBody String updateSubSeriveName) {
@@ -826,7 +828,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save category")
 	@RequestMapping(value = "/m/saveCategory", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String saveCategory(@RequestBody String saveCategory) {
@@ -875,7 +877,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save category user exist", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save category user exist")
 	@RequestMapping(value = "/m/saveCategoryUseExist", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveCategoryUseExist(@RequestBody String saveCategoryUseExist) {
@@ -921,7 +923,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get category by sub service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get category by sub service id")
 	@RequestMapping(value = "/m/getCategoryBySubServiceID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getCategoryBySubServiceID(@RequestBody String getCategoryBySubServiceID) {
@@ -952,7 +954,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get sub category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get sub category")
 	@RequestMapping(value = "/m/getsubCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getsubCategory(@RequestBody String getsubCategory1) {
@@ -983,7 +985,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get category")
 	@RequestMapping(value = "/m/getCategory", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getCategory(@RequestBody String getCategory) {
@@ -1015,7 +1017,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update sub category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update sub category")
 	@RequestMapping(value = "/m/updateSubCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateSubCategory(@RequestBody String updateCategory) {
@@ -1052,11 +1054,11 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get drug data", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get drug data")
 	@RequestMapping(value = "/m/getDrugData", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getDrugData(
-			@ApiParam(value = "{\"drugID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String drugMaster)
+			@Param(value = "{\"drugID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String drugMaster)
 			throws IEMRException {
 		OutputResponse response = new OutputResponse();
 		logger.debug("requset" + drugMaster);
@@ -1080,11 +1082,11 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get drug groups", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get drug groups")
 	@RequestMapping(value = "/m/getDrugGroups", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getDrugGroups(
-			@ApiParam(value = "{\"drugGroupID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String drugMaster)
+			@Param(value = "{\"drugGroupID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String drugMaster)
 			throws IEMRException {
 		OutputResponse response = new OutputResponse();
 		logger.debug("reqest" + drugMaster);
@@ -1107,7 +1109,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get drug group mappings", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get drug group mappings")
 	@RequestMapping(value = "/m/getDrugGroupMappings", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getDrugGroupMappings(@RequestBody String drugMaster) throws IEMRException {
@@ -1135,7 +1137,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update drug group", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update drug group")
 	@RequestMapping(value = "/m/updateDrugGroup", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateDrugGroup(@RequestBody String updateDrugGroup) {
@@ -1168,7 +1170,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update drug master", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update drug master")
 	@RequestMapping(value = "/m/updateDrugMaster", headers = "Authorization", method = RequestMethod.POST, produces = "application/json")
 	public String updateDrugMaster(@RequestBody String updateDrugData) {
 
@@ -1200,7 +1202,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update drug mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update drug mapping")
 	@RequestMapping(value = "/m/updateDrugMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateDrugMapping(@RequestBody String updateDrugData) {
@@ -1234,7 +1236,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update drug status", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update drug status")
 	@RequestMapping(value = "/m/updateDrugStatus", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateDrugStatus(@RequestBody String updateDrugStatus) {
@@ -1281,10 +1283,10 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Stores drug group ", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Stores drug group ")
 	@RequestMapping(value = "/m/saveDrugGroup", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveDrugGroup(
-			@ApiParam(value = "{\"drugGroup\":\"string\", \"drugGroupDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"deleted\":\"boolean\","
+			@Param(value = "{\"drugGroup\":\"string\", \"drugGroupDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"deleted\":\"boolean\","
 					+ " \"processed\":\"charactor\", \"createdBy\":\"string\"}") @RequestBody String drugMaster)
 			throws IEMRException {
 
@@ -1305,10 +1307,10 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store drug detail", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store drug detail")
 	@RequestMapping(value = "/m/saveDrug", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveDrug(
-			@ApiParam(value = "{\"drugName\":\"string\", \"drugDesc\":\"string\", \"remarks\":\"integer\", \"deleted\":\"boolean\","
+			@Param(value = "{\"drugName\":\"string\", \"drugDesc\":\"string\", \"remarks\":\"integer\", \"deleted\":\"boolean\","
 					+ " \"processed\":\"charactor\", \"providerServiceMapID\":\"integer\", \"createdBy\":\"string\"}") @RequestBody String DrugMasterTO)
 			throws IEMRException {
 
@@ -1330,11 +1332,11 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Map drug with drug group", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Map drug with drug group")
 	@RequestMapping(value = "/m/mapDrugWithGroup", headers = "Authorization", method = { RequestMethod.POST })
 
 	public String mapDrugWithGroup(
-			@ApiParam(value = "{\"drugId\":\"integer\", \"drugName\":\"string\", \"drugGroupID\":\"integer\", \"drugGroupName\":\"string\","
+			@Param(value = "{\"drugId\":\"integer\", \"drugName\":\"string\", \"drugGroupID\":\"integer\", \"drugGroupName\":\"string\","
 					+ " \"remarks\":\"integer\", "
 					+ " \"processed\":\"charactor\", \"providerServiceMapID\":\"integer\", \"createdBy\":\"string\"}") @RequestBody String DrugMasterTO)
 			throws IEMRException {
@@ -1357,7 +1359,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get severity", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get severity")
 	@RequestMapping(value = "/m/getServerity", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getServerity(@RequestBody String getServerity) {
@@ -1386,7 +1388,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save severity", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save severity")
 	@RequestMapping(value = "/m/saveServerity", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String saveServerity(@RequestBody String saveServerity) {
@@ -1415,7 +1417,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete severity", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete severity")
 	@RequestMapping(value = "/m/deleteServerity", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteServerity(@RequestBody String deleteServerity) {
@@ -1445,7 +1447,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit severity", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit severity")
 	@RequestMapping(value = "/m/editServerity", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editServerity(@RequestBody String deleteServerity) {
@@ -1477,7 +1479,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get feedback type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get feedback type")
 	@RequestMapping(value = "/m/getFeedbackType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getFeedbackType(@RequestBody String getFeedbackType) {
@@ -1504,7 +1506,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save feedback type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save feedback type")
 	@RequestMapping(value = "/m/saveFeedbackType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveFeedbackType(@RequestBody String saveFeedbackType) {
@@ -1533,7 +1535,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit feedback type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit feedback type")
 	@RequestMapping(value = "/m/editFeedbackType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editFeedbackType(@RequestBody String editFeedbackType) {
@@ -1562,7 +1564,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete feedback type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete feedback type")
 	@RequestMapping(value = "/m/deleteFeedbackType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteFeedbackType(@RequestBody String deleteFeedbackType) {
@@ -1593,7 +1595,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create category")
 	@RequestMapping(value = "/m/createCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createCategory(@RequestBody String createCategory) {
@@ -1620,7 +1622,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete category")
 	@RequestMapping(value = "/m/deleteCategory1", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteCategory1(@RequestBody String deleteCategory1) {
@@ -1651,7 +1653,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update provider admin")
 	@RequestMapping(value = "/updateProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateProviderAdmin(@RequestBody String updateProviderAdmin) {
@@ -1701,7 +1703,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create sub category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create sub category")
 	@RequestMapping(value = "/m/createSubCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createSubCategory(@RequestBody String createSubCategory) {
@@ -1729,7 +1731,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete sub category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete sub category")
 	@RequestMapping(value = "/m/deleteSubCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteSubCategory(@RequestBody String deleteCategory) {
@@ -1763,7 +1765,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get sub category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get sub category")
 	@RequestMapping(value = { "/m/getSubCategory" }, method = { RequestMethod.POST }, produces = { "application/json" })
 	public String getSubCategory(@RequestBody String getSubCategory) {
 		OutputResponse response = new OutputResponse();
@@ -1793,7 +1795,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update category", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update category")
 	@RequestMapping(value = "/m/updateCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateCategory(@RequestBody String deleteCategory1) {
@@ -1828,7 +1830,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institute directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institute directory")
 	@RequestMapping(value = "/m/createInstituteDirectory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createInstuteDirectoty(@RequestBody String createInstuteDirectory) {
@@ -1858,7 +1860,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institute directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institute directory")
 	@RequestMapping(value = "/m/getInstituteDirectory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getInstuteDirectory(@RequestBody String getInstuteDirectory) {
@@ -1888,7 +1890,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit institute directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit institute directory")
 	@RequestMapping(value = "/m/editInstituteDirectory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editInstuteDirectory(@RequestBody String editInstuteDirectory) {
@@ -1924,7 +1926,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete institute directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete institute directory")
 	@RequestMapping(value = "/m/deleteInstituteDirectory", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -1957,7 +1959,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institute type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institute type")
 	@RequestMapping(value = "/m/getInstituteType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getInstuteType(@RequestBody String getInstuteType) {
@@ -1982,7 +1984,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institute type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institute type")
 	@RequestMapping(value = "/m/createInstituteType", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2010,7 +2012,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit institute type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit institute type")
 	@RequestMapping(value = "/m/editInstituteType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editInstuteType(@RequestBody String editInstuteType) {
@@ -2042,7 +2044,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete institute type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete institute type")
 	@RequestMapping(value = "/m/deleteInstituteType", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2074,7 +2076,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get feedback nature type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get feedback nature type")
 	@RequestMapping(value = "/m/getFeedbackNatureType", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getFeedbackNatureType(@RequestBody String getFeedbackNatureType) {
@@ -2100,7 +2102,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create feedback nature type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create feedback nature type")
 	@RequestMapping(value = "/m/createFeedbackNatureType", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2130,7 +2132,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete feedback nature type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete feedback nature type")
 	@RequestMapping(value = { "/m/deleteFeedbackNatureType" }, method = { RequestMethod.POST }, produces = {
 			"application/json" }, headers = "Authorization")
 	public String deleteFeedbackNatureType(@RequestBody String deleteFeedbackNatureType) {
@@ -2160,7 +2162,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit feedback nature type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit feedback nature type")
 	@RequestMapping(value = { "/m/editFeedbackNatureType" }, method = { RequestMethod.POST }, produces = {
 			"application/json" }, headers = "Authorization")
 	public String editFeedbackNatureType(@RequestBody String editFeedbackNatureType) {
@@ -2191,7 +2193,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institution", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institution")
 	@RequestMapping(value = { "/m/getInstution"
 
 	}, method = { RequestMethod.POST }, produces = { "application/json" }, headers = "Authorization")
@@ -2220,7 +2222,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institution", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institution")
 	@RequestMapping(value = "/m/createInstution", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2248,7 +2250,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit institution", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit institution")
 	@RequestMapping(value = "/m/editInstution", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2286,7 +2288,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete institution", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete institution")
 	@RequestMapping(value = "/m/deleteInstution", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteInstution(@RequestBody String deleteInstution) {
@@ -2309,7 +2311,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institute sub directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institute sub directory")
 	@RequestMapping(value = "/m/getInstutesubDirectory", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2335,7 +2337,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institute sub directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institute sub directory")
 	@RequestMapping(value = "/m/createInstutesubDirectory", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2362,7 +2364,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit institute sub directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit institute sub directory")
 	@RequestMapping(value = "/m/editInstutesubDirectory", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2395,7 +2397,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete institute sub directory", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete institute sub directory")
 	@RequestMapping(value = "/m/deleteInstutesubDirectory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteInstuteSubDirectory(@RequestBody String deleteInstuteSubDirectory) {
@@ -2422,7 +2424,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institute sub directory mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institute sub directory mapping")
 	@RequestMapping(value = "/m/createInstutesubDirectoryMapping", headers = "Authorization", method = {
 			RequestMethod.POST
 
@@ -2449,7 +2451,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete institute sub directory mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete institute sub directory mapping")
 	@RequestMapping(value = "/m/deleteInstutesubDirectoryMapping", headers = "Authorization", method = {
 			RequestMethod.POST
 
@@ -2479,7 +2481,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institute sub directory mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institute sub directory mapping")
 	@RequestMapping(value = "/m/getInstutesubDirectoryMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getInstuteSubDirectoryMaping(@RequestBody String getInstuteSubDirectoryMapping) {
@@ -2502,7 +2504,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create provider")
 	@RequestMapping(value = "/createProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 
@@ -2531,7 +2533,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Provider update", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Provider update")
 	@RequestMapping(value = "/providerUpdate", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 
@@ -2579,7 +2581,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Provider delete", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Provider delete")
 	@RequestMapping(value = "/providerdelete", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2611,7 +2613,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Mapping provider admin to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Mapping provider admin to provider")
 	@RequestMapping(value = "/mappingProviderAdmintoProvider", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2659,7 +2661,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit mapping provider admin to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit mapping provider admin to provider")
 	@RequestMapping(value = "/editmappingProviderAdmintoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editMappingProviderAdmintoProvider(@RequestBody String editMappingProviderAdmintoProvider) {
@@ -2690,7 +2692,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete mapping provider admin to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete mapping provider admin to provider")
 	@RequestMapping(value = "/deletemappingProviderAdmintoProvider", headers = "Authorization", method = {
 			RequestMethod.POST
 
@@ -2722,7 +2724,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get mapping provider admin to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get mapping provider admin to provider")
 	@RequestMapping(value = "/getmappingProviderAdmintoProvider", headers = "Authorization", method = {
 			RequestMethod.POST
 
@@ -2752,7 +2754,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Map category to feedback nature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Map category to feedback nature")
 	@RequestMapping(value = "/m/mapCategorytoFeedbackNature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String mapCategorytoFeedbackNature(@RequestBody String mapCategorytoFeedbackNature) {
@@ -2787,7 +2789,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update category to feedback nature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update category to feedback nature")
 	@RequestMapping(value = "/m/updateCategorytoFeedbackNature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateCategorytoFeedbackNature(@RequestBody String updateCategorytoFeedbackNature) {
@@ -2825,7 +2827,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get mapped category to feedback nature with category id and feedback nature id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get mapped category to feedback nature with category id and feedback nature id")
 	@RequestMapping(value = "/m/getmapedCategorytoFeedbackNatureWithFeedbackNatureID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getmapedCategorytoFeedbackNatureWithCatIDandFeedbackNatureID(
@@ -2854,7 +2856,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get unmapped category for feedback nature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get unmapped category for feedback nature")
 	@RequestMapping(value = "/m/getunmappedCategoryforFeedbackNature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getunmappedCategoryforFeedbackNature(@RequestBody String getmapedCategorytoFeedbackNature) {
@@ -2882,7 +2884,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Unmap category for feedback nature", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Unmap category for feedback nature")
 	@RequestMapping(value = "/t/unmappCategoryforFeedbackNature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String unmappCategoryforFeedbackNature(@RequestBody String getmapedCategorytoFeedbackNature) {
@@ -2913,7 +2915,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get category by map id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get category by map id")
 	@RequestMapping(value = "/m/getCategoryByMapID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllCategoryPsmMapid(@RequestBody String getmapedCategorytoFeedbackNature) {
@@ -2940,7 +2942,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institute type by district", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institute type by district")
 	@RequestMapping(value = "/m/createInstituteTypeByDist", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2968,7 +2970,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create institution by village", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institution by village")
 	@RequestMapping(value = "/m/createInstutionByVillage", headers = "Authorization", method = { RequestMethod.POST
 
 	}, produces = { "application/json" })
@@ -2996,7 +2998,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institution by village", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institution by village")
 	@RequestMapping(value = { "/m/getInstutionByVillage"
 
 	}, method = { RequestMethod.POST }, produces = { "application/json" }, headers = "Authorization")
@@ -3025,7 +3027,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get institute type by district", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get institute type by district")
 	@RequestMapping(value = "/m/getInstituteTypeByDist", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getInstituteTypeByDist(@RequestBody String getInstuteType) {
@@ -3051,7 +3053,7 @@ public class ProviderOnBoardController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Create institution by file", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create institution by file")
 	@RequestMapping(value = "m/createInstitutionByFile", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createInstitutionByFile(@RequestBody String getInstitutionDetails) {

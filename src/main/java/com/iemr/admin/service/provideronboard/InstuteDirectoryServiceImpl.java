@@ -38,7 +38,7 @@ public class InstuteDirectoryServiceImpl implements InstuteDirectoryInter{
 
 	@Override
 	public ArrayList<M_Institutedirectory> createInstuteDirectory(List<M_Institutedirectory> instuteDiractoty) {
-		ArrayList<M_Institutedirectory> data=(ArrayList<M_Institutedirectory>) instuteDirectoryRepo.save(instuteDiractoty);
+		ArrayList<M_Institutedirectory> data=(ArrayList<M_Institutedirectory>) instuteDirectoryRepo.saveAll(instuteDiractoty);
 		return data;
 	}
 

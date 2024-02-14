@@ -26,14 +26,12 @@ import java.util.ArrayList;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.M_UserLangMapping;
 
 
 @Repository
-@RestResource(exported = false)
 public interface M_UserLangMappingRepo extends CrudRepository<M_UserLangMapping, Integer>{
 	@Query("SELECT u FROM M_UserLangMapping u WHERE u.userID=:userID AND u.languageID=:languageID AND deleted=0")
 	M_UserLangMapping ulangmapedit(@Param ("userID") Integer userID,@Param ("languageID") Integer languageID);
@@ -66,5 +64,7 @@ public interface M_UserLangMappingRepo extends CrudRepository<M_UserLangMapping,
 
 	@Query("SELECT u FROM M_UserLangMapping u WHERE u.userID=:userID")
 	ArrayList<M_UserLangMapping> getmappedlanguageData(@Param("userID") Integer userID);
+	
+	M_UserLangMapping findByUserLangID(Integer userLangID);
 
 }

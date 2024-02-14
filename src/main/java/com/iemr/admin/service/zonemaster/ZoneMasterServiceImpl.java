@@ -46,7 +46,7 @@ public class ZoneMasterServiceImpl implements ZoneMasterService{
 	
 	@Override
 	public ArrayList<M_Zone> createZone(List<M_Zone> zoneList) {
-		ArrayList<M_Zone> zones=(ArrayList<M_Zone>) zoneMasterRepo.save(zoneList);
+		ArrayList<M_Zone> zones=(ArrayList<M_Zone>) zoneMasterRepo.saveAll(zoneList);
 		return zones;
 	}
 
@@ -70,7 +70,7 @@ public class ZoneMasterServiceImpl implements ZoneMasterService{
 	
 	@Override
 	public ArrayList<M_ZoneDistrictMap> createZoneDistrictMapping(List<M_ZoneDistrictMap> zoneList) {
-		ArrayList<M_ZoneDistrictMap> zones=(ArrayList<M_ZoneDistrictMap>) zoneDistrictMappingRepo.save(zoneList);
+		ArrayList<M_ZoneDistrictMap> zones=(ArrayList<M_ZoneDistrictMap>) zoneDistrictMappingRepo.saveAll(zoneList);
 		return zones;
 	}
 
@@ -79,7 +79,7 @@ public class ZoneMasterServiceImpl implements ZoneMasterService{
 		
 		ArrayList<M_ZoneDistrictMap> zoneList = new ArrayList<M_ZoneDistrictMap>();		
 		
-		List<Objects[]>  allData=zoneDistrictMappingRepo.getAvailableZoneDistrictMappingss(providerServiceMapID);
+		List<Objects[]>  allData=zoneDistrictMappingRepo.getAvailableZoneDistrictMappings(providerServiceMapID);
 		
 		for (Object[] objects : allData) {
 			
@@ -125,7 +125,7 @@ public class ZoneMasterServiceImpl implements ZoneMasterService{
 	}
 
 	public M_ZoneDistrictMap editZoneDistrictMapping(Integer zoneDistrictMapID) {
-		M_ZoneDistrictMap data=zoneDistrictMappingRepo.findOne(zoneDistrictMapID);
+		M_ZoneDistrictMap data=zoneDistrictMappingRepo.findByZoneDistrictMapID(zoneDistrictMapID);
 		return data;
 	}
 

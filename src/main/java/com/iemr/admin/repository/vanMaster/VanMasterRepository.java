@@ -25,39 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.parkingPlace.M_Parkingplace;
 import com.iemr.admin.data.vanMaster.M_Van;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface VanMasterRepository extends CrudRepository<M_Van, Integer>{
 	
 
-//	
-//	@Query("SELECT v.vanID, v.vanName, v.vehicalNo, v.vanTypeID, vt.vanType, v.deleted, v.providerServiceMapID, v.countryID, "
-//			+ "c.countryName, v.stateID, s.stateName, v.districtID, d.districtName, v.parkingPlaceID, pp.parkingPlaceName,pp.districtBlockID "
-//			+ " FROM M_Van v "
-//			+ " LEFT JOIN v.m_vanType vt "
-//			+ " LEFT JOIN v.m_parkingplace pp"
-//			+ " LEFT JOIN v.m_country c"
-//			+ " LEFT JOIN v.state s"
-//			+ " LEFT JOIN v.m_district d"
-//			+ " LEFT JOIN v.m_providerServiceMapping p "
-//			+ " where (v.districtID IS NULL or cast(v.districtID as string) like :districtID) "
-//			+ " AND (v.parkingPlaceID IS NULL or cast(v.parkingPlaceID as string) like :parkingPlaceID)"
-//			+ " AND (v.vanTypeID IS NULL or cast(v.vanTypeID as string) like :vanTypeID) "
-//			+ " AND p.providerServiceMapID =:providerServiceMapID")
-//	List<Objects[]> getAvailableVans(@Param("districtID")String districtID, 
-//			@Param("parkingPlaceID")String parkingPlaceID, @Param("vanTypeID")String vanTypeID,@Param("providerServiceMapID") Integer providerServiceMapID);
+
 
 	@Transactional
 	@Modifying

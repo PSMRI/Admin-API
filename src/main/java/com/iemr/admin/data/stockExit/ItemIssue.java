@@ -21,10 +21,10 @@
 */
 package com.iemr.admin.data.stockExit;
 
-import javax.persistence.Transient;
 
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Data

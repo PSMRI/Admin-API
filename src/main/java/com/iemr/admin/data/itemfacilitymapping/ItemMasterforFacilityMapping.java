@@ -23,29 +23,17 @@ package com.iemr.admin.data.itemfacilitymapping;
 
 import java.sql.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import com.google.gson.annotations.Expose;
-import com.iemr.admin.data.manufacturer.M_Manufacturer;
-import com.iemr.admin.data.pharmacologicalcategory.M_Pharmacologicalcategory;
-import com.iemr.admin.data.provideronboard.M_ProviderServiceMapping;
-import com.iemr.admin.data.rolemaster.M_Role;
-import com.iemr.admin.to.provider.ProviderServiceMappingTO;
 import com.iemr.admin.utils.mapper.OutputMapper;
-import com.iemr.admin.data.items.M_ItemCategory;
-import com.iemr.admin.data.items.M_ItemForm;
-import com.iemr.admin.data.items.M_Route;
 
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import lombok.Data;
 
 
 @Entity

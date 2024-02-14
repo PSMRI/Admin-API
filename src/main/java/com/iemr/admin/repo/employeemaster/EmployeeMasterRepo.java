@@ -24,19 +24,17 @@ package com.iemr.admin.repo.employeemaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.M_UserServiceRoleMapping2;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapping2, Integer> {
 
 	@Query("SELECT distinct srm.userID, srm.roleID,"
@@ -124,5 +122,8 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 	@Query("SELECT em.userID,em.userName FROM M_UserServiceRoleMapping2 u left join u.employeeMaster em WHERE u.providerServiceMapID=:pid AND u.deleted=0 and em.deleted=false and em.designationID=:did and u.userID not in (:uid) group by u.userID")
 	List<Object[]> getAllEmpByProviderServiceMapIDAndDesignationNotInUserID(@Param("pid") Integer providerServiceMapID,
 			@Param("did") Integer designationID, @Param("uid") List<Integer> allids);
+	
+	@Query("SELECT u FROM M_UserServiceRoleMapping2 u WHERE u.uSRMappingID=:uSRMappingID")
+	M_UserServiceRoleMapping2 findByUSRMappingID(@Param("uSRMappingID") Integer uSRMappingID);
 
 }

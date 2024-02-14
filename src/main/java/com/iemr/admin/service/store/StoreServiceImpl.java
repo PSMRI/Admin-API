@@ -74,7 +74,7 @@ public class StoreServiceImpl implements StoreService {
 	@Override
 	public M_Facility getMainStore(Integer mainStoreID) {
 		// TODO Auto-generated method stub
-		return mainStoreRepo.findOne(mainStoreID);
+		return mainStoreRepo.findByFacilityID(mainStoreID);
 	}
 
 	// @Override
@@ -104,7 +104,7 @@ public class StoreServiceImpl implements StoreService {
 		// List<M_Facility> store=(List<M_Facility>)
 		// mainStoreRepo.save(maniStore);
 		// for(int i=0;i<store.length)
-		return (List<M_Facility>) mainStoreRepo.save(maniStore);
+		return (List<M_Facility>) mainStoreRepo.saveAll(maniStore);
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class StoreServiceImpl implements StoreService {
 	public M_Facility deleteStore(M_Facility facility) throws Exception {
 		// TODO Auto-generated method stub
 
-		M_Facility stores = mainStoreRepo.findOne(facility.getFacilityID());
+		M_Facility stores = mainStoreRepo.findByFacilityID(facility.getFacilityID());
 		if (stores != null && facility.getDeleted() != null) {
 			if (facility.getDeleted()) {
 				List<M_Facility> childStore = mainStoreRepo.findByMainFacilityIDAndDeletedOrderByFacilityName(facility.getFacilityID(),

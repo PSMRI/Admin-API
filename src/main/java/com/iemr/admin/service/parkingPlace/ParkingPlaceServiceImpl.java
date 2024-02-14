@@ -73,7 +73,7 @@ public class ParkingPlaceServiceImpl implements ParkingPlaceService {
 
 	@Override
 	public ArrayList<M_Parkingplace> saveParkingPlace(List<M_Parkingplace> parkingPlaces) {
-		ArrayList<M_Parkingplace> allData = (ArrayList<M_Parkingplace>) parkingPlaceRepository.save(parkingPlaces);
+		ArrayList<M_Parkingplace> allData = (ArrayList<M_Parkingplace>) parkingPlaceRepository.saveAll(parkingPlaces);
 		return allData;
 	}
 

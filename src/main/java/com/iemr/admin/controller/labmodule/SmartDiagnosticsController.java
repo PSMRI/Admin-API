@@ -35,7 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iemr.admin.sevice.labmodule.IOTService;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequestMapping("/diagnostics")
@@ -47,7 +48,7 @@ public class SmartDiagnosticsController {
 	IOTService iotService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get diagnostic test procedure details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get diagnostic test procedure details")
 	@RequestMapping(value = "/getDiagnosticProcedure", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTProcedure() {
 		OutputResponse response = new OutputResponse();
@@ -67,7 +68,7 @@ public class SmartDiagnosticsController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get diagnostic procedure component details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get diagnostic procedure component details")
 	@RequestMapping(value = "/getDiagnosticProcedureComponent", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTComponent() {
 		OutputResponse response = new OutputResponse();
@@ -89,7 +90,7 @@ public class SmartDiagnosticsController {
 	@Value("${biological-screening-device-url}")
 	private String biologicalScreeningDeviceUrl ;
 
-	@ApiOperation(value = "Get the physiological and biological rapid screening device URL")
+	@Operation(summary = "Get the physiological and biological rapid screening device URL")
 	@RequestMapping(value = "/biologicalScreeningDevice", method = RequestMethod.GET, headers = "Authorization")
 	public String getBiologicalScreeningDeviceUrl() {
 		return biologicalScreeningDeviceUrl;

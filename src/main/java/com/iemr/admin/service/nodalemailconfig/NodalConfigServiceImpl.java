@@ -24,27 +24,24 @@ package com.iemr.admin.service.nodalemailconfig;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iemr.admin.data.emailconfig.AuthorityEmail;
 import com.iemr.admin.mapper.emailconfig.InstituteEmailConfigMapper;
-import com.iemr.admin.model.emailconfig.AuthEmailRequest;
-import com.iemr.admin.model.emailconfig.AuthEmailResponse;
 import com.iemr.admin.model.emailconfig.CreateNodalEmailRequestModel;
 import com.iemr.admin.model.emailconfig.NodalEmailRequest;
 import com.iemr.admin.model.emailconfig.NodalEmailResponse;
-import com.iemr.admin.model.emailconfig.UpdateAuthEmailRequest;
 import com.iemr.admin.model.emailconfig.UpdateNodalEmailRequest;
 import com.iemr.admin.repository.emailconfig.InstituteEmailRepo;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 @Service
 public class NodalConfigServiceImpl implements NodalConfigService{

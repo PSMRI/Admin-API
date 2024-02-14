@@ -143,7 +143,7 @@ public class IemrUserServiceImpl implements IemrUserService {
 			}
 
 			requestSet.add(m_user);
-			savedData = (List<M_User>) this.iemrUserRepositoryImplCustom.save(requestSet);
+			savedData = (List<M_User>) this.iemrUserRepositoryImplCustom.saveAll(requestSet);
 			
 			for (M_User user : savedData) {
 				encryptUserPassword.encryptUserCredentials(user);
@@ -183,7 +183,7 @@ public class IemrUserServiceImpl implements IemrUserService {
 				requestSet.add(usrmOBJ);
 			}
 			ArrayList<M_UserServiceRoleMapping> resultList = (ArrayList<M_UserServiceRoleMapping>) this.m_UserMappingRepo
-					.save(requestSet);
+					.saveAll(requestSet);
 			if (resultList.size() > 0) {
 				response = 1;
 			} else {

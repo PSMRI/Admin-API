@@ -39,7 +39,7 @@ public class M_InstitutedirectorymappingImpl implements M_Institutedirectorymapp
 @Override
 public ArrayList<M_Institutedirectorymapping> createInstituteDirectoryData(
 		List<M_Institutedirectorymapping> instuteDiractoty) {
-	ArrayList<M_Institutedirectorymapping> data=(ArrayList<M_Institutedirectorymapping>) m_InstitutedirectorymappingRepo.save(instuteDiractoty);
+	ArrayList<M_Institutedirectorymapping> data=(ArrayList<M_Institutedirectorymapping>) m_InstitutedirectorymappingRepo.saveAll(instuteDiractoty);
 	return data;
 }
 

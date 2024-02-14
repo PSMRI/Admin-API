@@ -39,7 +39,7 @@ public class ManufacturerServiceImpl implements ManufacturerInter {
 
 	@Override
 	public ArrayList<M_Manufacturer> createManufacturer(List<M_Manufacturer> manufacturerData) {
-		ArrayList<M_Manufacturer> createData=(ArrayList<M_Manufacturer>) manufacturerRepo.save(manufacturerData);
+		ArrayList<M_Manufacturer> createData=(ArrayList<M_Manufacturer>) manufacturerRepo.saveAll(manufacturerData);
 		if(createData.size()>0)
 		return createData;
 		else

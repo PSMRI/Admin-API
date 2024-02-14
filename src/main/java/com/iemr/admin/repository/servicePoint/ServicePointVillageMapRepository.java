@@ -24,21 +24,17 @@ package com.iemr.admin.repository.servicePoint;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.locationmaster.DistrictBranchMapping;
-import com.iemr.admin.data.provideronboard.M_ProviderServiceMapping;
 import com.iemr.admin.data.servicePoint.M_Servicepointvillagemap;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface ServicePointVillageMapRepository extends CrudRepository<M_Servicepointvillagemap, Integer>{
 
 
@@ -69,5 +65,7 @@ public interface ServicePointVillageMapRepository extends CrudRepository<M_Servi
 
 	@Query("SELECT u.districtBranchID FROM M_Servicepointvillagemap u where   u.providerServiceMapID=:sid and u.deleted=false")
 	List<Integer> finbyTalukID(@Param("sid") Integer providerServiceMapID);
+	
+	M_Servicepointvillagemap findByServicePointVillageMapID(Integer servicePointVillageMapID);
 	
 }

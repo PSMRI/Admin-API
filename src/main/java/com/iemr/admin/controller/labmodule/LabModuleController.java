@@ -38,8 +38,10 @@ import com.iemr.admin.sevice.labmodule.MastersMappingServiceImpl;
 import com.iemr.admin.sevice.labmodule.MastersStatusUpdateImpl;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 /***
  * @category master creation for lab module
@@ -77,9 +79,9 @@ public class LabModuleController {
 
 
 	@CrossOrigin
-	@ApiOperation(value = "Create procedure master by provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create procedure master by provider admin")
 	@RequestMapping(value = { "/createProcedureMaster" }, method = { RequestMethod.POST })
-	public String createProcedureMaster(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String createProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			String s = mastersCreationServiceImpl.createProcedureMaster(requestOBJ);
@@ -97,9 +99,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Create component master by provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create component master by provider admin")
 	@RequestMapping(value = { "/createComponentMaster" }, method = { RequestMethod.POST })
-	public String createComponentMaster(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String createComponentMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			String s = mastersCreationServiceImpl.createComponentMaster(requestOBJ);
@@ -115,9 +117,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Create procedure - component mapping by provider admin", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create procedure - component mapping by provider admin")
 	@RequestMapping(value = { "/createProcedureComponentMapping" }, method = { RequestMethod.POST })
-	public String createProcedureComponentMapping(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String createProcedureComponentMapping(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			logger.info(requestOBJ);
@@ -138,7 +140,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch procedure master for provider-service-map-id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch procedure master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchProcedureMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcedureMaster(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -156,7 +158,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch component master for provider-service-map-id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch component master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchComponentMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchComponentMaster(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -174,7 +176,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch procedure master for provider-service-map-id and deleted is false", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch procedure master for provider-service-map-id and deleted is false")
 	@RequestMapping(value = { "/fetchProcedureMasterDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcedureMasterDelFalse(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -192,7 +194,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch component master for provider-service-map-id and deleted false", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch component master for provider-service-map-id and deleted false")
 	@RequestMapping(value = { "/fetchComponentMasterDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchComponentMasterDelFalse(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -210,7 +212,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch procedure component mapping list for provider-service-map-id and deleted false", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch procedure component mapping list for provider-service-map-id and deleted false")
 	@RequestMapping(value = { "/fetchprocCompMappingDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcCompMappingDelFalse(@PathVariable("psmID") Integer psmID) {
 		OutputResponse response = new OutputResponse();
@@ -228,7 +230,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch procedure component mapping list for particular procedure id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch procedure component mapping list for particular procedure id")
 	@RequestMapping(value = { "/fetchProcCompMappingForSingleProcedure/{pID}" }, method = { RequestMethod.GET })
 	public String fetchProcCompMappingForSingleProcedure(@PathVariable("pID") Integer pID) {
 		OutputResponse response = new OutputResponse();
@@ -246,7 +248,7 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Fetch  component details  for particular component id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch  component details  for particular component id")
 	@RequestMapping(value = { "/fetchComponentDetailsForComponentID/{cID}" }, method = { RequestMethod.GET })
 	public String fetchComponentDetailsForComponentID(@PathVariable("cID") Integer cID) {
 		OutputResponse response = new OutputResponse();
@@ -268,9 +270,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update procedure status for enable or disable", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update procedure status for enable or disable")
 	@RequestMapping(value = { "/updateProcedureStatus" }, method = { RequestMethod.POST })
-	public String updateProcedureStatus(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateProcedureStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			JSONObject jsnOBJ = new JSONObject(requestOBJ);
@@ -293,9 +295,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update component status for enable or disable", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update component status for enable or disable")
 	@RequestMapping(value = { "/updateComponentStatus" }, method = { RequestMethod.POST })
-	public String updateComponentStatus(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateComponentStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 			JSONObject jsnOBJ = new JSONObject(requestOBJ);
@@ -318,9 +320,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update procedure master for a particular procedure", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update procedure master for a particular procedure")
 	@RequestMapping(value = { "/updateProcedureMaster" }, method = { RequestMethod.POST })
-	public String updateProcedureMaster(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 
@@ -340,9 +342,9 @@ public class LabModuleController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Update component master for a particular Component", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update component master for a particular Component")
 	@RequestMapping(value = { "/updateComponentMaster" }, method = { RequestMethod.POST })
-	public String updateComponentMaster(@ApiParam(value = "{}") @RequestBody String requestOBJ) {
+	public String updateComponentMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
 		OutputResponse response = new OutputResponse();
 		try {
 

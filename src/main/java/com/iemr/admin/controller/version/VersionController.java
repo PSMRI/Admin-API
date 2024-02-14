@@ -35,7 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class VersionController {
@@ -43,7 +44,7 @@ public class VersionController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@CrossOrigin()
-	@ApiOperation(value = "Version information", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Version information")
 	@RequestMapping(value = "/version", method = { RequestMethod.GET })
 	public String versionInformation() {
 		OutputResponse output = new OutputResponse();

@@ -27,13 +27,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.store.M_Facility;
 
 @Repository
-@RestResource(exported = false)
 public interface MainStoreRepo extends CrudRepository<M_Facility, Integer>{
 	
 	List<M_Facility> findByProviderServiceMapIDOrderByFacilityName(Integer providerServiceMapID);
@@ -55,6 +53,8 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer>{
 	M_Facility findByFacilityIDAndDeleted(Integer mainfacID,Boolean deleted);
 
 	List<M_Facility> findByFacilityCodeAndProviderServiceMapID(String facilityCode, Integer providerServiceMapID);
+	
+	M_Facility findByFacilityID(Integer facilityID);
 	
 
 }

@@ -24,7 +24,6 @@ package com.iemr.admin.service.stockEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +38,8 @@ import com.iemr.admin.data.stockentry.PhysicalStockEntry;
 import com.iemr.admin.repo.stockEntry.ItemStockEntryRepo;
 import com.iemr.admin.repo.stockEntry.PhysicalStockEntryRepo;
 import com.iemr.admin.service.item.ItemService;
+
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -67,7 +68,7 @@ public class StockEntryServiceImpl implements StockEntryService {
 		});
 		try {
 			physicalStockEntryinput.setItemStockEntry(
-					(List<ItemStockEntry>) itemStockEntryRepo.save(physicalStockEntry.getItemStockEntry()));
+					(List<ItemStockEntry>) itemStockEntryRepo.saveAll(physicalStockEntry.getItemStockEntry()));
 		} catch (DataIntegrityViolationException sqe) {
 			physicalStockEntryinput.setDeleted(true);
 			physicalStockEntryRepo.updateDelete(physicalStockEntryinput.getPhyEntryID(),true);

@@ -53,7 +53,7 @@ public class UserParkingPlaceMapServiceImpl implements UserParkingPlaceMapServic
 	public ArrayList<M_UserParkingPlaceMap> saveUserParkingPlaceDetails(
 			List<M_UserParkingPlaceMap> userParkingPlaceMaster) {
 		ArrayList<M_UserParkingPlaceMap> allData = (ArrayList<M_UserParkingPlaceMap>) userParkingPlaceMapRepository
-				.save(userParkingPlaceMaster);
+				.saveAll(userParkingPlaceMaster);
 
 		ArrayList<M_UserVanMapping> usrvanmaplist = new ArrayList();
 		for (M_UserParkingPlaceMap usrppmap : allData) {
@@ -64,7 +64,7 @@ public class UserParkingPlaceMapServiceImpl implements UserParkingPlaceMapServic
 				usrvanmaplist.add(usrvanmap);
 			}
 		}
-		userVanMappingRepository.save(usrvanmaplist);
+		userVanMappingRepository.saveAll(usrvanmaplist);
 		return allData;
 	}
 
@@ -148,12 +148,12 @@ public class UserParkingPlaceMapServiceImpl implements UserParkingPlaceMapServic
 	public ArrayList<M_UserParkingPlaceMap> saveUserParkingPlaceDetails1(
 			List<M_UserParkingPlaceMap> parkingPlaceMaster) {
 		ArrayList<M_UserParkingPlaceMap> data = (ArrayList<M_UserParkingPlaceMap>) userParkingPlaceMapRepository
-				.save(parkingPlaceMaster);
+				.saveAll(parkingPlaceMaster);
 		return data;
 	}
 
 	public M_UserParkingPlaceMap getUserParkingPlaceDetails(Integer userParkingPlaceMapID) {
-		M_UserParkingPlaceMap data = userParkingPlaceMapRepository.findOne(userParkingPlaceMapID);
+		M_UserParkingPlaceMap data = userParkingPlaceMapRepository.findByUserParkingPlaceMapID(userParkingPlaceMapID);
 		return data;
 	}
 
@@ -178,7 +178,7 @@ public class UserParkingPlaceMapServiceImpl implements UserParkingPlaceMapServic
 			usrvanmaplist.add(usrvanmap);
 		}
 
-		data.setUservanmapping((List<M_UserVanMapping>) userVanMappingRepository.save(usrvanmaplist));
+		data.setUservanmapping((List<M_UserVanMapping>) userVanMappingRepository.saveAll(usrvanmaplist));
 
 		return data;
 	}

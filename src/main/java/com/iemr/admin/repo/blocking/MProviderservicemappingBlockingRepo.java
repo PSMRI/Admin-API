@@ -24,19 +24,17 @@ package com.iemr.admin.repo.blocking;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.blocking.M_Providerservicemapping_Blocking;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Providerservicemapping_Blocking, Integer>
 {
 
@@ -48,12 +46,12 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 			@Param("stateID") Integer stateID, @Param("serviceID") Integer serviceID,
 			@Param("statusID") Integer statusID);
 
-	@Query("SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.stateID=:stateID AND u.serviceID=:serviceID AND deleted=0")
+	@Query(value = "SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.stateID=:stateID AND u.serviceID=:serviceID AND deleted=0", nativeQuery = true)
 	M_Providerservicemapping_Blocking getProviderServiceMappingDetails(
 			@Param("serviceProviderID") Integer serviceProviderID, @Param("stateID") Integer stateID,
 			@Param("serviceID") Integer serviceID);
 
-	@Query("SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.stateID=:stateID AND deleted=0")
+	@Query(value = "SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.stateID=:stateID AND deleted=0", nativeQuery = true)
 	List<M_Providerservicemapping_Blocking> getProviderStateMappingDetails(
 			@Param("serviceProviderID") Integer serviceProviderID, @Param("stateID") Integer stateID);
 
@@ -65,11 +63,11 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 	void blockProviderByState(@Param("serviceProviderID") Integer serviceProviderID, @Param("stateID") Integer stateID,
 			@Param("statusID") Integer statusID);
 
-	@Query("SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND deleted=0")
+	@Query(value = "SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND deleted=0", nativeQuery = true)
 	ArrayList<M_Providerservicemapping_Blocking>
 			getProviderStatus(@Param("serviceProviderID") Integer serviceProviderID);
 
-	@Query("SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.serviceID=:serviceID AND deleted=0")
+	@Query(value = "SELECT u FROM M_Providerservicemapping_Blocking u where u.serviceProviderID = :serviceProviderID AND u.serviceID=:serviceID AND deleted=0", nativeQuery = true)
 	ArrayList<M_Providerservicemapping_Blocking> getProviderStatusByProviderAndServiceId(
 			@Param("serviceProviderID") Integer serviceProviderID, @Param("serviceID") Integer serviceID);
 
@@ -84,10 +82,10 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 	void blockProviderByProviderIdAndServiceId(@Param("serviceProviderID") Integer serviceProviderID,
 			@Param("serviceID") Integer serviceID, @Param("statusID") Integer statusID);
 
-	@Query(" SELECT distinct srm.providerServiceMapID,srm.serviceProviderID,srm.serviceID,"
+	@Query(value = " SELECT distinct srm.providerServiceMapID,srm.serviceProviderID,srm.serviceID,"
 			+ " sm.serviceName as serviceName," + " sm.isNational as isNational "
 			+ " FROM M_Providerservicemapping_Blocking srm " + "  JOIN srm.m_ServicemasterForBlocking sm"
-			+ " WHERE srm.serviceProviderID =:serviceProviderID AND srm.deleted=0" + " GROUP BY sm.serviceName")
+			+ " WHERE srm.serviceProviderID =:serviceProviderID AND srm.deleted=0" + " GROUP BY sm.serviceName", nativeQuery = true)
 	ArrayList<Object[]> getServiceLiensUsingProvider(@Param("serviceProviderID") Integer serviceProviderID);
 
 	@Transactional
@@ -150,8 +148,8 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 			+ " ORDER BY spmf.serviceProviderName")
 	ArrayList<Object[]> getServiceLiensUsingProvider1(@Param("serviceProviderID") Integer serviceProviderID);
 
-	@Query("select providerMap from M_Providerservicemapping_Blocking providerMap where "
-			+ "providerServiceMapID in :providerServiceMapIDs")
+	@Query(value = "select providerMap from M_Providerservicemapping_Blocking providerMap where "
+			+ "providerServiceMapID in :providerServiceMapIDs", nativeQuery = true)
 	List<M_Providerservicemapping_Blocking> findM_Providerservicemapping_BlockingByProviderServiceMapIDs(
 			@Param("providerServiceMapIDs") List<Integer> providerServiceMapID);
 
@@ -161,5 +159,7 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 	void updateAPIMAN(@Param("apimanClientID")String id,@Param("apimanClientKey") String string,@Param("providerServiceMapID") Integer providerServiceMapID);
 
 	List<M_Providerservicemapping_Blocking> findByProviderServiceMapIDIn(ArrayList<Integer> ids);
+	
+	M_Providerservicemapping_Blocking findByProviderServiceMapID(Integer providerServiceMapID);
 
 }

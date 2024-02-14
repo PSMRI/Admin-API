@@ -36,8 +36,10 @@ import com.iemr.admin.data.parkingPlace.ParkingplaceTalukMappingTO;
 import com.iemr.admin.service.parkingPlace.ParkingPlaceTalukMappingServiceImpl;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/parkingPlaceTalukMapping")
@@ -46,11 +48,11 @@ public class ParkingPlaceTalukMappingController {
 	private ParkingPlaceTalukMappingServiceImpl parkingPlaceTalukMappingServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Stores parking place and taluk mapping details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Stores parking place and taluk mapping details")
 	@RequestMapping(value = "/create/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String parkingPlacesTalukMapping(
-			@ApiParam(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
+			@Param(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", \"districtBlockID\":\"integer\", \"districtBranchID\":\"integer\", "
 					+ " \"createdBy\":\"string\", \"deleted\":\"boolean\"}") @RequestBody List<ParkingplaceTalukMapping> parkingPlace) {
 
@@ -68,11 +70,11 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update parking place and taluk mapping details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update parking place and taluk mapping details")
 	@RequestMapping(value = "/update/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String updateparkingPlacesTalukMapping(
-			@ApiParam(value = "{\"ppSubDistrictMapID\": integer,\"parkingPlaceID\":integer,\"districtBlockID\":integer,\"districtID\":integer,\"providerServiceMapID\":integer,\"createdBy\":string}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"ppSubDistrictMapID\": integer,\"parkingPlaceID\":integer,\"districtBlockID\":integer,\"districtID\":integer,\"providerServiceMapID\":integer,\"createdBy\":string}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -97,11 +99,11 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get parking place and taluk mapping by map id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get parking place and taluk mapping by map id")
 	@RequestMapping(value = "/getbyid/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String getparkingPlacesTalukMapping(
-			@ApiParam(value = "{\"ppSubDistrictMapID\":\"integer\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"ppSubDistrictMapID\":\"integer\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -120,11 +122,11 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all parking place and taluk mapping based on parking place id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all parking place and taluk mapping based on parking place id")
 	@RequestMapping(value = "/getall/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String getallparkingPlacesTalukMapping(
-			@ApiParam(value = "{\"parkingPlaceID\":\"string\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"parkingPlaceID\":\"string\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -141,11 +143,11 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all parking place and taluk mapping based on parking place id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all parking place and taluk mapping based on parking place id")
 	@RequestMapping(value = "/getbyppidanddid/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String getafilterparkingPlacesTalukMapping(
-			@ApiParam(value = "{\"parkingPlaceID\":\"integer\",\"districtID\":\"integer\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"parkingPlaceID\":\"integer\",\"districtID\":\"integer\"}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -162,11 +164,11 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Activate/deactivate parking place and taluk mapping ", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Activate/deactivate parking place and taluk mapping ")
 	@RequestMapping(value = "/activate/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String activateparkingPlacesTalukMapping(
-			@ApiParam(value = "{\"ppSubDistrictMapID\":integer,\"deleted\":boolean}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"ppSubDistrictMapID\":integer,\"deleted\":boolean}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -188,10 +190,10 @@ public class ParkingPlaceTalukMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get unmapped taluk by district id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get unmapped taluk by district id")
 	@RequestMapping(value = "/get/unmappedtaluk", headers = "Authorization", method = { RequestMethod.POST })
 	public String getunmappedtaluk(
-			@ApiParam(value = "{\"districtID\":integer,\"providerServiceMapID\":integer}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
+			@Param(value = "{\"districtID\":integer,\"providerServiceMapID\":integer}") @RequestBody ParkingplaceTalukMapping parkingPlace) {
 
 		OutputResponse output = new OutputResponse();
 

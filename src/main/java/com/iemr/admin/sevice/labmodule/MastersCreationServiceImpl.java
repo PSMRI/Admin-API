@@ -129,7 +129,7 @@ public class MastersCreationServiceImpl implements MastersCreationService {
 						compOptList, componentMasterOBJ.getProviderServiceMapID(), componentMasterOBJ.getCreatedBy(),
 						componentMasterOBJ.getTestComponentID());
 				ArrayList<ComponentResultMap> comResultMapObjListRS = (ArrayList<ComponentResultMap>) componentResultMapRepo
-						.save(comResultMapObjList);
+						.saveAll(comResultMapObjList);
 				if (comResultMapObjList.size() == comResultMapObjListRS.size()) {
 					return new Gson().toJson(componentMasterRS);
 				} else {

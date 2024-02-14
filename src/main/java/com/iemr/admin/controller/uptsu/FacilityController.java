@@ -43,8 +43,10 @@ import com.iemr.admin.data.uptsu.UploadRequest;
 import com.iemr.admin.service.uptsu.FacilityService;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @CrossOrigin
@@ -55,10 +57,10 @@ public class FacilityController {
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@PostMapping(value = "/saveFacility")
-	@ApiOperation(value = "Save facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save facility")
 	@CrossOrigin
 	public String saveFacilityData(
-			@ApiParam("[\r\n" + "  {\r\n" + "    \"createdBy\": \"String\",\r\n" + "    \"fileName\": \"String\",\r\n"
+			@Param("[\r\n" + "  {\r\n" + "    \"createdBy\": \"String\",\r\n" + "    \"fileName\": \"String\",\r\n"
 					+ "    \"providerServiceMapID\": Integer,\r\n" + "    \"fileExtension\": \"String\"\r\n"
 					+ "    \"fileContent\": \"String\"\r\n" + "  }]") @RequestBody String uploadReq,
 			@RequestHeader(value = "Authorization") String authorization) {
@@ -82,7 +84,7 @@ public class FacilityController {
 	}
 	
 	@CrossOrigin
-	@ApiOperation(value = "Save cdss details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save cdss details")
 	@RequestMapping(value= "/submit/cdss", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveCdssDetails(@RequestBody String request) {
 		ObjectMapper mapper = new ObjectMapper();
@@ -102,7 +104,7 @@ public class FacilityController {
 	}
 	
 	@CrossOrigin
-	@ApiOperation(value = "Fetch Cdss data", produces = "application/json")
+	@Operation(summary = "Fetch Cdss data")
 	@RequestMapping(value="/getCdssData/{psmId}", method = RequestMethod.GET)
 	public String getCdssData(@PathVariable Integer psmId, @RequestHeader(value = "Authorization") String authorization) throws Exception {
 		OutputResponse response = new OutputResponse();

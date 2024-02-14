@@ -42,8 +42,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/parkingPlaceMaster")
@@ -52,10 +54,10 @@ public class UserParkingPlaceMapController {
 	private UserParkingPlaceMapServiceImpl userParkingPlaceMapServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save user parking places", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save user parking places")
 	@RequestMapping(value = "/save/userParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveuserParkingPlaces(
-			@ApiParam(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
 					+ "\"createdBy\":\"string\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
@@ -77,10 +79,10 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user parking places", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user parking places")
 	@RequestMapping(value = "/get/userParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getuserParkingPlaces(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String userParkingPlaces)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -102,10 +104,10 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user parking places designation", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user parking places designation")
 	@RequestMapping(value = "/get/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String getuserParkingPlacesDesiganation(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String userParkingPlaces)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -128,10 +130,10 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove user parking place", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove user parking place")
 	@RequestMapping(value = "/remove/userParkingPlace", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteuserParkingPlaceDetails(
-			@ApiParam(value = "{\"vanServicePointMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String userParkingPlaces)
+			@Param(value = "{\"vanServicePointMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -156,10 +158,10 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit user parking places", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit user parking places")
 	@RequestMapping(value = "/edit/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String edituserParkingPlaces(
-			@ApiParam(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
 					+ "\"createdBy\":\"string\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
@@ -185,10 +187,10 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete user parking places", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete user parking places")
 	@RequestMapping(value = "/delete/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteuserParkingPlaces(
-			@ApiParam(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"userID\":\"integer\", \"parkingPlaceID\":\"integer\", \"providerServiceMapID\":\"integer\", "
 					+ "\"createdBy\":\"string\"}") @RequestBody String userParkingPlaces)
 			throws IEMRException {
 
@@ -218,9 +220,9 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Fetch un-mapped users", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch un-mapped users")
 	@RequestMapping(value = "/get/unmappeduser", headers = "Authorization", method = { RequestMethod.POST })
-	public String unmappeduser(@ApiParam(value = "{ \"providerServiceMapID\":\"integer\","
+	public String unmappeduser(@Param(value = "{ \"providerServiceMapID\":\"integer\","
 			+ "\"designationID\":\"integer\"}") @RequestBody String userParkingPlaces) throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -240,7 +242,7 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Fetch mapped vans for user PP id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch mapped vans for user PP id")
 	@RequestMapping(value = "/get/mappedvan/{userppID}", headers = "Authorization", method = { RequestMethod.POST })
 	public String mappedvan(@PathVariable("userppID") Integer userParkingPlacesID) throws IEMRException {
 
@@ -258,7 +260,7 @@ public class UserParkingPlaceMapController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete mapped vans for user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete mapped vans for user")
 	@RequestMapping(value = "/delete/mappedvan", headers = "Authorization", method = { RequestMethod.POST })
 	public String deletemappedvan(@RequestBody String userpvanmapID) throws IEMRException {
 

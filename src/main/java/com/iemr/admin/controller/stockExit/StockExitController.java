@@ -32,7 +32,8 @@ import com.iemr.admin.data.stockExit.T_PatientIssue;
 import com.iemr.admin.service.stockExit.StockExitService;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class StockExitController {
@@ -41,7 +42,7 @@ public class StockExitController {
 	StockExitService stockExitService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store service point details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/patientIssue", headers = "Authorization", method = { RequestMethod.POST })
 	public String patientIssue(@RequestBody T_PatientIssue patientIssue) {
 

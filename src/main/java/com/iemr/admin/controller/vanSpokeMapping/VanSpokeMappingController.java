@@ -35,7 +35,8 @@ import com.iemr.admin.service.vanSpokeMapping.VanSpokeMappingService;
 import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequestMapping(value = "/mapping")
@@ -52,7 +53,7 @@ public class VanSpokeMappingController {
 	 * @throws IEMRException
 	 */
 	@CrossOrigin
-	@ApiOperation(value = "Save van and spoke mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save van and spoke mapping")
 	@RequestMapping(value = { "/save/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String saveBenNCDCareNurseData(@RequestBody String requestObj,
 			@RequestHeader(value = "Authorization") String Authorization) throws IEMRException {
@@ -74,7 +75,7 @@ public class VanSpokeMappingController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Get van and spoke mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get van and spoke mapping")
 	@RequestMapping(value = { "/get/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String getVanSpokeMapping(@RequestBody String requestObj,
 			@RequestHeader(value = "Authorization") String Authorization) throws IEMRException {
@@ -93,7 +94,7 @@ public class VanSpokeMappingController {
 	}
 
 	@CrossOrigin
-	@ApiOperation(value = "Delete van and spoke mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete van and spoke mapping")
 	@RequestMapping(value = { "/delete/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String deleteVanSpokeMapping(@RequestBody String requestObj,
 			@RequestHeader(value = "Authorization") String Authorization) throws IEMRException {

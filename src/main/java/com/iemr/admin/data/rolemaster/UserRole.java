@@ -21,11 +21,11 @@
 */
 package com.iemr.admin.data.rolemaster;
 
-import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Data

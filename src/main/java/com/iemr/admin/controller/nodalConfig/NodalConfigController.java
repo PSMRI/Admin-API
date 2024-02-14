@@ -23,7 +23,6 @@ package com.iemr.admin.controller.nodalConfig;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.MediaType;
 
@@ -43,7 +42,8 @@ import com.iemr.admin.service.nodalemailconfig.NodalConfigService;
 import com.iemr.admin.utils.mapper.OutputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @ApplicationPath("/nodal")
@@ -54,7 +54,7 @@ public class NodalConfigController {
 	NodalConfigService nodalConfigService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save config", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save config")
 	@RequestMapping(value = "/saveConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String saveConfig(@RequestBody List<CreateNodalEmailRequestModel> createEmailRequests,
 			HttpServletRequest request) {
@@ -75,7 +75,7 @@ public class NodalConfigController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get nodal email configs", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get nodal email configs")
 	@RequestMapping(value = "/getNodalEmailConfigs", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getNodalEmailConfigs(@RequestBody NodalEmailRequest authEmailRequest, HttpServletRequest request) {
 		OutputResponse response = new OutputResponse();
@@ -95,7 +95,7 @@ public class NodalConfigController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update nodal email config", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update nodal email config")
 	@RequestMapping(value = "/updateNodalEmailConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String updateNodalEmailConfig(@RequestBody UpdateNodalEmailRequest updateEmailRequest,
 			HttpServletRequest request) {

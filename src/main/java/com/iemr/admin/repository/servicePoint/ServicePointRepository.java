@@ -24,19 +24,17 @@ package com.iemr.admin.repository.servicePoint;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.servicePoint.M_Servicepoint;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface ServicePointRepository extends CrudRepository<M_Servicepoint, Integer>{
 	
 	@Query("SELECT sp.servicePointID, sp.servicePointName, sp.servicePointDesc, sp.servicePointHQAddress, sp.providerServiceMapID, sp.deleted, sp.countryID, "
@@ -62,4 +60,6 @@ public interface ServicePointRepository extends CrudRepository<M_Servicepoint, I
 	@Modifying
 	@Query("update M_Servicepoint sp set sp.deleted=:deleted, sp.modifiedBy=:modifiedBy where sp.servicePointID =:servicePointID")
 	int updateServicePointStatus(@Param("servicePointID")Integer servicePointID, @Param("deleted")Boolean deleted, @Param("modifiedBy")String modifiedBy);
+	
+	M_Servicepoint findByServicePointID(Integer servicePointID);
 }

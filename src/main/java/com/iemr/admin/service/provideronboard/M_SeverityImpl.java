@@ -46,7 +46,7 @@ public ArrayList<M_Severity> getServerity(Integer providerServiceMapID) {
 
 @Override
 public ArrayList<M_Severity> saveServerity(List<M_Severity> serveritydata) {
-	ArrayList<M_Severity> saveSerdata=(ArrayList<M_Severity>) M_ServerityRepo.save(serveritydata);
+	ArrayList<M_Severity> saveSerdata=(ArrayList<M_Severity>) M_ServerityRepo.saveAll(serveritydata);
 	return saveSerdata;
 }
 

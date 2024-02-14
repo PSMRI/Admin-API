@@ -25,20 +25,17 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import org.hibernate.validator.constraints.Length;
-import javax.persistence.Transient;
-
 import com.google.gson.annotations.Expose;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /***
@@ -57,19 +54,19 @@ public class ProcedureMaster {
 	@Column(name = "ProcedureID")
 	private Integer procedureID;
 	@Expose
-	@Length(max = 100)
+	@Size(max = 100)
 	@Column(name = "ProcedureName")
 	private String procedureName;
 	@Expose
-	@Length(max = 100)
+	@Size(max = 100)
 	@Column(name = "ProcedureDesc")
 	private String procedureDesc;
 	@Expose
-	@Length(max = 30)
+	@Size(max = 30)
 	@Column(name = "ProcedureType")
 	private String procedureType;
 	@Expose
-	@Length(max = 10)
+	@Size(max = 10)
 	@Column(name = "Gender")
 	private String gender;
 	@Expose
@@ -82,7 +79,7 @@ public class ProcedureMaster {
 	@Column(name = "Processed", insertable = false)
 	private String processed;
 	@Expose
-	@Length(max = 50)
+	@Size(max = 50)
 	@Column(name = "CreatedBy")
 	private String createdBy;
 	@Expose
@@ -92,7 +89,7 @@ public class ProcedureMaster {
 	@Column(name = "CreatedDate", insertable = false, updatable = false)
 	private Timestamp createdDate;
 	@Expose
-	@Length(max = 50)
+	@Size(max = 50)
 	@Column(name = "ModifiedBy")
 	private String modifiedBy;
 	@Expose

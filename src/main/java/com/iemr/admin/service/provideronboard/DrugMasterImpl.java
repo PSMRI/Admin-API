@@ -58,7 +58,7 @@ public class DrugMasterImpl implements DrugMasterInter{
 	
 	@Override
 	public ArrayList<M_104drugmaster> saveDrugData(List<M_104drugmaster> resList) {
-		ArrayList<M_104drugmaster> data1=(ArrayList<M_104drugmaster>) drugMasterRepo.save(resList);
+		ArrayList<M_104drugmaster> data1=(ArrayList<M_104drugmaster>) drugMasterRepo.saveAll(resList);
 		return data1;
 	}
 
@@ -120,13 +120,13 @@ public class DrugMasterImpl implements DrugMasterInter{
 	@Override
 	public ArrayList<M_104druggroup> saveDrugGroup(List<M_104druggroup> resList) {
 		
-		ArrayList<M_104druggroup> data1=(ArrayList<M_104druggroup>) drugGroupRepo.save(resList);
+		ArrayList<M_104druggroup> data1=(ArrayList<M_104druggroup>) drugGroupRepo.saveAll(resList);
 		return data1;
 	}
 
 	@Override
 	public ArrayList<M_104drugmapping> mapDrugWithGroup(List<M_104drugmapping> resList) {
-		ArrayList<M_104drugmapping> data1=(ArrayList<M_104drugmapping>) drugMappingRepo.save(resList);
+		ArrayList<M_104drugmapping> data1=(ArrayList<M_104drugmapping>) drugMappingRepo.saveAll(resList);
 		return data1;
 	}
 

@@ -39,7 +39,7 @@ public class DrugtypeServiceImpl implements DrugtypeInter{
 	@Override
 	public ArrayList<M_Drugtype> createDrugtypeData(List<M_Drugtype> drugtypeData) {
 		
-		ArrayList<M_Drugtype> savedData=(ArrayList<M_Drugtype>) drugtypeRepo.save(drugtypeData);
+		ArrayList<M_Drugtype> savedData=(ArrayList<M_Drugtype>) drugtypeRepo.saveAll(drugtypeData);
 		
 		if(savedData.size()>0)
 			return savedData;

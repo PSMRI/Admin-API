@@ -23,12 +23,11 @@ package com.iemr.admin.to.vanMaster;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
-import com.iemr.admin.data.servicePoint.M_Servicepoint;
 import com.iemr.admin.data.vanMaster.M_Van;
 import com.iemr.admin.data.vanServicePointMapping.M_VanServicePointMap;
 import com.iemr.admin.data.vanType.M_VanType;
+
+import jakarta.persistence.Transient;
 
 public class VanMasterTO {
 

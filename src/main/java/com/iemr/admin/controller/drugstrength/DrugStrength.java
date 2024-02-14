@@ -39,7 +39,8 @@ import com.iemr.admin.service.drugstrangth.DrugStrangthInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class DrugStrength {
@@ -48,7 +49,7 @@ public class DrugStrength {
 	private DrugStrangthInter durgStrangthInter;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create drug strength", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create drug strength")
 	@RequestMapping(value = "/createDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createDrugStrangth(@RequestBody String createDrugStrangth) {
@@ -76,7 +77,7 @@ public class DrugStrength {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get drug strength", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get drug strength")
 	@RequestMapping(value = "/getDrugStrangth", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getDrugStrangth(@RequestBody String getDrugStrangth) {
@@ -103,7 +104,7 @@ public class DrugStrength {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update drug strength", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update drug strength")
 	@RequestMapping(value = "/updateDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String updateDrugStrangth(@RequestBody String updateDrugStrangth) {
@@ -136,7 +137,7 @@ public class DrugStrength {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete drug strength", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete drug strength")
 	@RequestMapping(value = "/deleteDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteDrugStrangth(@RequestBody String deleteDrugStrangth) {

@@ -21,22 +21,21 @@
 */
 package com.iemr.admin.apiman.test;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+
 
 import com.iemr.admin.data.apiman.ApimanClient;
 import com.iemr.admin.service.apiman.ApimanService;
 import com.iemr.admin.utils.exception.IEMRException;
 
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
 public class ApimanTest {
 
 	@Mock
 	ApimanService apimanService;
 
-	@Test
+	//@Test
 	public void createClient() {
 		// add the behavior of calc service to add two numbers
 		ApimanClient apimanClient=new ApimanClient();

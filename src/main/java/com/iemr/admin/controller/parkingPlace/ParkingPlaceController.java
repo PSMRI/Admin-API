@@ -38,8 +38,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/parkingPlaceMaster")
@@ -49,10 +51,10 @@ public class ParkingPlaceController {
 	private ParkingPlaceServiceImpl parkingPlaceServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Stores parking place details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Stores parking place details")
 	@RequestMapping(value = "/create/parkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveParkingPlace(
-			@ApiParam(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
+			@Param(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", \"districtBlockID\":\"integer\", \"districtBranchID\":\"integer\", "
 					+ " \"createdBy\":\"string\", \"deleted\":\"boolean\"}") @RequestBody String parkingPlaceMaster)
 			throws IEMRException {
@@ -74,10 +76,10 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get parking place details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get parking place details")
 	@RequestMapping(value = "/get/parkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getParkingPlaces(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -96,10 +98,10 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Removes parking place", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Removes parking place")
 	@RequestMapping(value = "/remove/parkingPlace", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteParkingPlace(
-			@ApiParam(value = "{\"parkingPlaceID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String parkingPlaceMaster)
+			@Param(value = "{\"parkingPlaceID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String parkingPlaceMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -123,10 +125,10 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update parking place details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update parking place details")
 	@RequestMapping(value = "/update/parkingPlaceDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateParkingPlaceDetails(
-			@ApiParam(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
+			@Param(value = "{\"parkingPlaceName\":\"string\", \"parkingPlaceDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"areaHQAddress\":\"string\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", \"districtBlockID\":\"integer\", \"districtBranchID\":\"integer\","
 					+ " \"modifiedBy\":\"string\"}") @RequestBody String parkingPlaceData)
 			throws IEMRException {
@@ -161,10 +163,10 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get parking place details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get parking place details")
 	@RequestMapping(value = "/getParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getParkingPlacesProviderserviceMap(
-			@ApiParam(value = "{ \"providerServiceMapID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
+			@Param(value = "{ \"providerServiceMapID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -183,11 +185,11 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get sub district details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get sub district details")
 	@RequestMapping(value = "/getSubDistrictByParkingPlaceID", headers = "Authorization", method = {
 			RequestMethod.POST })
 	public String getSubDistrictDetailsByParkingPlaceID(
-			@ApiParam(value = "{ \"ParkingPlaceId\":\"integer\"}") @RequestBody String SubDistrictByParkingPlaceID)
+			@Param(value = "{ \"ParkingPlaceId\":\"integer\"}") @RequestBody String SubDistrictByParkingPlaceID)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -206,10 +208,10 @@ public class ParkingPlaceController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get parking place details by zone id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get parking place details by zone id")
 	@RequestMapping(value = "/get/parkingPlacesbyzoneid", headers = "Authorization", method = { RequestMethod.POST })
 	public String getparkingPlacesbyzoneid(
-			@ApiParam(value = "{\"zoneID\":\"integer\", \"providerServiceMapID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
+			@Param(value = "{\"zoneID\":\"integer\", \"providerServiceMapID\":\"integer\"}") @RequestBody String parkingPlaceMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();

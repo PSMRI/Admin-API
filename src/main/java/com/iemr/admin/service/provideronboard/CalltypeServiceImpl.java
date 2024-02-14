@@ -39,7 +39,7 @@ public class CalltypeServiceImpl implements Calltypeinter{
 
 	@Override
 	public ArrayList<M_Calltype> saveCallList(List<M_Calltype> resList) {
-		ArrayList<M_Calltype> data=(ArrayList<M_Calltype>) calltypeRepo.save(resList);
+		ArrayList<M_Calltype> data=(ArrayList<M_Calltype>) calltypeRepo.saveAll(resList);
 		return data;
 	}
 
@@ -69,7 +69,7 @@ public class CalltypeServiceImpl implements Calltypeinter{
 
 	@Override
 	public ArrayList<M_Calltype> createCalltype(List<M_Calltype> callMaster) {
-		ArrayList<M_Calltype> calltypedata=(ArrayList<M_Calltype>) calltypeRepo.save(callMaster);
+		ArrayList<M_Calltype> calltypedata=(ArrayList<M_Calltype>) calltypeRepo.saveAll(callMaster);
 		return calltypedata;
 	}
 	

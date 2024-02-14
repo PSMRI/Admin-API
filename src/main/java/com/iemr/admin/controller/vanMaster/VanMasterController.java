@@ -39,8 +39,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/vanMaster")
@@ -50,10 +52,10 @@ public class VanMasterController {
 	private VanMasterServiceImpl vanMasterServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store van details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store van details")
 	@RequestMapping(value = "/save/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanDetails(
-			@ApiParam(value = "{\"vanName\":\"string\", \"vehicalNo\":\"string\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"vanName\":\"string\", \"vehicalNo\":\"string\", \"providerServiceMapID\":\"integer\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", "
 					+ " \"createdBy\":\"string\", \"deleted\":\"boolean\" ,"
 					+ " \"swymedDomain\":\"string\", \"swymedID\":\"string\", \"swymedEmail\":\"string\"}") @RequestBody String vanDetails)
@@ -75,10 +77,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get van details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/get/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePoints(
-			@ApiParam(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String vanMaster)
+			@Param(value = "{\"stateID\":\"integer\", \"districtID\":\"integer\", \"parkingPlaceID\":\"integer\", \"serviceProviderID\":\"integer\"}") @RequestBody String vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -97,10 +99,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove van", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove van")
 	@RequestMapping(value = "/remove/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanDetails(
-			@ApiParam(value = "{\"vanID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String vanMaster)
+			@Param(value = "{\"vanID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -124,10 +126,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update van details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update van details")
 	@RequestMapping(value = "/update/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateZoneData(
-			@ApiParam(value = "{\"vanID\":\"integer\", \"vanName\":\"string\", \"vehicalNo\":\"string\", \"providerServiceMapID\":\"integer\", "
+			@Param(value = "{\"vanID\":\"integer\", \"vanName\":\"string\", \"vehicalNo\":\"string\", \"providerServiceMapID\":\"integer\", "
 					+ "\"countryID\":\"integer\", \"stateID\":\"integer\", \"districtID\":\"integer\", "
 					+ " \"createdBy\":\"string\", \"deleted\":\"boolean\", "
 					+ " \"swymedDomain\":\"string\", \"swymedID\":\"string\", \"swymedEmail\":\"string\"}") @RequestBody String vanDetails)
@@ -160,10 +162,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store van type details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store van type details")
 	@RequestMapping(value = "/save/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanTypeDetails(
-			@ApiParam(value = "{\"vanType\":\"string\", \"vanTypeDesc\":\"string\", \"providerServiceMapID\":\"integer\"}") @RequestBody String vanDetails)
+			@Param(value = "{\"vanType\":\"string\", \"vanTypeDesc\":\"string\", \"providerServiceMapID\":\"integer\"}") @RequestBody String vanDetails)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -182,7 +184,7 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get van types", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get van types")
 	@RequestMapping(value = "/get/vanTypes", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanTypes() {
 
@@ -198,10 +200,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove van type", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove van type")
 	@RequestMapping(value = "/remove/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanType(
-			@ApiParam(value = "{\"vanTypeID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String vanMaster)
+			@Param(value = "{\"vanTypeID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -225,10 +227,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get van details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanMaster", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanMaster(
-			@ApiParam(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String vanMaster)
+			@Param(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -247,10 +249,10 @@ public class VanMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get van details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanFromFacilityID", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanFromFacilityID(
-			@ApiParam(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody M_Van vanMaster)
+			@Param(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody M_Van vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();

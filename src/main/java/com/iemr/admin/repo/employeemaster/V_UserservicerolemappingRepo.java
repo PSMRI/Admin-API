@@ -26,14 +26,11 @@ import java.util.ArrayList;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.V_Userservicerolemapping;
-import com.iemr.admin.data.rolemaster.M_Role;
 
 @Repository
-@RestResource(exported = false)
 public interface V_UserservicerolemappingRepo extends CrudRepository<V_Userservicerolemapping, Integer>{
 
 	/*@Query("SELECT u FROM M_Role u where u.roleID = :roleID")

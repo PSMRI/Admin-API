@@ -23,10 +23,10 @@ package com.iemr.admin.to.servicePoint;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
 import com.iemr.admin.data.servicePoint.M_Servicepoint;
 import com.iemr.admin.data.servicePoint.M_Servicepointvillagemap;
+
+import jakarta.persistence.Transient;
 
 public class ServicePointTO {
 	@Transient

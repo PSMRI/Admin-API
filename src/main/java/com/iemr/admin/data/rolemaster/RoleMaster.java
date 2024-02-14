@@ -21,24 +21,23 @@
 */
 package com.iemr.admin.data.rolemaster;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 
 @Entity
 @Table(name = "m_role")
-public class M_Role {
+public class RoleMaster {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Expose
@@ -99,11 +98,11 @@ public class M_Role {
 	@Column(name = "ProviderServiceMapID")
 	private Integer providerServiceMapID;
 
-	public M_Role() {
+	public RoleMaster() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public M_Role(Integer roleID, String roleName, String roleDesc, Boolean deleted, String screenName,Integer sRSMappingID ) {
+	public RoleMaster(Integer roleID, String roleName, String roleDesc, Boolean deleted, String screenName,Integer sRSMappingID ) {
 		this.sRSMappingID=sRSMappingID;
 		this.roleID = roleID;
 		this.roleName = roleName;

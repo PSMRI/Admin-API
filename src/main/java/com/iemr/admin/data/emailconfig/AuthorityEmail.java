@@ -23,24 +23,23 @@ package com.iemr.admin.data.emailconfig;
 
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.data.employeemaster.M_Designation;
 import com.iemr.admin.data.employeemaster.M_ProviderServiceMap1;
 import com.iemr.admin.data.locationmaster.DistrictBlock;
 import com.iemr.admin.data.locationmaster.DistrictBranchMapping;
 import com.iemr.admin.data.locationmaster.M_District;
-import com.iemr.admin.data.locationmaster.State;
+import com.iemr.admin.data.locationmaster.StateMaster;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 
 @Data
@@ -61,7 +60,7 @@ public class AuthorityEmail
 	private Integer stateID;
 	@JoinColumn(name = "stateID", insertable = false, updatable = false)
 	@OneToOne(fetch = FetchType.EAGER)
-	private State state;
+	private StateMaster state;
 	@Column(name = "DistrictID", insertable = true, updatable = false)
 	private Integer districtID;
 	@JoinColumn(name = "districtID", insertable = false, updatable = false)

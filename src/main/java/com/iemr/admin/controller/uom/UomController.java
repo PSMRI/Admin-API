@@ -39,7 +39,8 @@ import com.iemr.admin.service.uom.UomInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class UomController {
@@ -48,7 +49,7 @@ public class UomController {
 	private UomInter uomInter;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create Uom", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create Uom")
 	@RequestMapping(value = "/createUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createUom(@RequestBody String createUom) {
@@ -76,7 +77,7 @@ public class UomController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get Uom", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get Uom")
 	@RequestMapping(value = "/getUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getUom(@RequestBody String getUom) {
@@ -102,7 +103,7 @@ public class UomController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit Uom", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit Uom")
 	@RequestMapping(value = "/editUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editUom(@RequestBody String editUom) {
@@ -135,7 +136,7 @@ public class UomController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete Uom", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete Uom")
 	@RequestMapping(value = "/deleteUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String deleteUom(@RequestBody String editUom) {
@@ -164,7 +165,7 @@ public class UomController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Check Uom code", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Check Uom code")
 	@RequestMapping(value = "/checkUomCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String checkUomCode(@RequestBody String editUom) {

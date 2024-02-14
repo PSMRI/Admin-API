@@ -58,7 +58,7 @@ public class M_InstitutionImpl implements  M_InstitutionInter{
 
 	@Override
 	public ArrayList<M_Institution> createInstution(List<M_Institution> createinstute) {
-		ArrayList<M_Institution> data=(ArrayList<M_Institution>) m_InstitutionRepo.save(createinstute);
+		ArrayList<M_Institution> data=(ArrayList<M_Institution>) m_InstitutionRepo.saveAll(createinstute);
 		return data;
 	}
 
@@ -79,7 +79,7 @@ public class M_InstitutionImpl implements  M_InstitutionInter{
 	 */
 	@Override
 	public ArrayList<M_Institution> createInstutionByVillage(List<M_Institution> createinstute) {
-		ArrayList<M_Institution> data=(ArrayList<M_Institution>) m_InstitutionRepo.save(createinstute);
+		ArrayList<M_Institution> data=(ArrayList<M_Institution>) m_InstitutionRepo.saveAll(createinstute);
 		return data;
 	}
 	/*

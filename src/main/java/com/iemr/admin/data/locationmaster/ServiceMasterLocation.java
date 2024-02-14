@@ -19,26 +19,25 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.data.rolemaster;
+package com.iemr.admin.data.locationmaster;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 @Entity
 @Table(name="m_ServiceMaster")
-public class ServiceMaster {
+public class ServiceMasterLocation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Expose
@@ -50,11 +49,6 @@ public class ServiceMaster {
 	@Expose
 	@Column(name="ServiceDesc")
 	private String serviceDesc;
-	
-	@Expose
-	@Column(name="IsNational")
-	private Boolean isNational;
-	
 	@Expose
 	@Column(name="Deleted", insertable = false, updatable = true)
 	private Boolean deleted;
@@ -71,9 +65,18 @@ public class ServiceMaster {
 	@Column(name="LastModDate", insertable = false, updatable = false)
 	private Timestamp lastModDate;
 	
+	@Expose
+	@Column(name="IsNational")
+	private Boolean isNational;
+	
 	@OneToOne(mappedBy="serviceMaster")
-	private StateServiceMapping roleMapping;
-
+	private StateServiceMapping1 roleMapping;
+	
+	public ServiceMasterLocation() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	
 	public Integer getServiceID() {
 		return serviceID;
 	}
@@ -125,31 +128,34 @@ public class ServiceMaster {
 	}
 
 	
-	
-	
-	
+
 
 	public Timestamp getCreatedDate() {
 		return createdDate;
 	}
 
+
 	public void setCreatedDate(Timestamp createdDate) {
 		this.createdDate = createdDate;
 	}
+
 
 	public Timestamp getLastModDate() {
 		return lastModDate;
 	}
 
+
 	public void setLastModDate(Timestamp lastModDate) {
 		this.lastModDate = lastModDate;
 	}
 
-	public StateServiceMapping getRoleMapping() {
+
+	public StateServiceMapping1 getRoleMapping() {
 		return roleMapping;
 	}
 
-	public void setRoleMapping(StateServiceMapping roleMapping) {
+
+	public void setRoleMapping(StateServiceMapping1 roleMapping) {
 		this.roleMapping = roleMapping;
 	}
 	
@@ -160,6 +166,7 @@ public class ServiceMaster {
 	public Boolean getIsNational() {
 		return isNational;
 	}
+
 
 	public void setIsNational(Boolean isNational) {
 		this.isNational = isNational;
@@ -176,6 +183,9 @@ public class ServiceMaster {
 	public String toString() {
 		return outputMapper.gson().toJson(this);
 	}
+	
+	
+
 	
 	
 	

@@ -23,10 +23,10 @@ package com.iemr.admin.to.zonemaster;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
 import com.iemr.admin.data.zonemaster.M_Zone;
 import com.iemr.admin.data.zonemaster.M_ZoneDistrictMap;
+
+import jakarta.persistence.Transient;
 
 public class ZoneMasterTO {
 

@@ -50,7 +50,7 @@ public class ServicePointServiceImpl implements servicePointService {
 	
 	@Override
 	public ArrayList<M_Servicepoint> saveServicePoint(List<M_Servicepoint> ServicePoints) {
-		ArrayList<M_Servicepoint>  allData=(ArrayList<M_Servicepoint>) servicePointRepository.save(ServicePoints);
+		ArrayList<M_Servicepoint>  allData=(ArrayList<M_Servicepoint>) servicePointRepository.saveAll(ServicePoints);
 		return allData;
 	}
 
@@ -97,7 +97,7 @@ public class ServicePointServiceImpl implements servicePointService {
 	@Override
 	public ArrayList<M_Servicepointvillagemap> saveServicePointVillageMap(
 			List<M_Servicepointvillagemap> Servicepointvillagemaps) {
-		ArrayList<M_Servicepointvillagemap>  allData=(ArrayList<M_Servicepointvillagemap>) servicePointVillageMapRepository.save(Servicepointvillagemaps);
+		ArrayList<M_Servicepointvillagemap>  allData=(ArrayList<M_Servicepointvillagemap>) servicePointVillageMapRepository.saveAll(Servicepointvillagemaps);
 		return allData;
 	}
 
@@ -145,7 +145,7 @@ public class ServicePointServiceImpl implements servicePointService {
 	}
 
 	public M_Servicepoint getdataForEditServicePointStatus(Integer servicePointID) {
-		M_Servicepoint data=servicePointRepository.findOne(servicePointID);
+		M_Servicepoint data=servicePointRepository.findByServicePointID(servicePointID);
 		return data;
 	}
 
@@ -155,7 +155,7 @@ public class ServicePointServiceImpl implements servicePointService {
 	}
 
 	public M_Servicepointvillagemap updateServicePointVillageMapStatus(Integer servicePointVillageMapID) {
-		M_Servicepointvillagemap data=servicePointVillageMapRepository.findOne(servicePointVillageMapID);
+		M_Servicepointvillagemap data=servicePointVillageMapRepository.findByServicePointVillageMapID(servicePointVillageMapID);
 		return data;
 	}
 

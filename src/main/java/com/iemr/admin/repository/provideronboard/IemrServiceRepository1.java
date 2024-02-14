@@ -24,23 +24,20 @@ package com.iemr.admin.repository.provideronboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-//import org.springframework.test.annotation.Commit;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.provideronboard.ServiceProvider_Model;
+
+import jakarta.transaction.Transactional;
 
 @Transactional
 //@Commit
 
 @Repository
-@RestResource(exported = false)
 public interface IemrServiceRepository1 extends CrudRepository<ServiceProvider_Model, Integer> {
 	@Query("Select b from ServiceProvider_Model b where deleted=0")
 	List<ServiceProvider_Model> getAlldata(Pageable pageable);

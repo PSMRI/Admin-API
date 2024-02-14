@@ -39,7 +39,8 @@ import com.iemr.admin.data.telemedicine.UserVideoConsultation;
 import com.iemr.admin.service.telemedicine.VideoConsultationInter;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequestMapping(value = "/videoConsultation")
@@ -52,7 +53,7 @@ public class VideoConsultationController {
 
 	
 	@CrossOrigin()
-	@ApiOperation(value = "Get unmapped user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get unmapped user")
 	@RequestMapping(value = "/getunmappedUser/{serviceproviderID}/{designationID}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
 	public String getUserTM(@PathVariable("serviceproviderID") Integer serviceproviderID,
@@ -78,7 +79,7 @@ public class VideoConsultationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create user")
 	@RequestMapping(value = "/createUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createUserTM(@RequestBody UserVideoConsultation userVideoConsultation) {
@@ -104,7 +105,7 @@ public class VideoConsultationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit user")
 	@RequestMapping(value = "/editUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editUser(@RequestBody UserVideoConsultation userVideoConsultation) {
@@ -129,7 +130,7 @@ public class VideoConsultationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete user")
 	@RequestMapping(value = "/deleteUser/{userVideoConsultationMapID}/{deletedflag}/{ModifiedBy}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
 	public String createUserTM(@PathVariable("ModifiedBy") String modifiedBy,
@@ -155,7 +156,7 @@ public class VideoConsultationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get mapped user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get mapped user")
 	@RequestMapping(value = "/getmappedUsers/{serviceproviderID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getmappedUsers(@PathVariable("serviceproviderID") Integer serviceproviderID) {
@@ -180,7 +181,7 @@ public class VideoConsultationController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get domain", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get domain")
 	@RequestMapping(value = "/getdomain/{serviceproviderID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getdomain(@PathVariable("serviceproviderID") Integer serviceproviderID) {

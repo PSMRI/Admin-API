@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.locationmaster.M_District;
 import com.iemr.admin.data.locationmaster.M_ProviderServiceAddMapping;
-import com.iemr.admin.data.locationmaster.ServiceMaster;
+import com.iemr.admin.data.locationmaster.ServiceMasterLocation;
 import com.iemr.admin.data.locationmaster.Showofficedetails;
 import com.iemr.admin.data.locationmaster.StateServiceMapping1;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
@@ -46,7 +46,8 @@ import com.iemr.admin.to.locationmaster.LocationTO;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class LocationMasterController {
@@ -60,7 +61,7 @@ public class LocationMasterController {
 	private InputMapper inputMapper = new InputMapper();
 
 	@CrossOrigin()
-	@ApiOperation(value = "get all role 2", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "get all role 2")
 	@RequestMapping(value = "/m/location/getAlllocation1", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllRole2(@RequestBody String stateserviceMapping1) {
@@ -104,7 +105,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all location", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all location")
 	@RequestMapping(value = "/m/location/getAlllocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAlllocation(@RequestBody String getAlllocation) {
@@ -116,7 +117,7 @@ public class LocationMasterController {
 			StateServiceMapping1 stateserviceMapping = InputMapper.gson().fromJson(getAlllocation,
 					StateServiceMapping1.class);
 
-			ServiceMaster stateserviceMapping1 = InputMapper.gson().fromJson(getAlllocation, ServiceMaster.class);
+			ServiceMasterLocation stateserviceMapping1 = InputMapper.gson().fromJson(getAlllocation, ServiceMasterLocation.class);
 
 			/**
 			 * sending serviceproviderId & stateid & serviceId and getting the responce
@@ -168,7 +169,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all new location", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all new location")
 	@RequestMapping(value = "/m/location/getAlllocationNew", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAlllocationNew(@RequestBody String getAlllocation) {
@@ -180,7 +181,7 @@ public class LocationMasterController {
 			StateServiceMapping1 stateserviceMapping = InputMapper.gson().fromJson(getAlllocation,
 					StateServiceMapping1.class);
 
-			ServiceMaster stateserviceMapping1 = InputMapper.gson().fromJson(getAlllocation, ServiceMaster.class);
+			ServiceMasterLocation stateserviceMapping1 = InputMapper.gson().fromJson(getAlllocation, ServiceMasterLocation.class);
 
 			ArrayList<Showofficedetails> rolesData;
 
@@ -206,7 +207,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Search role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/location/state", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String searchRole(@RequestBody String stateserviceMapping1) {
@@ -236,7 +237,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service")
 	@RequestMapping(value = "m/location/service", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getService(@RequestBody String stateserviceMapping1) {
@@ -265,7 +266,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all district", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all district")
 	@RequestMapping(value = "m/location/findDistrict", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllDistrict(@RequestBody String mDistrict1) {
@@ -294,7 +295,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get all role", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get all role")
 	@RequestMapping(value = "m/location/addLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getAllRole(@RequestBody String stateserviceMapping1) {
@@ -341,7 +342,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get edit location", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get edit location")
 	@RequestMapping(value = "m/location/editLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String geteditLocation(@RequestBody String editLocation) {
@@ -378,7 +379,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete location", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete location")
 	@RequestMapping(value = "m/location/deleteLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteLocation(@RequestBody String deletelocation) {
@@ -411,7 +412,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get location by service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get location by service id")
 	@RequestMapping(value = "/m/location/getLocationByServiceID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getLocationByServiceID(@RequestBody String getLocationByServiceID) {
@@ -459,7 +460,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get location by state id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get location by state id")
 	@RequestMapping(value = "/m/location/getLocationByStateId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getLocationByStateId(@RequestBody String getLocationByStateId) {
@@ -508,7 +509,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get office name by map id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get office name by map id")
 	@RequestMapping(value = "/m/location/getOfficeNameByMapId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getOfficeNameByMapId(@RequestBody String getOfficeNameByMapId) {
@@ -554,7 +555,7 @@ public class LocationMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get state by service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get state by service id")
 	@RequestMapping(value = "/m/location/getStatesByServiceID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getStatesByServiceID(@RequestBody String stateserviceMapping1) {

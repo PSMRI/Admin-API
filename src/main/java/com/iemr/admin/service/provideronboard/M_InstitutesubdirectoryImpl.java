@@ -51,7 +51,7 @@ public class M_InstitutesubdirectoryImpl implements M_InstitutesubdirectoryInter
 	@Override
 	public ArrayList<M_Institutesubdirectory> CreateInstutesubDirectory(
 			List<M_Institutesubdirectory> instuteSubDiractoty) {
-		ArrayList<M_Institutesubdirectory> data=(ArrayList<M_Institutesubdirectory>) m_InstitutesubdirectoryRepo.save(instuteSubDiractoty);
+		ArrayList<M_Institutesubdirectory> data=(ArrayList<M_Institutesubdirectory>) m_InstitutesubdirectoryRepo.saveAll(instuteSubDiractoty);
 		return data;
 	}
 

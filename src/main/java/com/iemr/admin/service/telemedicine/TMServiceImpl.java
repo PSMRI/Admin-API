@@ -68,13 +68,13 @@ public class TMServiceImpl implements TMInter {
 	public ArrayList<UserSpecializationMapping> saveUserSpecialization(
 			ArrayList<UserSpecializationMapping> usrspecmapp) {
 		// TODO Auto-generated method stub
-		return (ArrayList<UserSpecializationMapping>) userSpecializationMappingRepo.save(usrspecmapp);
+		return (ArrayList<UserSpecializationMapping>) userSpecializationMappingRepo.saveAll(usrspecmapp);
 	}
 
 	@Override
 	public UserSpecializationMapping findUserSpecialization(UserSpecializationMapping userSpecializationMapping) {
 		// TODO Auto-generated method stub
-		return userSpecializationMappingRepo.findOne(userSpecializationMapping.getUserSpecializationMapID());
+		return userSpecializationMappingRepo.findByUserSpecializationMapID(userSpecializationMapping.getUserSpecializationMapID());
 	}
 
 	@Override

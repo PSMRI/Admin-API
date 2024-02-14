@@ -47,7 +47,7 @@ import com.iemr.admin.to.blocking.BlockingTO;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 public class BlockingController {
@@ -61,7 +61,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block provider 1", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block provider 1")
 	@RequestMapping(value = "/blockProvider1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String blockProvider1(@RequestBody String providerBlocking) {
@@ -120,7 +120,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block provider")
 	@RequestMapping(value = "/blockProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String blockProvider(@RequestBody String providerBlocking) {
@@ -179,7 +179,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block provider by service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block provider by service id")
 	@RequestMapping(value = { "/blockProviderByServiceId" }, method = { RequestMethod.POST }, produces = {
 			"application/json" }, headers = "Authorization")
 	public String blockProviderByServiceId(@RequestBody String blockProviderByServiceId) {
@@ -240,7 +240,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider status", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider status")
 	@RequestMapping(value = "/getProviderStatus", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderStatus(@RequestBody String getProviderStatus) {
@@ -267,7 +267,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider status 1", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider status 1")
 	@RequestMapping(value = "/getProviderStatus1", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderStatus1(@RequestBody String getProviderStatus) {
@@ -294,7 +294,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get service liens using provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get service liens using provider")
 	@RequestMapping(value = "/getServiceLinesUsingProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getServiceLiensUsingProvider(@RequestBody String getServiceLiensUsingProvider) {
@@ -321,7 +321,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider status by provider and service id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider status by provider and service id")
 	@RequestMapping(value = "/getProviderStatusByProviderAndServiceId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderStatusByProviderAndServiceId(@RequestBody String getProviderStatusByProviderAndServiceId) {
@@ -349,7 +349,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block provider by service", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block provider by service")
 	@RequestMapping(value = "/blockProviderByService", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String blockProviderByService(@RequestBody String providerServiceBlocking) {
@@ -402,7 +402,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider status by service", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider status by service")
 	@RequestMapping(value = "/getProviderStatusByService", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderStatusByService(@RequestBody String providerServiceBlocking) {
@@ -431,7 +431,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block provider by state", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block provider by state")
 	@RequestMapping(value = "/blockProviderByState", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String blockProviderByState(@RequestBody String providerStateBlocking) {
@@ -492,7 +492,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get provider status by state", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get provider status by state")
 	@RequestMapping(value = "/getProviderStatusByState", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getProviderStatusByState(@RequestBody String providerStateBlocking) {
@@ -521,7 +521,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Block user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Block user")
 	@RequestMapping(value = "/blockUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String blockUser(@RequestBody String blockUser) {
@@ -569,7 +569,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get status", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get status")
 	@RequestMapping(value = "/getStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getStatus(@RequestBody String getStatus) {
@@ -594,7 +594,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Provider state and service lines", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Provider state and service lines")
 	@RequestMapping(value = "/addProviderStateAndServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String ProviderStateAndServiceLines(@RequestBody String ProviderStateAndServiceLines) {
@@ -658,7 +658,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete provider state and service lines", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete provider state and service lines")
 	@RequestMapping(value = "/deleteProviderStateAndServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteProviderStateAndServiceLines(@RequestBody String deleteProviderStateAndServiceLines) {
@@ -702,7 +702,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create cit mapping with service lines", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create cit mapping with service lines")
 	@RequestMapping(value = "/createCitMappingwithServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String createCitMappingwithServiceLines(@RequestBody String createCitMappingwithServiceLines) {
@@ -729,7 +729,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get mapped service lines and state to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get mapped service lines and state to provider")
 	@RequestMapping(value = "/getMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, consumes = { "application/json" }, produces = { "application/json" })
 	public String getMappedServiceLinesAndStatetoProvider(@RequestBody String getMappedServiceLinesAndStatetoProvider) {
@@ -757,7 +757,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Map provider and service lines", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Map provider and service lines")
 	@RequestMapping(value = "/mapServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String mapProviderAndServiceLines(@RequestBody String mapProviderAndServiceLines) {
@@ -823,7 +823,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit mapped service lines and state to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit mapped service lines and state to provider")
 	@RequestMapping(value = "/editMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editMappedServiceLinesAndStatetoProvider(
@@ -857,7 +857,7 @@ public class BlockingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete mapped service lines and state to provider", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete mapped service lines and state to provider")
 	@RequestMapping(value = "/deleteMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String deleteMappedServiceLinesAndStatetoProvider(

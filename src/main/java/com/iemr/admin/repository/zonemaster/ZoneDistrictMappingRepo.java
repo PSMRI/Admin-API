@@ -21,23 +21,20 @@
 */
 package com.iemr.admin.repository.zonemaster;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.zonemaster.M_ZoneDistrictMap;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface ZoneDistrictMappingRepo extends CrudRepository<M_ZoneDistrictMap, Integer>{
 
 	@Query("SELECT m.zoneDistrictMapID, m.zoneID, z.zoneName, m.districtID, m.providerServiceMapID, m.deleted, p.stateID, s.stateName, d.districtName,"
@@ -62,7 +59,7 @@ public interface ZoneDistrictMappingRepo extends CrudRepository<M_ZoneDistrictMa
 			+ " LEFT JOIN p.m_serviceMaster sm "
 			+ " LEFT JOIN m.m_district d "
 			+ " where p.providerServiceMapID =:providerServiceMapID  ORDER By z.zoneName ")
-	List<Objects[]> getAvailableZoneDistrictMappingss(@Param("providerServiceMapID")Integer providerServiceMapID);
+	List<Objects[]> getAvailableZoneDistrictMappings(@Param("providerServiceMapID")Integer providerServiceMapID);
 	
 	
 	@Transactional
@@ -80,5 +77,7 @@ public interface ZoneDistrictMappingRepo extends CrudRepository<M_ZoneDistrictMa
 	
 	@Query("Select u from M_ZoneDistrictMap u where u.zoneID=:zoneID AND u.deleted=0")
 	List getRecord(@Param("zoneID") Integer zoneID);
+	
+	M_ZoneDistrictMap findByZoneDistrictMapID(Integer zoneDistrictMapID);
 	
 }

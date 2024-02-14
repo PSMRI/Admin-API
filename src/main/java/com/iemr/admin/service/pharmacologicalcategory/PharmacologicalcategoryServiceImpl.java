@@ -40,7 +40,7 @@ public class PharmacologicalcategoryServiceImpl implements Pharmacologicalcatego
 	@Override
 	public ArrayList<M_Pharmacologicalcategory> createPharmacologicalcategory(
 			List<M_Pharmacologicalcategory> createPharmacologicaldata) {
-		ArrayList<M_Pharmacologicalcategory> data=(ArrayList<M_Pharmacologicalcategory>) pharmacologicalcategoryRepo.save(createPharmacologicaldata);
+		ArrayList<M_Pharmacologicalcategory> data=(ArrayList<M_Pharmacologicalcategory>) pharmacologicalcategoryRepo.saveAll(createPharmacologicaldata);
 		if(data.size()>0)
 			return data;
 		else	

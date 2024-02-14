@@ -61,7 +61,7 @@ public class VideoConsultationServiceImpl implements VideoConsultationInter {
 
 	@Override
 	public UserVideoConsultation createUser(UserVideoConsultation userVideoConsultation) throws VideoConsultationException {
-		M_UserTemp user=userRepo.findOne(userVideoConsultation.getUserID());
+		M_UserTemp user=userRepo.findByUserID(userVideoConsultation.getUserID());
 		if(user==null){
 			throw new VideoConsultationException("Invalid User");
 		}
@@ -84,7 +84,7 @@ public class VideoConsultationServiceImpl implements VideoConsultationInter {
 
 	@Override
 	public UserVideoConsultation editUser(UserVideoConsultation userVideoConsultation) throws VideoConsultationException {
-		UserVideoConsultation swy=userVideoConsultationRepo.findOne(userVideoConsultation.getUserVideoConsultationMapID());
+		UserVideoConsultation swy=userVideoConsultationRepo.findByUserVideoConsultationMapID(userVideoConsultation.getUserVideoConsultationMapID());
 		
 		
 		if(swy==null){
@@ -125,7 +125,7 @@ public class VideoConsultationServiceImpl implements VideoConsultationInter {
 
 	@Override
 	public UserVideoConsultation deleteUser(Long userVideoConsultationMapID, Boolean deletedflag,String modifiedBy) throws VideoConsultationException {
-		UserVideoConsultation swy=userVideoConsultationRepo.findOne(userVideoConsultationMapID);
+		UserVideoConsultation swy=userVideoConsultationRepo.findByUserVideoConsultationMapID(userVideoConsultationMapID);
 		swy.setDeleted(deletedflag);
 		swy.setModifiedBy(modifiedBy);
 		swy.setUser(null);

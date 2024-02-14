@@ -39,8 +39,10 @@ import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.lettuce.core.dynamic.annotation.Param;
+import io.swagger.v3.oas.annotations.Operation;
+
+
 
 @RestController
 @RequestMapping(value = "/zonemaster")
@@ -50,10 +52,10 @@ public class ZoneMasterController {
 	private ZoneMasterServiceImpl zoneMasterServiceImpl;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store zone details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store zone details")
 	@RequestMapping(value = "/save/zone", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveZone(
-			@ApiParam(value = "{\"zoneName\":\"string\", \"zoneDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"zoneHQAddress\":\"string\", \"stateID\":\"string\","
+			@Param(value = "{\"zoneName\":\"string\", \"zoneDesc\":\"string\", \"providerServiceMapID\":\"integer\", \"zoneHQAddress\":\"string\", \"stateID\":\"string\","
 					+ " \"createdBy\":\"string\"}") @RequestBody String zonemaster)
 			throws IEMRException {
 
@@ -73,9 +75,9 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get zone details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get zone details")
 	@RequestMapping(value = "/get/zones", headers = "Authorization", method = { RequestMethod.POST })
-	public String getZones(@ApiParam(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String requestObj) {
+	public String getZones(@Param(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String requestObj) {
 
 		OutputResponse output = new OutputResponse();
 		try {
@@ -98,10 +100,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Map zone with district", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Map zone with district")
 	@RequestMapping(value = "/save/zoneDistrictMapping", headers = "Authorization", method = { RequestMethod.POST })
 	public String mapZoneWithDistrict(
-			@ApiParam(value = "{\"ZoneID\":\"integer\", \"DistrictID\":\"integer\", \"providerServiceMapID\":\"integer\",  \"createdBy\":\"string\"}") @RequestBody String zonemaster)
+			@Param(value = "{\"ZoneID\":\"integer\", \"DistrictID\":\"integer\", \"providerServiceMapID\":\"integer\",  \"createdBy\":\"string\"}") @RequestBody String zonemaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -121,10 +123,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit zone district", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit zone district")
 	@RequestMapping(value = "/edit/zoneDistrictMapping", headers = "Authorization", method = { RequestMethod.POST })
 	public String editZoneDistrict(
-			@ApiParam(value = "{\"ZoneID\":\"integer\", \"DistrictID\":\"integer\", \"providerServiceMapID\":\"integer\",  \"createdBy\":\"string\"}") @RequestBody String zonemaster)
+			@Param(value = "{\"ZoneID\":\"integer\", \"DistrictID\":\"integer\", \"providerServiceMapID\":\"integer\",  \"createdBy\":\"string\"}") @RequestBody String zonemaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -151,10 +153,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get zone details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get zone details")
 	@RequestMapping(value = "/get/zoneDistrictMappings", headers = "Authorization", method = { RequestMethod.POST })
 	public String getZoneDistrictMappings(
-			@ApiParam(value = "{\"serviceProviderID\":\"integer\"}") @RequestBody String requestObj) {
+			@Param(value = "{\"serviceProviderID\":\"integer\"}") @RequestBody String requestObj) {
 
 		OutputResponse output = new OutputResponse();
 
@@ -178,10 +180,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove zone", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove zone")
 	@RequestMapping(value = "/remove/zone", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteZone(
-			@ApiParam(value = "{\"ZoneID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String zoneData)
+			@Param(value = "{\"ZoneID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String zoneData)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -207,10 +209,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update zone details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update zone details")
 	@RequestMapping(value = "/update/zoneData", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateZoneData(
-			@ApiParam(value = "{\"zoneID\":\"integer\", \"zoneName\":\"string\", \"zoneDesc\":\"string\", \"stateID\":\"string\", \"zoneHQAddress\":\"string\","
+			@Param(value = "{\"zoneID\":\"integer\", \"zoneName\":\"string\", \"zoneDesc\":\"string\", \"stateID\":\"string\", \"zoneHQAddress\":\"string\","
 					+ " \"modifiedBy\":\"string\"}") @RequestBody String zoneData)
 			throws IEMRException {
 
@@ -241,7 +243,7 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Zone district mapping")
+	@Operation(summary = "Zone district mapping")
 
 	@RequestMapping(value = "/getdistrictMappedtoZone", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -266,10 +268,10 @@ public class ZoneMasterController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Remove zone district mapping", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Remove zone district mapping")
 	@RequestMapping(value = "/remove/zoneDistrictMapping", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteZoneDistrictMapping(
-			@ApiParam(value = "{\"zoneDistrictMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String zoneData)
+			@Param(value = "{\"zoneDistrictMapID\":\"integer\", \"deleted\":\"boolean\", \"modifiedBy\":\"string\"}") @RequestBody String zoneData)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();

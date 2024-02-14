@@ -39,7 +39,8 @@ import com.iemr.admin.data.stockentry.PhysicalStockEntry;
 import com.iemr.admin.service.stockEntry.StockEntryService;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class StockEntryController {
@@ -49,7 +50,7 @@ public class StockEntryController {
 	StockEntryService stockEntryService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Store service point details", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/physicalStockEntry", headers = "Authorization", method = { RequestMethod.POST })
 	public String physicalStockEntry(@RequestBody PhysicalStockEntry physicalStockEntry) {
 
@@ -67,7 +68,7 @@ public class StockEntryController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get item batch for store id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get item batch for store id")
 	@RequestMapping(value = "/getItemBatchForStoreID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getItemBatchForStoreID(@RequestBody ItemStockEntry itemStockEntry) {
@@ -91,7 +92,7 @@ public class StockEntryController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Allocate stock from item id", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Allocate stock from item id")
 	@RequestMapping(value = "/allocateStockFromItemID/{facilityID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String allocateStockFromItemID(@PathVariable("facilityID") Integer facilityID,

@@ -39,7 +39,8 @@ import com.iemr.admin.data.createOrder.CreateOrderData;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class CareStreamCreateOrderController {
@@ -49,7 +50,7 @@ public class CareStreamCreateOrderController {
 	private static final char CARRIAGE_RETURN = 13;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Create order", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Create order")
 	@RequestMapping(value = "/createOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String createOrder(@RequestBody String createOrder) throws UnknownHostException, IOException {
@@ -118,7 +119,7 @@ public class CareStreamCreateOrderController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update order", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update order")
 	@RequestMapping(value = "/UpdateOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String UpdateOrder(@RequestBody String UpdateOrder) throws UnknownHostException, IOException {
@@ -174,7 +175,7 @@ public class CareStreamCreateOrderController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete order", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete order")
 	@RequestMapping(value = "/deleteOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String deleteOrder(@RequestBody String deleteOrder) throws UnknownHostException, IOException {

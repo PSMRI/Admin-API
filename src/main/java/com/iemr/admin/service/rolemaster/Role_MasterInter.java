@@ -24,7 +24,7 @@ package com.iemr.admin.service.rolemaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.iemr.admin.data.rolemaster.M_Role;
+import com.iemr.admin.data.rolemaster.RoleMaster;
 import com.iemr.admin.data.rolemaster.M_Role104;
 import com.iemr.admin.data.rolemaster.M_Screen;
 import com.iemr.admin.data.rolemaster.M_UserservicerolemappingForRoleProviderAdmin;
@@ -37,19 +37,19 @@ public interface Role_MasterInter {
 
 	ArrayList<StateServiceMapping> getServiceByServiceProviderIdAndStateId(Integer serviceProviderID, Integer stateID);
 
-	List<M_Role> getAllRoleByMapId();
+	List<RoleMaster> getAllRoleByMapId();
 
 	ArrayList<StateServiceMapping> getAllByMapId(Integer serviceProviderID, Integer stateID, Integer serviceID,Boolean isNational);
 
-	public ArrayList<M_Role> getProStateServRoles(int pssmID);
+	public ArrayList<RoleMaster> getProStateServRoles(int pssmID);
 
-	public List<M_Role> addRole(List<M_Role> mRole);
+	public List<RoleMaster> addRole(List<RoleMaster> mRole);
 
-	public M_Role getRoleByRoleId(Integer roleID);
+	public RoleMaster getRoleByRoleId(Integer roleID);
 
-	public M_Role  modifydata(M_Role editdata);
+	public RoleMaster  modifydata(RoleMaster editdata);
 
-	public String deletedata(M_Role deleteData);
+	public String deletedata(RoleMaster deleteData);
 
 	ArrayList<M_Screen> getAllFeature(Integer serviceID);
 
@@ -57,7 +57,7 @@ public interface Role_MasterInter {
 
 	String settingScreenId(Integer sRSMappingID, Integer screenID);
 	
-	public ArrayList<M_Role> getProStateServRoles1(int pssmID);
+	public ArrayList<RoleMaster> getProStateServRoles1(int pssmID);
 
 	List<RoleScreenMapping> mapfeature(List<RoleScreenMapping> mRoles3);
 
@@ -68,13 +68,13 @@ public interface Role_MasterInter {
 
 	ArrayList<StateServiceMapping> getAllByMapId(Integer serviceProviderID, Integer serviceID);
 
-	ArrayList<M_Role> getProStateServRolesV1(int pssmID);
+	ArrayList<RoleMaster> getProStateServRolesV1(int pssmID);
 
-	List<M_Role> getRoleMasterTM(Integer providerServiceMapID);
+	List<RoleMaster> getRoleMasterTM(Integer providerServiceMapID);
 
-	ArrayList<M_Role> getProStateServRolesActive(Integer providerServiceMapID);
+	ArrayList<RoleMaster> getProStateServRolesActive(Integer providerServiceMapID);
 
-	M_Role configWrapUpTime(M_Role role) throws Exception;
+	RoleMaster configWrapUpTime(RoleMaster role) throws Exception;
 
 
 	

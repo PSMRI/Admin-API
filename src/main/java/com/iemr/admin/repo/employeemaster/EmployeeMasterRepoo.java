@@ -23,19 +23,17 @@ package com.iemr.admin.repo.employeemaster;
 
 import java.util.ArrayList;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.M_User1;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 {
 
@@ -81,4 +79,5 @@ public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 	@Query("SELECT u FROM M_User1 u WHERE u.designationID=:designationID AND u.serviceProviderID=:serviceProviderID AND u.isProviderAdmin=NULL")
 	ArrayList<M_User1> getempByDesiganation(@Param("designationID") Integer designationID,@Param("serviceProviderID") Integer serviceProviderID);
 	
+	M_User1 findByUserID(Integer userID);
 }

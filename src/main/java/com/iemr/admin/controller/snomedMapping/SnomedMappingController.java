@@ -36,7 +36,8 @@ import com.google.gson.JsonParser;
 import com.iemr.admin.service.snomedMapping.SnomedService;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RequestMapping(value = "/snomed")
 @RestController
@@ -47,7 +48,7 @@ public class SnomedMappingController {
 	private SnomedService snomedService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit snomed master", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit snomed master")
 	@RequestMapping(value = "/editSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String editSnomedMaster(@RequestBody String requestObj) {
@@ -89,7 +90,7 @@ public class SnomedMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save snomed master", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save snomed master")
 	@RequestMapping(value = "/saveSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveSnomedMaster(@RequestBody String requestObj) {
@@ -131,7 +132,7 @@ public class SnomedMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Fetch snomed worklist", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Fetch snomed worklist")
 	@RequestMapping(value = "/fetchSnomedWorklist", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String fetchSnomedWorklist(@RequestBody String requestObj) {
@@ -162,7 +163,7 @@ public class SnomedMappingController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update status", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update status")
 	@RequestMapping(value = "/updateStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String updateStatus(@RequestBody String requestObj) {

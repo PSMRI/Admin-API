@@ -26,13 +26,11 @@ import java.util.ArrayList;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.telemedicine.M_UserTemp;
 
 @Repository
-@RestResource(exported = false)
 public interface UserRepo extends CrudRepository<M_UserTemp, Long> {
 
 	/** Get the list of users for supervisor or tc specialist or doctor in TM service line
@@ -50,4 +48,6 @@ public interface UserRepo extends CrudRepository<M_UserTemp, Long> {
 	@Query("select new M_UserTemp( u,swy.userVideoConsultationMapID) from M_UserTemp u left join u.userVideoConsultation swy where swy.userVideoConsultationMapID is null "
 			+ " and u.ServiceProviderID=:serviceproviderID and u.designationID=:designationID and u.Deleted=false")
 	ArrayList<M_UserTemp> getunmappedVideoConsultationUser(@Param("serviceproviderID")Integer serviceproviderID,@Param("designationID")Integer designationID);
+	
+	M_UserTemp findByUserID(Long userID);
 }

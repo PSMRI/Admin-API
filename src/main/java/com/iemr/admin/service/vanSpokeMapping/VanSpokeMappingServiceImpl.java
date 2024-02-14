@@ -69,7 +69,7 @@ public class VanSpokeMappingServiceImpl implements VanSpokeMappingService {
 				saveVanSpokeReq.add(obj);
 			}
 
-			vanSpokeRepo = (List<m_VanSpokeMapping>) vanSpokeMappingRepo.save(saveVanSpokeReq);
+			vanSpokeRepo = (List<m_VanSpokeMapping>) vanSpokeMappingRepo.saveAll(saveVanSpokeReq);
 			
 			for(m_VanSpokeMapping vanSpokeMapped : vanSpokeRepo) {
 				int vanID = vanSpokeMapped.getMmu_VanID();
@@ -150,7 +150,7 @@ public class VanSpokeMappingServiceImpl implements VanSpokeMappingService {
 		}
 
 		ArrayList<m_VanSpokeMapping> deleteResponse = (ArrayList<m_VanSpokeMapping>) vanSpokeMappingRepo
-				.save(updateMapping);
+				.saveAll(updateMapping);
 
 		if (deleteResponse != null)
 			return "success";

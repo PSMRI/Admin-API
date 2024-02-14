@@ -23,33 +23,15 @@ package com.iemr.admin.to;
 
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Transient;
-
-import com.google.gson.annotations.Expose;
 import com.iemr.admin.data.provideronboard.M_104druggroup;
 import com.iemr.admin.data.provideronboard.M_104drugmapping;
 import com.iemr.admin.data.provideronboard.M_104drugmaster;
 
+import jakarta.persistence.Transient;
+
 public class DrugMasterTO {
 	
-/*	@Expose
-	@Column(name = "DrugName")
-	private String drugName1[];
-	@Expose
-	@Column(name = "DrugDesc")
-	private String drugDesc1[];
-	@Expose
-	@Column(name = "DrugForm")
-	private String drugForm1[];
-	@Expose
-	@Column(name = "DrugStrength")
-	private String drugStrength1[];
-	@Expose
-	@Column(name = "Remarks")
-	private String remarks1[];
-	
-	*/
+
 
 	@Transient
 	private List<M_104druggroup> drugGroups;

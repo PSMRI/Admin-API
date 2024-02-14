@@ -23,20 +23,18 @@ package com.iemr.admin.repository.item;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.items.M_ItemForm;
 
+import jakarta.transaction.Transactional;
+
 
 @Repository
-@RestResource(exported = false)
 public interface ItemFormRepo extends CrudRepository<M_ItemForm, Integer> {
 	
 	@Query("select u from M_ItemForm u")

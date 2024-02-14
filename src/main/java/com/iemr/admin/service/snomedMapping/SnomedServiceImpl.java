@@ -114,7 +114,7 @@ public class SnomedServiceImpl implements SnomedService{
 
 				DiseaseType familyReq =  InputMapper.gson().fromJson(reObj,DiseaseType.class);
 				
-				List<DiseaseType> familyResObj=(List<DiseaseType>) snomedFamilyHistoryRepo.save(familyReq.getMappingDetails());
+				List<DiseaseType> familyResObj=(List<DiseaseType>) snomedFamilyHistoryRepo.saveAll(familyReq.getMappingDetails());
 
 				
 				
@@ -128,7 +128,7 @@ public class SnomedServiceImpl implements SnomedService{
 			break;
           case "Optional Vaccination": 
         	  OptionalVaccinations vaccinationReq =  InputMapper.gson().fromJson(requestOBJ.toString(),OptionalVaccinations .class);
-        	  List<OptionalVaccinations> vaccinationResObj=(List<OptionalVaccinations>) snomedVaccinationRepo.save(vaccinationReq.getMappingDetails());
+        	  List<OptionalVaccinations> vaccinationResObj=(List<OptionalVaccinations>) snomedVaccinationRepo.saveAll(vaccinationReq.getMappingDetails());
 				
         	  if (null != vaccinationResObj && vaccinationResObj.size() > 0) {
 					snomedData="Data Saved";
@@ -137,7 +137,7 @@ public class SnomedServiceImpl implements SnomedService{
 			break;
           case "Immunization": 
         	  ChildVaccinations immunizationReq =  InputMapper.gson().fromJson(requestOBJ.toString(),ChildVaccinations .class);
-        	  List<ChildVaccinations> immunizationResObj=(List<ChildVaccinations>) snomedImmunizationRepo.save(immunizationReq.getMappingDetails());
+        	  List<ChildVaccinations> immunizationResObj=(List<ChildVaccinations>) snomedImmunizationRepo.saveAll(immunizationReq.getMappingDetails());
 				
         	  if (null != immunizationResObj && immunizationResObj.size() > 0) {
 					snomedData="Data Saved";

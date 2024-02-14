@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -82,9 +83,9 @@ public class CalibrationServiceImpl implements CalibrationService {
 		try {
 			if (req != null && req.getProviderServiceMapID() != null) {
 				if (req.getPageNo() != null) {
-					PageRequest pr = new PageRequest(req.getPageNo(), calibrationPageSize);
+					Pageable pageable = PageRequest.of(req.getPageNo(), calibrationPageSize);
 					calibrationList = calibrationRepo.getCalibrationStripsWithPagination(req.getProviderServiceMapID(),
-							pr);
+							pageable);
 					dataMap.put("calibrationData", calibrationList.getContent());
 					dataMap.put("pageCount", calibrationList.getTotalPages());
 				} else {

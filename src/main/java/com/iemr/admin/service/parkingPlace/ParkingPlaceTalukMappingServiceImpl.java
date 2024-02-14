@@ -55,7 +55,7 @@ public class ParkingPlaceTalukMappingServiceImpl implements ParkingPlaceTalukMap
 	@Override
 	public ArrayList<ParkingplaceTalukMapping> saveParkingPlaceTalukMapping(List<ParkingplaceTalukMapping> parkingPlace) {
 		
-		return (ArrayList<ParkingplaceTalukMapping>) parkingPlaceTalukMappingRepository.save(parkingPlace);
+		return (ArrayList<ParkingplaceTalukMapping>) parkingPlaceTalukMappingRepository.saveAll(parkingPlace);
 	}
 	
 	@Override
@@ -67,7 +67,7 @@ public class ParkingPlaceTalukMappingServiceImpl implements ParkingPlaceTalukMap
 	@Override
 	public ParkingplaceTalukMapping findbyID(Integer id) {
 		
-		return (ParkingplaceTalukMapping) parkingPlaceTalukMappingRepository.findOne(id);
+		return (ParkingplaceTalukMapping) parkingPlaceTalukMappingRepository.findByPpSubDistrictMapID(id);
 	}
 	
 	@Override

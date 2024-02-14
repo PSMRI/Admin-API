@@ -23,10 +23,9 @@ package com.iemr.admin.to.villageMaster;
 
 import java.util.List;
 
-import javax.persistence.Transient;
-
 import com.iemr.admin.data.locationmaster.DistrictBranchMapping;
-import com.iemr.admin.data.vanMaster.M_Van;
+
+import jakarta.persistence.Transient;
 
 public class VillageMasterTO {
 	

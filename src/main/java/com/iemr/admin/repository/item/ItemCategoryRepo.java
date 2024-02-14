@@ -23,19 +23,17 @@ package com.iemr.admin.repository.item;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.items.M_ItemCategory;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface ItemCategoryRepo extends CrudRepository<M_ItemCategory, Integer> {
 //	OrderByItemCategoryName
 	List<M_ItemCategory> findByDeletedAndProviderServiceMapIDOrderByItemCategoryName(Boolean deleted, Integer providerServiceMapID);
@@ -66,4 +64,6 @@ public interface ItemCategoryRepo extends CrudRepository<M_ItemCategory, Integer
 	@Modifying
 	@Query("UPDATE M_ItemCategory c SET c.alertBeforeDays = :alertBeforeDays WHERE c.itemCategoryID = :id")
 	Integer updateExpiryAlert(@Param("id") Integer id, @Param("alertBeforeDays") Integer alertBeforeDays);
+	
+	M_ItemCategory findByItemCategoryID(Integer itemCategoryID);
 }

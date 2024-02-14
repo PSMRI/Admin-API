@@ -25,19 +25,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.USRAgentMapping;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface USRAgentMappingRepository extends CrudRepository<USRAgentMapping, Integer>
 {
 	@Query(value = "select usra.usrAgentMappingID, usra.usrMappingID, usra.usrMapping, "
@@ -87,7 +85,7 @@ public interface USRAgentMappingRepository extends CrudRepository<USRAgentMappin
 			+ "from USRAgentMapping usra left join usra.usrMapping join usra.providerServiceMap "
 			+ "where usra.cti_CampaignName = :cti_CampaignName "
 			+ "and usra.providerServiceMapID = :providerServiceMapID order by CAST(usra.agentID as int)")
-	Set<Objects[]> getAllAgentIds(@Param("providerServiceMapID") Integer providerServiceMapID,
+	Set<Objects[]> getAllAgentId(@Param("providerServiceMapID") Integer providerServiceMapID,
 			@Param("cti_CampaignName") String cti_CampaignName);
 
 	@Query(value = "select usra.usrAgentMappingID, usra.usrMappingID, usra.usrMapping, "

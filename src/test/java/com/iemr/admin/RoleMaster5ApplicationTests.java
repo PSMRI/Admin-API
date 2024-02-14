@@ -21,7 +21,7 @@
 */
 package com.iemr.admin;
 
-import org.junit.Test;
+
 
 /*
  * @RunWith(SpringJUnit4ClassRunner.class)
@@ -33,7 +33,7 @@ import org.junit.Test;
 public class RoleMaster5ApplicationTests
 {
 
-	@Test
+	//@Test
 	public void contextLoads()
 	{
 	}

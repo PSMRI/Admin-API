@@ -46,7 +46,7 @@ public class M_FeedbacknatureImpl implements M_FeedbacknatureInteger{
 	@Override
 	public ArrayList<M_Feedbacknature> createFeedbackNatueType(List<M_Feedbacknature> instuteType) {
 		
-		ArrayList<M_Feedbacknature> data=(ArrayList<M_Feedbacknature>) m_FeedbacknatureRepo.save(instuteType);
+		ArrayList<M_Feedbacknature> data=(ArrayList<M_Feedbacknature>) m_FeedbacknatureRepo.saveAll(instuteType);
 		return data;
 	}
 

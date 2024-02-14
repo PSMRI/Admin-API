@@ -39,7 +39,8 @@ import com.iemr.admin.service.facilitytype.M_facilitytypeInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 public class FacilitytypeController {
@@ -49,7 +50,7 @@ public class FacilitytypeController {
 	private M_facilitytypeInter m_facilitytypeInter;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get facility")
 	@RequestMapping(value = "/getFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getFacility(@RequestBody String getFacility) {
@@ -76,7 +77,7 @@ public class FacilitytypeController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Add facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Add facility")
 	@RequestMapping(value = "/addFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String addFacility(@RequestBody String addFacility) {
@@ -103,7 +104,7 @@ public class FacilitytypeController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Edit facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Edit facility")
 	@RequestMapping(value = "/editFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String editFacility(@RequestBody String editFacility) {
@@ -135,7 +136,7 @@ public class FacilitytypeController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Delete facility", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Delete facility")
 	@RequestMapping(value = "/deleteFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String deleteFacility(@RequestBody String deleteFacility) {
@@ -165,7 +166,7 @@ public class FacilitytypeController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Check facility type code", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Check facility type code")
 	@RequestMapping(value = "/checkFacilityTypeCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String checkFacilityTypeCode(@RequestBody String deleteManufacturer) {

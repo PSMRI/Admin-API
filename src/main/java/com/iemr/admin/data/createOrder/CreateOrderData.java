@@ -21,8 +21,6 @@
 */
 package com.iemr.admin.data.createOrder;
 
-import java.sql.Date;
-
 public class CreateOrderData {
 	private String firstName;
 	private String middleName;

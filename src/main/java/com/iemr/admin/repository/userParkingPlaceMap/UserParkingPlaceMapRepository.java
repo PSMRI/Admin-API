@@ -24,36 +24,20 @@ package com.iemr.admin.repository.userParkingPlaceMap;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.userParkingPlaceMap.M_UserParkingPlaceMap;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface UserParkingPlaceMapRepository extends CrudRepository<M_UserParkingPlaceMap, Integer>{
 	
-/*	@Query("SELECT u.userParkingPlaceMapID, u.userID,usr.userName,usr.genderID,usr.emergencyContactNo, usr.aadhaarNo, s.stateID, s.stateName, d.districtID,"
-			+ " d.districtName, u.parkingPlaceID, pp.parkingPlaceName, "
-			+ "u.providerServiceMapID, u.deleted"
-			+ " FROM M_UserParkingPlaceMap u "
-			+ " LEFT JOIN u.m_user usr "
-			+ " LEFT JOIN u.m_parkingplace pp "
-			+ " LEFT JOIN u.m_providerServiceMapping p "
-			+ " LEFT JOIN p.state s"
-			+ " LEFT JOIN p.m_district d"
-			+ " where (p.stateID IS NULL or cast(p.stateID as string) like :stateID) "
-			+ " AND (p.districtID IS NULL or cast(p.districtID as string) like :districtID) "
-			+ " AND (u.parkingPlaceID IS NULL or cast(u.parkingPlaceID as string) like :parkingPlaceID)")
-	List<Objects[]> getUserParkingPlaceMappings(@Param("stateID")String stateID, @Param("districtID")String districtID, 
-			@Param("parkingPlaceID")String parkingPlaceID);
-*/
+
 	
 	@Query(value = "SELECT upmap.UserParkingPlaceMapID,usr.UserID,usr.firstName,usr.lastName,usr.UserName,usr.DesignationID, group_concat(usro.RoleID), group_concat(r.RoleName),usr.GenderID,g.GenderName,psm.StateID,s.stateName,"
 			+ " psam.DistrictID, d.districtName , upmap.ParkingPlaceID, pp.ParkingPlaceName, usr.emergencyContactNo, psm.ProviderServiceMapID, upmap.deleted "
@@ -115,5 +99,7 @@ public interface UserParkingPlaceMapRepository extends CrudRepository<M_UserPark
 
 
 List<M_UserParkingPlaceMap> findByProviderServiceMapIDAndUserIDAndDeleted(Integer providerServiceMapID, Integer userID, boolean b);
+
+M_UserParkingPlaceMap findByUserParkingPlaceMapID(Integer userParkingPlaceMapID);
 
 }

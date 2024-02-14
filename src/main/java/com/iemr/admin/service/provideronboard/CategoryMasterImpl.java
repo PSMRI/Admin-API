@@ -58,7 +58,7 @@ public class CategoryMasterImpl implements CategoryInter{
 
 	@Override
 	public ArrayList<M_Subcategory> saveSubCatData(List<M_Subcategory> resList) {
-		ArrayList<M_Subcategory> data2=(ArrayList<M_Subcategory>) subCategoryRepo.save(resList);
+		ArrayList<M_Subcategory> data2=(ArrayList<M_Subcategory>) subCategoryRepo.saveAll(resList);
 		return data2;
 	}
 
@@ -102,7 +102,7 @@ public class CategoryMasterImpl implements CategoryInter{
 
 	@Override
 	public ArrayList<M_Category> createcat(List<M_Category> catdata) {
-		ArrayList<M_Category> data=(ArrayList<M_Category>) categoryRepo.save(catdata);
+		ArrayList<M_Category> data=(ArrayList<M_Category>) categoryRepo.saveAll(catdata);
 		return data;
 	}
 
@@ -120,7 +120,7 @@ public class CategoryMasterImpl implements CategoryInter{
 
 	@Override
 	public ArrayList<M_Subcategory> createSubCategory(List<M_Subcategory> subcatdata) {
-		ArrayList<M_Subcategory> subcatData=(ArrayList<M_Subcategory>) subCategoryRepo.save(subcatdata);
+		ArrayList<M_Subcategory> subcatData=(ArrayList<M_Subcategory>) subCategoryRepo.saveAll(subcatdata);
 		return subcatData;
 	}
 

@@ -39,7 +39,8 @@ import com.iemr.admin.data.telemedicine.UserSpecializationMapping;
 import com.iemr.admin.service.telemedicine.TMInter;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+
 
 @RestController
 @RequestMapping(value = "/TM")
@@ -50,7 +51,7 @@ public class TeleMedicineController {
 	private TMInter tmInter;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user")
 	@RequestMapping(value = "/getUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
 	public String getUserTM(@RequestBody TMinput tminput) {
@@ -74,7 +75,7 @@ public class TeleMedicineController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get specialization", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get specialization")
 	@RequestMapping(value = "/getSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getSpecialization() {
@@ -98,7 +99,7 @@ public class TeleMedicineController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get user specialization", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get user specialization")
 	@RequestMapping(value = "/getUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String getUserSpecialization(@RequestBody TMinput tminput) {
@@ -123,7 +124,7 @@ public class TeleMedicineController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save user specialization", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save user specialization")
 	@RequestMapping(value = "/saveUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveUserSpecialization(@RequestBody ArrayList<UserSpecializationMapping> userSpecializationMapping) {
@@ -148,7 +149,7 @@ public class TeleMedicineController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Activate user specialization", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Activate user specialization")
 	@RequestMapping(value = "/activateUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
 	public String saveUserSpecialization(@RequestBody UserSpecializationMapping userSpecializationMapping) {

@@ -40,7 +40,7 @@ public class M_InstitutiontypeImpl implements M_InstitutiontypeInter{
 
 @Override
 public ArrayList<M_Institutiontype> createInstuteType(List<M_Institutiontype> instuteType) {
-	ArrayList<M_Institutiontype> data=(ArrayList<M_Institutiontype>) m_InstitutiontypeRepo.save(instuteType);
+	ArrayList<M_Institutiontype> data=(ArrayList<M_Institutiontype>) m_InstitutiontypeRepo.saveAll(instuteType);
 	return data;
 }
 
@@ -66,7 +66,7 @@ public M_Institutiontype saveEditdata(M_Institutiontype editInstuteType1) {
  */
 @Override
 public ArrayList<M_Institutiontype> createInstuteTypeByDist(List<M_Institutiontype> instuteType) {
-	ArrayList<M_Institutiontype> data=(ArrayList<M_Institutiontype>) m_InstitutiontypeRepo.save(instuteType);
+	ArrayList<M_Institutiontype> data=(ArrayList<M_Institutiontype>) m_InstitutiontypeRepo.saveAll(instuteType);
 	return data;
 }	
 

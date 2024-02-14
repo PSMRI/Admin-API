@@ -81,7 +81,7 @@ public class FacilityServiceImpl implements FacilityService {
 		}
 		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 		uptsuUploadRepository.updatedeleteStatus(request.getProviderServiceMapID(),timestamp,request.getCreatedBy());
-		data = uptsuUploadRepository.save(list);
+		data = uptsuUploadRepository.saveAll(list);
 		}
 	return data;
 	}

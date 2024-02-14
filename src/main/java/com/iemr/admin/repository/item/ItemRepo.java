@@ -23,20 +23,17 @@ package com.iemr.admin.repository.item;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.itemfacilitymapping.M_itemfacilitymapping;
 import com.iemr.admin.data.items.ItemMaster;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface ItemRepo extends CrudRepository<ItemMaster, Integer> {
 
 	List<ItemMaster> findByProviderServiceMapIDOrderByItemName(Integer providerServiceMapID);
@@ -61,4 +58,6 @@ public interface ItemRepo extends CrudRepository<ItemMaster, Integer> {
 	ItemMaster findDetailOne(@Param("itemid")Integer itemid);
 
 	List<ItemMaster> findByItemCodeAndProviderServiceMapID(String itemCode, Integer providerServiceMapID);
+	
+	ItemMaster findByItemID(Integer itemID);
 }

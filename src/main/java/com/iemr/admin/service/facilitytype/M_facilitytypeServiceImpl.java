@@ -45,13 +45,13 @@ public class M_facilitytypeServiceImpl implements M_facilitytypeInter{
 
 	@Override
 	public ArrayList<M_facilitytype> addAllFicilityData(List<M_facilitytype> addfacilityDetails) {
-		ArrayList<M_facilitytype> data=(ArrayList<M_facilitytype>) m_facilitytypeRepo.save(addfacilityDetails);
+		ArrayList<M_facilitytype> data=(ArrayList<M_facilitytype>) m_facilitytypeRepo.saveAll(addfacilityDetails);
 		return data;
 	}
 
 	@Override
 	public M_facilitytype editAllFicilityData(Integer facilityTypeID) {
-		M_facilitytype data=m_facilitytypeRepo.findOne(facilityTypeID); 
+		M_facilitytype data=m_facilitytypeRepo.findByFacilityTypeID(facilityTypeID); 
 		return data;
 	}
 

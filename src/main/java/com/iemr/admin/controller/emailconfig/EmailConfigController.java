@@ -23,7 +23,6 @@ package com.iemr.admin.controller.emailconfig;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.MediaType;
 
@@ -43,7 +42,8 @@ import com.iemr.admin.service.emailconfig.EmailConfigService;
 import com.iemr.admin.utils.mapper.OutputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @ApplicationPath("/email")
@@ -53,7 +53,7 @@ public class EmailConfigController {
 	EmailConfigService emailConfigService;
 
 	@CrossOrigin()
-	@ApiOperation(value = "Save configuration", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Save configuration")
 	@RequestMapping(value = "/saveConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String saveConfig(@RequestBody List<CreateAuthEmailRequestModel> createEmailRequests,
 			HttpServletRequest request) {
@@ -74,7 +74,7 @@ public class EmailConfigController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Get email configuration", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Get email configuration")
 	@RequestMapping(value = "/getEmailConfigs", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getEmailConfigs(@RequestBody AuthEmailRequest authEmailRequest, HttpServletRequest request) {
 		OutputResponse response = new OutputResponse();
@@ -94,7 +94,7 @@ public class EmailConfigController {
 	}
 
 	@CrossOrigin()
-	@ApiOperation(value = "Update email configuration", consumes = "application/json", produces = "application/json")
+	@Operation(summary = "Update email configuration")
 	@RequestMapping(value = "/updateEmailConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String updateEmailConfig(@RequestBody UpdateAuthEmailRequest updateEmailRequest,
 			HttpServletRequest request) {

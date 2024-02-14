@@ -60,7 +60,7 @@ public class FoetalMonitorServiceImpl implements FoetalMonitorService{
 		M_FoetalMonitor[] testMasterOBJ = InputMapper.gson().fromJson(requestOBJ, M_FoetalMonitor[].class);
 		List<M_FoetalMonitor> testMasterRS = null;
 		List<M_FoetalMonitor> alist = Arrays.asList(testMasterOBJ);
-		testMasterRS = (List<M_FoetalMonitor>) foetalMonitorRepository.save(alist);
+		testMasterRS = (List<M_FoetalMonitor>) foetalMonitorRepository.saveAll(alist);
 		if (testMasterRS != null && testMasterOBJ.length == testMasterRS.size())
 			return new Gson().toJson(testMasterRS);
 		else
@@ -108,7 +108,7 @@ public class FoetalMonitorServiceImpl implements FoetalMonitorService{
 
 		try {
 			ArrayList<FoetalMonitorDeviceID> deviceIdsaved = (ArrayList<FoetalMonitorDeviceID>) foetalMonitorDeviceIDRepo
-					.save(foetalMonitorData);
+					.saveAll(foetalMonitorData);
 			if (deviceIdsaved.size() > 0 && deviceIdsaved.get(0).getVfdID() > 0)
 				return 1;
 			else

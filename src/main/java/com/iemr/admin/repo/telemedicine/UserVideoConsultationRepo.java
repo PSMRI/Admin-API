@@ -26,16 +26,16 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.telemedicine.UserVideoConsultation;
 
 @Repository
-@RestResource(exported = false)
 public interface UserVideoConsultationRepo extends CrudRepository<UserVideoConsultation, Long> {
 
 	@Query("select new UserVideoConsultation(us,u.UserName,desc1.designationName,u.Deleted,desc1.designationID) from UserVideoConsultation us left join us.user u  left join u.designation desc1 where u.ServiceProviderID=:serviceproviderID ")
 	List<UserVideoConsultation> fetchmappedUser(@Param("serviceproviderID")Integer serviceproviderID);
+	
+	UserVideoConsultation findByUserVideoConsultationMapID(Long userVideoConsultationMapID);
 
 }

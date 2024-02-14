@@ -38,7 +38,7 @@ public class DrugStrangthService implements DrugStrangthInter{
 
 	@Override
 	public ArrayList<M_104DrugStrength> createDrugStrangth(List<M_104DrugStrength> saveDrugStrangth) {
-		ArrayList<M_104DrugStrength> data=(ArrayList<M_104DrugStrength>) drugStrangthRepo.save(saveDrugStrangth);
+		ArrayList<M_104DrugStrength> data=(ArrayList<M_104DrugStrength>) drugStrangthRepo.saveAll(saveDrugStrangth);
 		return data;
 	}
 
@@ -50,7 +50,7 @@ public class DrugStrangthService implements DrugStrangthInter{
 
 	@Override
 	public M_104DrugStrength updateDrugStrangth(Integer drugStrengthID) {
-		M_104DrugStrength getdataforupdate=drugStrangthRepo.findOne(drugStrengthID);
+		M_104DrugStrength getdataforupdate=drugStrangthRepo.findByDrugStrengthID(drugStrengthID);
 		return getdataforupdate;
 	}
 

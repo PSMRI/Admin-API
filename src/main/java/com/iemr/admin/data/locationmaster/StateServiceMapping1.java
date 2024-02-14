@@ -24,19 +24,19 @@ package com.iemr.admin.data.locationmaster;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name="m_ProviderServiceMapping")
@@ -100,12 +100,12 @@ public class StateServiceMapping1 {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ServiceID", insertable = false, updatable = false)
 	@Expose
-	private ServiceMaster serviceMaster;
+	private ServiceMasterLocation serviceMaster;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "StateID", insertable = false, updatable = false)
 	@Expose
-	private State stateMaster;
+	private StateMaster stateMaster;
 	
 	
 	
@@ -362,22 +362,22 @@ public class StateServiceMapping1 {
 	}
 
 
-	public ServiceMaster getServiceMaster() {
+	public ServiceMasterLocation getServiceMaster() {
 		return serviceMaster;
 	}
 
 
-	public void setServiceMaster(ServiceMaster serviceMaster) {
+	public void setServiceMaster(ServiceMasterLocation serviceMaster) {
 		this.serviceMaster = serviceMaster;
 	}
 
 
-	public State getStateMaster() {
+	public StateMaster getStateMaster() {
 		return stateMaster;
 	}
 
 
-	public void setStateMaster(State stateMaster) {
+	public void setStateMaster(StateMaster stateMaster) {
 		this.stateMaster = stateMaster;
 	}
 

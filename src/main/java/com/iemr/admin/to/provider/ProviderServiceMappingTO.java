@@ -21,30 +21,23 @@
 */
 package com.iemr.admin.to.provider;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
 import com.google.gson.annotations.Expose;
-import com.iemr.admin.data.items.ItemMaster;
-import com.iemr.admin.data.items.M_ItemCategory;
-import com.iemr.admin.data.items.M_Route;
 import com.iemr.admin.data.locationmaster.M_District;
-import com.iemr.admin.data.locationmaster.State;
-import com.iemr.admin.data.manufacturer.M_Manufacturer;
-import com.iemr.admin.data.pharmacologicalcategory.M_Pharmacologicalcategory;
+import com.iemr.admin.data.locationmaster.StateMaster;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Entity
@@ -74,7 +67,7 @@ public class ProviderServiceMappingTO
 	@Expose
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(updatable = false, insertable = false, name = "StateID")
-	private State state;
+	private StateMaster state;
 
 	@Expose
 	@Column(name = "DistrictID")
@@ -243,12 +236,12 @@ public class ProviderServiceMappingTO
 		this.lastModDate = lastModDate;
 	}
 
-	public State getState()
+	public StateMaster getState()
 	{
 		return state;
 	}
 
-	public void setState(State state)
+	public void setState(StateMaster state)
 	{
 		this.state = state;
 	}

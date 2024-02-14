@@ -43,7 +43,7 @@ class M_FeedbacktypeImpl implements M_FeedbacktypeInter {
 
 	@Override
 	public ArrayList<M_Feedbacktype> saveFeedbackType(List<M_Feedbacktype> feedbackTypedata) {
-		ArrayList<M_Feedbacktype> data=(ArrayList<M_Feedbacktype>) m_FeedbacktypeRepo.save(feedbackTypedata);
+		ArrayList<M_Feedbacktype> data=(ArrayList<M_Feedbacktype>) m_FeedbacktypeRepo.saveAll(feedbackTypedata);
 		return data;
 	}
 

@@ -24,14 +24,13 @@ package com.iemr.admin.service.rolemaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.iemr.admin.data.rolemaster.M_Role;
+import com.iemr.admin.data.rolemaster.RoleMaster;
 import com.iemr.admin.data.rolemaster.M_Role104;
 import com.iemr.admin.data.rolemaster.M_Screen;
 import com.iemr.admin.data.rolemaster.M_UserservicerolemappingForRoleProviderAdmin;
@@ -44,6 +43,8 @@ import com.iemr.admin.repository.rolemaster.M_UserservicerolemappingForRoleProvi
 import com.iemr.admin.repository.rolemaster.RoleMasterRepo;
 import com.iemr.admin.repository.rolemaster.RoleScreenMappingRepo;
 import com.iemr.admin.repository.rolemaster.StateMasterRepo;
+
+import jakarta.persistence.EntityManager;
 
 @Service
 public class Role_Master_ServiceImpl implements Role_MasterInter
@@ -116,9 +117,9 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public List<M_Role> getAllRoleByMapId()
+	public List<RoleMaster> getAllRoleByMapId()
 	{
-		ArrayList<M_Role> resList = null;
+		ArrayList<RoleMaster> resList = null;
 		return resList;
 	}
 
@@ -135,7 +136,7 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 					serviceID);
 		} else
 		{
-			resSet = (ArrayList<StateServiceMapping>) roleMasterRepo.getAllByMapId(serviceProviderID, serviceID);
+			resSet = (ArrayList<StateServiceMapping>) roleMasterRepo.getAlByMapId(serviceProviderID, serviceID);
 
 		}
 
@@ -144,15 +145,15 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public ArrayList<M_Role> getProStateServRoles(int pssmID)
+	public ArrayList<RoleMaster> getProStateServRoles(int pssmID)
 	{
-		ArrayList<M_Role> stateServiceMappings = new ArrayList<M_Role>();
+		ArrayList<RoleMaster> stateServiceMappings = new ArrayList<RoleMaster>();
 		ArrayList<Object[]> resultSet = roleScreenMappingRepo.getAllRoleByMapId(pssmID);
 		for (Object[] objects : resultSet)
 		{
 			if (objects != null && objects.length >= 2)
 			{
-				stateServiceMappings.add(new M_Role((Integer) objects[0], (String) objects[1], (String) objects[2],
+				stateServiceMappings.add(new RoleMaster((Integer) objects[0], (String) objects[1], (String) objects[2],
 						(Boolean) objects[3], (String) objects[4], (Integer) objects[5]));
 			}
 		}
@@ -160,19 +161,19 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public ArrayList<M_Role> getProStateServRolesV1(int pssmID)
+	public ArrayList<RoleMaster> getProStateServRolesV1(int pssmID)
 	{
 		logger.info(" get all roles for service provider with map id " + pssmID);
-		ArrayList<M_Role> stateServiceMappings = mRoleRepo.getAllRoleByMapId1(pssmID);
+		ArrayList<RoleMaster> stateServiceMappings = mRoleRepo.getAllRoleByMapId1(pssmID);
 		logger.debug(" get all roles for service provider with map id " + stateServiceMappings);
 		logger.info(" sending " + stateServiceMappings.size() + " roles for service provider with map id " + pssmID);
 		return stateServiceMappings;
 	}
 
 	@Override
-	public List<M_Role> addRole(List<M_Role> mRole)
+	public List<RoleMaster> addRole(List<RoleMaster> mRole)
 	{
-		List data = (List) mRoleRepo.save(mRole);
+		List data = (List) mRoleRepo.saveAll(mRole);
 
 		logger.debug("saved Role result is " + data);
 		return data;
@@ -180,24 +181,24 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public M_Role getRoleByRoleId(Integer roleID)
+	public RoleMaster getRoleByRoleId(Integer roleID)
 	{
 
 		return mRoleRepo.getRoleByRoleId(roleID);
 	}
 
 	@Override
-	public M_Role modifydata(M_Role editdata)
+	public RoleMaster modifydata(RoleMaster editdata)
 	{
-		M_Role data = mRoleRepo.save(editdata);
+		RoleMaster data = mRoleRepo.save(editdata);
 		return data;
 
 	}
 
 	@Override
-	public String deletedata(M_Role deleteData)
+	public String deletedata(RoleMaster deleteData)
 	{
-		M_Role data = mRoleRepo.save(deleteData);
+		RoleMaster data = mRoleRepo.save(deleteData);
 
 		return "success";
 
@@ -228,10 +229,10 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public ArrayList<M_Role> getProStateServRoles1(int pssmID)
+	public ArrayList<RoleMaster> getProStateServRoles1(int pssmID)
 	{
 
-		ArrayList<M_Role> resList = mRoleRepo.getAllRoleByMapId1(pssmID);
+		ArrayList<RoleMaster> resList = mRoleRepo.getAllRoleByMapId1(pssmID);
 
 		return resList;
 	}
@@ -240,7 +241,7 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	public List<RoleScreenMapping> mapfeature(List<RoleScreenMapping> mRoles3)
 	{
 
-		return (List<RoleScreenMapping>) roleScreenMappingRepo.save(mRoles3);
+		return (List<RoleScreenMapping>) roleScreenMappingRepo.saveAll(mRoles3);
 	}
 
 	@Override
@@ -322,22 +323,22 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	{
 
 		ArrayList<StateServiceMapping> resSet = new ArrayList<StateServiceMapping>();
-		resSet = (ArrayList<StateServiceMapping>) roleMasterRepo.getAllByMapId(serviceProviderID, serviceID);
+		resSet = (ArrayList<StateServiceMapping>) roleMasterRepo.getAlByMapId(serviceProviderID, serviceID);
 		logger.debug("getting response with serviceid and Spm mapId " + resSet);
 		return resSet;
 
 	}
 
 	@Override
-	public List<M_Role> getRoleMasterTM(Integer providerServiceMapID) {
+	public List<RoleMaster> getRoleMasterTM(Integer providerServiceMapID) {
 		// TODO Auto-generated method stub
-		ArrayList<M_Role> stateServiceMappings = new ArrayList<M_Role>();
+		ArrayList<RoleMaster> stateServiceMappings = new ArrayList<RoleMaster>();
 		ArrayList<Object[]> resultSet = roleScreenMappingRepo.getAllRoleByMapId(providerServiceMapID);
 		for (Object[] objects : resultSet)
 		{
 			if (objects != null && objects.length >= 2)
 			{
-				stateServiceMappings.add(new M_Role((Integer) objects[0], (String) objects[1], (String) objects[2],
+				stateServiceMappings.add(new RoleMaster((Integer) objects[0], (String) objects[1], (String) objects[2],
 						(Boolean) objects[3], (String) objects[4], (Integer) objects[5]));
 			}
 		}
@@ -345,15 +346,15 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	}
 
 	@Override
-	public ArrayList<M_Role> getProStateServRolesActive(Integer providerServiceMapID) {
+	public ArrayList<RoleMaster> getProStateServRolesActive(Integer providerServiceMapID) {
 		// TODO Auto-generated method stub
 		return mRoleRepo.findByDeletedAndProviderServiceMapID(false,providerServiceMapID);
 	}
 
 	@Override
-	public M_Role configWrapUpTime(M_Role role) throws Exception {
+	public RoleMaster configWrapUpTime(RoleMaster role) throws Exception {
 		// TODO Auto-generated method stub
-		M_Role buff=mRoleRepo.findOne(role.getRoleID());
+		RoleMaster buff=mRoleRepo.findByRoleID(role.getRoleID());
 		
 		if(buff==null) {
 			throw new Exception("Invalid Role");

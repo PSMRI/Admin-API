@@ -50,7 +50,7 @@ public class VanMasterServiceImpl implements VanMasterService{
 
 	@Override
 	public ArrayList<M_Van> saveVanDetails(List<M_Van> vanMaster) {
-		ArrayList<M_Van>  allData=(ArrayList<M_Van>) vanMasterRepository.save(vanMaster);
+		ArrayList<M_Van>  allData=(ArrayList<M_Van>) vanMasterRepository.saveAll(vanMaster);
 		return allData;
 	}
 
@@ -148,7 +148,7 @@ public class VanMasterServiceImpl implements VanMasterService{
 
 	@Override
 	public ArrayList<M_VanType> saveVanTypeDetails(List<M_VanType> vanTypeMaster) {
-		ArrayList<M_VanType>  allData=(ArrayList<M_VanType>) vanTypeRepository.save(vanTypeMaster);
+		ArrayList<M_VanType>  allData=(ArrayList<M_VanType>) vanTypeRepository.saveAll(vanTypeMaster);
 		return allData;
 	}
 

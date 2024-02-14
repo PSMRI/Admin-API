@@ -24,46 +24,23 @@ package com.iemr.admin.repository.vanServicePointMapping;
 import java.util.List;
 import java.util.Objects;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.provideronboard.M_104drugmaster;
 import com.iemr.admin.data.vanServicePointMapping.M_VanServicePointMap;
 
+import jakarta.transaction.Transactional;
+
 @Repository
-@RestResource(exported = false)
 public interface VanServicePointMappingRepository extends CrudRepository<M_VanServicePointMap, Integer> {
 
-	// @Query(value = "SELECT vs.vanServicePointMapID, vs.vanID, vs.vanSession,
-	// s.servicePointID, s.servicePointName,"
-	// + " vs.providerServiceMapID, vs.deleted "
-	// + "(Select * from m_VanServicePointMap vs1 where vs1.vanID IS NULL or
-	// vs1.vanID=:vanID) vs"
-	//// + " FROM M_VanServicePointMap vs "
-	// + " RIGHT JOIN m_servicepoint s on vs.ServicePointID = s.ServicePointID "
-	// + " where AND s.districtID =:districtID AND s.parkingPlaceID
-	// =:parkingPlaceID AND s.providerServiceMapID =:providerServiceMapID"
-	// + " GROUP BY s.servicePointName" ,nativeQuery = true )
+	
 
 	
-//	@Query(value = "select vs1.vanServicePointMapID, vs1.vanID,vs1.vanSession, s.servicePointID, s.servicePointName, "
-//			 + " vs1.providerServiceMapID, vs1.deleted"
-//			 + " from (SELECT * FROM M_VanServicePointMap vs where vs.vanID IS NULL or vs.vanID= :vanID )vs1 "
-//			 + " RIGHT JOIN m_servicepoint s on vs1.servicepointid = s.servicepointid"
-//			 + " where s.districtID = :districtID AND s.parkingPlaceID = :parkingPlaceID "
-//			 + " AND s.providerServiceMapID = :providerServiceMapID"
-//			 + " GROUP BY s.servicePointName" ,nativeQuery = true )
-//			 List<Objects[]>
-//			 getAvailableVanServicePointMappings(@Param("districtID")Integer
-//			 districtID,
-//			 @Param("parkingPlaceID")Integer parkingPlaceID, @Param("vanID")Integer
-//			 vanID, @Param("providerServiceMapID")Integer providerServiceMapID);
+
 			 
 	 @Query(value = "select vs1.vanServicePointMapID, vs1.vanID,vs1.vanSession, s.servicePointID, s.servicePointName, "
 	 + " vs1.providerServiceMapID, vs1.deleted"

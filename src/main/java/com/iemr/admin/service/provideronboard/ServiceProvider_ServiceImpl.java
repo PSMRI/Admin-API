@@ -68,7 +68,7 @@ public class ServiceProvider_ServiceImpl implements ServiceProvider_Service {
 	public Integer createProvider(Set<ServiceProvider_Model> serviceProvider_Model) {
 		ArrayList<ServiceProvider_Model> objList = null;
 		logger.info("Inside creating provider.....");
-		objList = (ArrayList<ServiceProvider_Model>) this.iemrServiceRepository1.save(serviceProvider_Model);
+		objList = (ArrayList<ServiceProvider_Model>) this.iemrServiceRepository1.saveAll(serviceProvider_Model);
 		Integer serviceProviderId = objList.get(0).getServiceProviderId();
 		logger.info("provider created");
 		
@@ -88,7 +88,7 @@ public class ServiceProvider_ServiceImpl implements ServiceProvider_Service {
 			Set<M_ProviderServiceMapping> m_ProviderServiceMappingSet) {
 		List<M_ProviderServiceMapping> sevProMapList = new ArrayList<M_ProviderServiceMapping>();
 		sevProMapList = (List<M_ProviderServiceMapping>) this.m_ProviderServiceMappingRepo
-				.save(m_ProviderServiceMappingSet);
+				.saveAll(m_ProviderServiceMappingSet);
 		
 		return sevProMapList;
 	}
@@ -119,14 +119,14 @@ public class ServiceProvider_ServiceImpl implements ServiceProvider_Service {
 
 	public ArrayList<ServiceProvider_Model> createProvider(List<ServiceProvider_Model> createServiceProvider) {
 		
-		return (ArrayList<ServiceProvider_Model>) iemrServiceRepository1.save(createServiceProvider);
+		return (ArrayList<ServiceProvider_Model>) iemrServiceRepository1.saveAll(createServiceProvider);
 	}
 
 	public ArrayList<ServiceProvider_Model> createProvider1(List<ServiceProvider_Model> createServiceProvider) {
 		if(createServiceProvider.isEmpty())
 		throw new DataNotFound("Please Enter valid data"); 
 		else{
-		ArrayList<ServiceProvider_Model> data=(ArrayList<ServiceProvider_Model>)iemrServiceRepository1.save(createServiceProvider);
+		ArrayList<ServiceProvider_Model> data=(ArrayList<ServiceProvider_Model>)iemrServiceRepository1.saveAll(createServiceProvider);
 		if(data.isEmpty()){
 		 throw new DataNotFound("Please Enter valid data");
 		}else 
@@ -138,12 +138,12 @@ public class ServiceProvider_ServiceImpl implements ServiceProvider_Service {
 	public ArrayList<M_UserservicerolemappingForRole> AddUserRole(List<M_UserservicerolemappingForRole> resList) {
 		
 		
-		ArrayList<M_UserservicerolemappingForRole> data= (ArrayList<M_UserservicerolemappingForRole>) m_UserservicerolemappingForRoleRepo.save(resList);
+		ArrayList<M_UserservicerolemappingForRole> data= (ArrayList<M_UserservicerolemappingForRole>) m_UserservicerolemappingForRoleRepo.saveAll(resList);
 		return data;
 	}
 
 	public M_UserservicerolemappingForRole getPADataForEdit(Integer uSRMappingID) {
-		M_UserservicerolemappingForRole getData=m_UserservicerolemappingForRoleRepo.findOne(uSRMappingID);
+		M_UserservicerolemappingForRole getData=m_UserservicerolemappingForRoleRepo.findByUSRMappingID(uSRMappingID);
 		return getData;
 	}
 

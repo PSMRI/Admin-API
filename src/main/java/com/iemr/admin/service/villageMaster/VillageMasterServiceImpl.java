@@ -41,7 +41,7 @@ public class VillageMasterServiceImpl implements VillageMasterService{
 	
 	@Override
 	public ArrayList<DistrictBranchMapping> storeVillageDetails(List<DistrictBranchMapping> villageList) {
-		ArrayList<DistrictBranchMapping> villagesList = (ArrayList<DistrictBranchMapping>) villageMasterRepository.save(villageList);
+		ArrayList<DistrictBranchMapping> villagesList = (ArrayList<DistrictBranchMapping>) villageMasterRepository.saveAll(villageList);
 		return villagesList;
 	}
 

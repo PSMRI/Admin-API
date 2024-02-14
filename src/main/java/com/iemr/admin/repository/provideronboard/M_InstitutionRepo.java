@@ -22,18 +22,15 @@
 package com.iemr.admin.repository.provideronboard;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.provideronboard.M_Institution;
 
 @Repository
-@RestResource(exported = false)
 public interface M_InstitutionRepo extends CrudRepository<M_Institution, Integer> {
 
 	@Query("SELECT u FROM M_Institution u where u.providerServiceMapID=:providerServiceMapID AND u.stateID=:stateID AND u.districtID=:districtID AND u.blockID=:blockID")

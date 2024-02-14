@@ -131,7 +131,7 @@ public class LocationMasterServiceImpl implements LocationMasterServiceInter{
 	@Override
 	public ArrayList<M_ProviderServiceAddMapping> addlocation(List<M_ProviderServiceAddMapping> resList) {
 		// TODO Auto-generated method stub
-		return (ArrayList<M_ProviderServiceAddMapping>) m_ProviderServiceAddMappingRepo.save(resList);
+		return (ArrayList<M_ProviderServiceAddMapping>) m_ProviderServiceAddMappingRepo.saveAll(resList);
 	}
 
 	@Override
