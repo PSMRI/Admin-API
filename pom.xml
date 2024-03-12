@@ -83,6 +83,14 @@
 					<groupId>org.springframework</groupId>
 					<artifactId>spring-web</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-webmvc</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>org.springframework</artifactId>
+					<groupId>spring-tx</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -266,12 +274,23 @@
 			<artifactId>spring-core</artifactId>
 			<version>6.1.3</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>6.1.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>6.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>6.1.3</version>
+		</dependency>
+
 		<!-- end newly added dependencies -->
 	</dependencies>
 
@@ -291,7 +310,7 @@
 					<target>17</target>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
