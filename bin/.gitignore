@@ -1,0 +1,38 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+#Config
+config.service.ts
+config.json
+
+# Other entries
+/Piramal - Shortcut.lnk
+.tern-project
+mvnw
+mvnw.cmd
+.mvn/
+
+# Properties
+src/main/environment/admin_local.properties
