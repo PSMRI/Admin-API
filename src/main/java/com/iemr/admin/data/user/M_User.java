@@ -21,10 +21,12 @@
 */
 package com.iemr.admin.data.user;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.Expose;
 import com.iemr.admin.utils.mapper.OutputMapper;
 
@@ -38,7 +40,8 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "M_User")
-public class M_User {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class M_User implements Serializable {
 	
 	@Id
 	   @GeneratedValue(strategy = GenerationType.IDENTITY)
