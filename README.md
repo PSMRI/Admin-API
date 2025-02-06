@@ -33,3 +33,12 @@ Refer to the SWAGGER API specification for details.
 The admin module can be used to manage all aspects of your application.
 To access the admin module, navigate to http://localhost:3000/admin in your browser.
 You will be prompted to login with a valid user account. Once you have logged in, you will be able to view and manage all of the resources in your application.
+
+## Filing Issues
+
+If you encounter any issues, bugs, or have feature requests, please file them in the [main AMRIT repository](https://github.com/PSMRI/AMRIT/issues). Centralizing all feedback helps us streamline improvements and address concerns efficiently.  
+
+## Join Our Community
+
+We’d love to have you join our community discussions and get real-time support!  
+Join our [Discord server](https://discord.gg/FVQWsf5ENS) to connect with contributors, ask questions, and stay updated.  
