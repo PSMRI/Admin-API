@@ -39,7 +39,6 @@ public class BulkRegistrationController {
    private Map<String, Object> response  = new HashMap<>();
 
 
-    @CrossOrigin()
     @RequestMapping(value = "/bulkRegistration",method = RequestMethod.POST,headers = "Authorization")
     public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user) throws Exception {
         logger.info("M_user Request"+m_user.toString());
@@ -64,7 +63,6 @@ public class BulkRegistrationController {
         return ResponseEntity.ok(response);
 
     }
-     @CrossOrigin()
      @Operation(description = "Download formatted Excel sheet")
     @RequestMapping(value = {"/downloadExcelSheet"},method = {RequestMethod.GET},consumes = {"application/octet-stream"})
     public  ResponseEntity<?> exportIntoExcelFile(){

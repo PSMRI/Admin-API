@@ -443,7 +443,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         try {
             return new Timestamp(dateFormat.parse(dateString).getTime());
         } catch (ParseException e) {
-            e.printStackTrace(); //
             return null;
         }
     }
