@@ -8,9 +8,8 @@ import com.iemr.admin.data.rolemaster.StateMasterForRole;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import com.iemr.admin.service.rolemaster.Role_MasterInter;
+import com.iemr.admin.utils.JwtUtil;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,6 +40,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private static final String EMAIL_REGEX = "^[\\w-.]+@[\\w-]+\\.[a-zA-Z]{2,}$";
     public Integer totalEmployeeListSize = 0;
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Autowired
     private EmployeeMasterInter employeeMasterInter;
@@ -58,7 +57,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
     public List<String> errorLogs = new ArrayList<>();
     public ArrayList<M_User1> m_bulkUser = new ArrayList<>();
-    //    public ArrayList<M_User1> m_bulkUser1 = new ArrayList<>();
     public ArrayList<M_UserDemographics> m_UserDemographics = new ArrayList<>();
 
     private List<M_District> m_districts;
@@ -69,32 +67,28 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
 
-
-
     @Override
-    public void registerBulkUser(String xml) {
+    public void registerBulkUser(String xml, String authorization) {
         try {
             EmployeeList employeeList = employeeXmlService.parseXml(xml);
             logger.info("employee_list" + employeeList.getEmployees().toString());
             totalEmployeeListSize = employeeList.getEmployees().size();
             for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                saveUserUser(employeeList.getEmployees().get(i), i);
+                saveUserUser(employeeList.getEmployees().get(i), i, authorization);
 
             }
 
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error("Exception:" + e.getMessage());
         }
 
 
     }
 
 
-    private void saveUserUser(Employee employee, Integer row) throws Exception {
+    private void saveUserUser(Employee employee, Integer row, String authorization) throws Exception {
         logger.info("employee_list after for loop" + employee.toString());
-
-
 
         if (employee.getTitle() == null || employee.getTitle().isEmpty() || getTitleId(employee.getTitle()) == 0) {
             validationErrors.add("Title is missing or invalid.");
@@ -136,15 +130,15 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         if (getDistrictId(employee.getPermanentDistrict()) == 0) {
             validationErrors.add("Permanent District is invalid.");
         }
-        if(employee.getPincode()==null|| employee.getPincode().isEmpty()){
+        if (employee.getPincode() == null || employee.getPincode().isEmpty()) {
             validationErrors.add("Pincode is invalid.");
 
         }
-        if(employee.getPermanentPincode()==null|| employee.getPermanentPincode().isEmpty()){
+        if (employee.getPermanentPincode() == null || employee.getPermanentPincode().isEmpty()) {
             validationErrors.add("Permanent Pincode is invalid.");
 
         }
-        if(isValidPAN(employee.getPan())){
+        if (!isValidPAN(employee.getPan())) {
             validationErrors.add("PAN is invalid.");
 
         }
@@ -155,35 +149,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
 
         try {
-            logger.info("Title: " + employee.getTitle());
-            logger.info("Title Id: " + getTitleId(employee.getTitle()));
-            logger.info("First Name: " + employee.getFirstName());
-            logger.info("Last Name: " + employee.getLastName());
-            logger.info("Email: " + employee.getEmail());
-            logger.info("Contact No: " + employee.getContactNo());
-            logger.info("Emergency Contact No: " + employee.getEmergencyContactNo());
-            logger.info("Age: " + employee.getAge());
-            logger.info("DOB: " + employee.getDob());
-            logger.info("State: " + employee.getState());
-            logger.info("State ID: " + getStateId(employee.getState()));
-            logger.info("District: " + employee.getDistrict());
-            logger.info("District ID: " + getDistrictId(employee.getDistrict()));
-            logger.info("Designation: " + employee.getDesignation());
-            logger.info("Designation Id: " + getDesignationId(employee.getDesignation()));
-            logger.info("Qualification: " + employee.getQualification());
-            logger.info("Father Name: " + employee.getFatherName());
-            logger.info("Mother Name: " + employee.getMotherName());
-            logger.info("Address Line 1: " + employee.getAddressLine1());
-            logger.info("Permanent Address: " + employee.getPermanentAddressLine1());
-            logger.info("Aadhaar No: " + employee.getAadhaarNo());
-            logger.info("PAN: " + employee.getPan());
-            logger.info("Gender: " + employee.getGender());
-            logger.info("Date of Joining: " + employee.getDateOfJoining());
-            logger.info("Religion: " + employee.getReligion());
-            logger.info("Community: " + employee.getCommunity());
-            logger.info("Pincode: " + employee.getPincode());
-
-
 
             M_User1 mUser = new M_User1();
             M_UserDemographics mUserDemographics = new M_UserDemographics();
@@ -201,27 +166,23 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
             mUser.setMiddleName(employee.getMiddleName());
             mUser.setAadhaarNo(String.valueOf(employee.getAadhaarNo()));
             mUser.setpAN(employee.getPan());
-//            mUser.setMaritalStatusID(getMaritalStatusID(employee.getMaritalStatus()));
             mUser.setMaritalStatusID(1);
             mUser.setEmailID(employee.getEmail());
             mUser.setGenderID(Short.parseShort(String.valueOf(getGenderId(employee.getGender()))));
             mUser.setQualificationID(getQualificationId(employee.getQualification()));
             mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
-            mUser.setCreatedBy("PSMRIL2");
-            mUser.setModifiedBy("PSMRIL2");
+            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
+            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
             mUser.setIsSupervisor(false);
             mUser.setServiceProviderID(15);
             mUser.setPassword(generateStrongPassword("Test@123"));
-            logger.info("M_user" + mUser);
             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
-            System.out.println("bulk_userID" + bulkUserID.getUserID().toString());
-            logger.info("M_user Id" + bulkUserID.getUserID());
             mUserDemographics.setUserID(bulkUserID.getUserID());
             mUserDemographics.setCountryID(91);
             mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
             mUserDemographics.setReligionID(getReligionStringId(employee.getReligion()));
             mUserDemographics.setFathersName(employee.getFatherName());
-            mUserDemographics.setCreatedBy("PSMRIL2");
+            mUserDemographics.setCreatedBy(jwtUtil.extractUsername(authorization));
             mUserDemographics.setAddressLine1(employee.getAddressLine1());
             mUserDemographics.setPermAddressLine1(employee.getPermanentAddressLine1());
             mUserDemographics.setPermStateID(getStateId(employee.getPermanentState()));
@@ -240,13 +201,11 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
             m_UserDemographics.add(mUserDemographics);
 
         } catch (Exception e) {
-            errorLogs.add("Row : " + (row+1) + e.getMessage());
+            errorLogs.add("Row : " + (row + 1) + e.getMessage());
         }
 
 
     }
-
-
 
 
     public int getGenderId(String genderString) {
@@ -267,8 +226,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
 
-
-
     public int getTitleId(String titleString) {
         int titleId = employeeMasterInter.getAllTitle()
                 .stream()
@@ -280,7 +237,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
         return titleId;
     }
-
 
 
     public int getDesignationId(String designationString) {
@@ -310,10 +266,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 .orElse(0);
 
 
-
         return qualificationId;
     }
-
 
     //Religion
     public int getReligionStringId(String religionString) {
@@ -359,10 +313,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return stateId;
     }
 
-
-
-
-
     private boolean isValidPAN(String pan) {
         // Check if the PAN matches the regex
         return Pattern.matches(PAN_REGEX, pan);
@@ -387,64 +337,15 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return headerMap;
     }
 
-    private Integer getIntegerValue(Row row, Integer cellIndex) {
-        if (cellIndex == null) return null;
-        Cell cell = row.getCell(cellIndex);
-        return (cell != null && cell.getCellType() == CellType.NUMERIC) ? (int) cell.getNumericCellValue() : null;
-    }
-
-    private Long getLongValue(Row row, Integer cellIndex) {
-        if (cellIndex == null) return null;
-        Cell cell = row.getCell(cellIndex);
-        return (cell != null && cell.getCellType() == CellType.NUMERIC) ? (long) cell.getNumericCellValue() : null;
-    }
-
-
-    private String getStringValue(Row row, Integer cellIndex) {
-        if (cellIndex == null || row.getCell(cellIndex) == null) return null;
-        Cell cell = row.getCell(cellIndex);
-        return (cell.getCellType() == CellType.STRING) ? cell.getStringCellValue().trim() : null;
-    }
-
-    private void validateHeaders(Map<String, Integer> headerMap, List<String> requiredHeaders) {
-        for (String header : requiredHeaders) {
-            if (!headerMap.containsKey(header)) {
-                throw new RuntimeException("Missing required header: " + header);
-            }
-        }
-    }
-
-    private Timestamp getTimestampValue(Row row, Integer cellIndex) {
-        if (cellIndex == null) return null;
-        Cell cell = row.getCell(cellIndex);
-        if (cell != null && cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
-            return new Timestamp(cell.getDateCellValue().getTime());
-        }
-        return null;
-    }
-
 
     public Date convertStringIntoDate(String dateString) throws ParseException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(dateString+" "+"00:00:00", formatter);
+        LocalDateTime dateTime = LocalDateTime.parse(dateString + " " + "00:00:00", formatter);
 
 
         // Convert String to Date
-        return  Date.valueOf(String.valueOf(dateTime));
+        return Date.valueOf(String.valueOf(dateTime));
 
-    }
-
-
-    private Timestamp getTimestampValue(String dateString) {
-        if (dateString == null || dateString.trim().isEmpty()) {
-        }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); //
-        try {
-            return new Timestamp(dateFormat.parse(dateString).getTime());
-        } catch (ParseException e) {
-            return null;
-        }
     }
 
 
