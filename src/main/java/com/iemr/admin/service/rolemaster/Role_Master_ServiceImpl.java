@@ -46,8 +46,8 @@ import com.iemr.admin.repository.rolemaster.StateMasterRepo;
 import jakarta.persistence.EntityManager;
 
 @Service
-public class Role_Master_ServiceImpl implements Role_MasterInter
-{
+public class Role_Master_ServiceImpl implements Role_MasterInter {
+
 
 	@Autowired
 	private StateMasterRepo stateMasterRepo;
@@ -62,7 +62,7 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 
 	@Autowired
 	private RoleScreenMappingRepo roleScreenMappingRepo;
-	
+
 	@Autowired
 	private M_ScreenRepo m_ScreenRepo;
 
@@ -279,7 +279,7 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 
 	@Override
 	public ArrayList<M_UserservicerolemappingForRoleProviderAdmin>
-			getStateByServiceProviderIdAndServiceLines(Integer userID, Integer serviceID, Boolean isNational)
+	getStateByServiceProviderIdAndServiceLines(Integer userID, Integer serviceID, Boolean isNational)
 	{
 		if (isNational == false)
 		{
@@ -364,7 +364,7 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 	public RoleMaster configWrapUpTime(RoleMaster role) throws Exception {
 		// TODO Auto-generated method stub
 		RoleMaster buff=mRoleRepo.findByRoleID(role.getRoleID());
-		
+
 		if(buff==null) {
 			throw new Exception("Invalid Role");
 		}
@@ -374,8 +374,14 @@ public class Role_Master_ServiceImpl implements Role_MasterInter
 		buff.setIsWrapUpTime(role.getIsWrapUpTime());
 		buff.setWrapUpTime(role.getWrapUpTime());
 		buff.setModifiedBy(role.getModifiedBy());
-		
+
 		return mRoleRepo.save(buff);
 	}
+
+	@Override
+	public ArrayList<StateMasterForRole> getAllState() {
+		return stateMasterRepo.getAllState();
+	}
+
 
 }

@@ -1178,4 +1178,14 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		return dataout;
 	}
 
+	@Override
+	public M_User1 saveBulkUserEmployee(M_User1 mUser) {
+		logger.info("EmployeeMasterServiceImpl.saveEmployee - start");
+		M_User1 data = employeeMasterRepo11.save(mUser);
+//        logger.info("Encrypt password returned " + encryptUserPassword.encryptUserCredentials(data).toString());
+		Integer data1 = data.getUserID();
+		logger.info("EmployeeMasterServiceImpl.saveEmployee - finish");
+		return data;
+	}
+
 }

@@ -184,4 +184,5 @@ public interface EmployeeMasterInter {
 
 	M_UserServiceRoleMapping2 deleteuserrolemapTM(M_UserServiceRoleMapping2 pre) throws Exception;
 
+    M_User1 saveBulkUserEmployee(M_User1 mUser);
 }
