@@ -6,6 +6,7 @@ import com.iemr.admin.service.bulkRegistration.BulkRegistrationServiceImpl;
 import com.iemr.admin.service.bulkRegistration.EmployeeXmlService;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-
 public class BulkRegistrationController {
     @Autowired
     private EmployeeXmlService employeeXmlService;
@@ -33,50 +33,59 @@ public class BulkRegistrationController {
 
     @Autowired
     private EmployeeMasterRepoo employeeMasterRepoo;
-   private Map<String, Object> errorResponse = new HashMap<>();
+    private Map<String, Object> errorResponse = new HashMap<>();
     @Autowired
     private LocationMasterServiceInter locationMasterServiceInter;
-   private Map<String, Object> response  = new HashMap<>();
+    private Map<String, Object> response = new HashMap<>();
 
-
-    @RequestMapping(value = "/bulkRegistration",method = RequestMethod.POST,headers = "Authorization")
-    public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user,@RequestHeader String authorization) throws Exception {
-         logger.info("Bulk registration request received. Request payload is omitted from logs.");
+    @CrossOrigin()
+    @PostMapping(value = "/bulkRegistration", headers = "Authorization")
+    public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user, @RequestHeader String authorization) {
+        bulkRegistrationServiceimpl.bulkRegistrationErrors.clear();
+        logger.info("Bulk registration request received. Request payload is omitted from logs.");
         try {
-            bulkRegistrationService.registerBulkUser(m_user,authorization);
-            response.put("status","Success");
-            response.put("statusCode",200);
-            response.put("totalUser",bulkRegistrationServiceimpl.totalEmployeeListSize);
-            response.put("registeredUser",bulkRegistrationServiceimpl.m_bulkUser.size());
-            response.put("error",bulkRegistrationServiceimpl.errorLogs.toString());
+            bulkRegistrationService.registerBulkUser(m_user, authorization);
+            response.put("status", "Success");
+            response.put("statusCode", 200);
+            response.put("totalUser", bulkRegistrationServiceimpl.totalEmployeeListSize);
+            response.put("registeredUser", bulkRegistrationServiceimpl.m_bulkUser.size());
+            response.put("error", bulkRegistrationServiceimpl.errorLogs.toString());
 
             bulkRegistrationServiceimpl.m_bulkUser.clear();
             bulkRegistrationServiceimpl.m_UserDemographics.clear();
             bulkRegistrationServiceimpl.errorLogs.clear();
-            bulkRegistrationServiceimpl.validationErrors.clear();
+            bulkRegistrationServiceimpl.totalEmployeeListSize=0;
 
         } catch (Exception e) {
-            response.put("status","Fail");
-            response.put("statusCode",500);
-            throw new RuntimeException(e);
+            response.put("message", e.getMessage());
+            response.put("statusCode", 500);
+
         }
         return ResponseEntity.ok(response);
 
     }
-     @Operation(description = "Download formatted Excel sheet")
-    @RequestMapping(value = {"/downloadExcelSheet"},method = {RequestMethod.GET},consumes = {"application/octet-stream"})
-    public  ResponseEntity<?> exportIntoExcelFile(){
 
-         // Load the Excel file from resources
-         ClassPathResource excelFile = new ClassPathResource("xlsxfile/bulkuser_excel_sheet.xlsx");
+    @CrossOrigin()
+    @GetMapping("/download-error-sheet")
+    public ResponseEntity<byte[]> downloadErrorSheet() {
+        try {
+            byte[] fileContent = bulkRegistrationServiceimpl.insertErrorLog();
 
-         // Return the Excel file as a response with proper headers
-         return ResponseEntity.ok()
-                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + excelFile.getFilename() + "\"")
-                 .body(excelFile);
-     }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=error_log.xlsx");
 
+            if(!bulkRegistrationServiceimpl.bulkRegistrationErrors.isEmpty()){
+                bulkRegistrationServiceimpl.bulkRegistrationErrors.clear();
+            }
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(fileContent);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
 
 }

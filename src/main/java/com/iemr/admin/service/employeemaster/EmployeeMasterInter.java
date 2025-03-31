@@ -110,6 +110,9 @@ public interface EmployeeMasterInter {
 	ArrayList<Showofficedetails1> getlocationByMapid2(int tempProSerStatMapID, Integer districtID);
 
 	String FindEmployeeName(String userName);
+	String FindEmployeeContact(String contactNo);
+	String FindEmployeeAadhaar(String aadhaarNo);
+
 
 	public M_User1 FindEmployeeName1(String userName);
 
