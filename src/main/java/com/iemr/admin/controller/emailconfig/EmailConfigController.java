@@ -52,7 +52,7 @@ public class EmailConfigController {
 	@Autowired
 	EmailConfigService emailConfigService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Save configuration")
 	@RequestMapping(value = "/saveConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String saveConfig(@RequestBody List<CreateAuthEmailRequestModel> createEmailRequests,
@@ -73,7 +73,7 @@ public class EmailConfigController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get email configuration")
 	@RequestMapping(value = "/getEmailConfigs", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getEmailConfigs(@RequestBody AuthEmailRequest authEmailRequest, HttpServletRequest request) {
@@ -93,7 +93,7 @@ public class EmailConfigController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update email configuration")
 	@RequestMapping(value = "/updateEmailConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String updateEmailConfig(@RequestBody UpdateAuthEmailRequest updateEmailRequest,

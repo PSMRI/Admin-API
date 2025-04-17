@@ -53,7 +53,7 @@ public class MItemFacilityMappingController {
 	@Autowired
 	private M_itemfacilitymappingInter M_itemfacilitymappingInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Map item to store")
 	@RequestMapping(value = "/mapItemtoStrore", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -111,7 +111,7 @@ public class MItemFacilityMappingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit item to store")
 	@RequestMapping(value = "/editItemtoStrore", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -146,7 +146,7 @@ public class MItemFacilityMappingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete item to store")
 	@RequestMapping(value = "/deleteItemtoStrore", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -177,7 +177,7 @@ public class MItemFacilityMappingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get sub store item")
 	@RequestMapping(value = "/getSubStoreitem", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -205,7 +205,7 @@ public class MItemFacilityMappingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all facility mapped data")
 	@RequestMapping(value = "/getAllFacilityMappedData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -233,7 +233,7 @@ public class MItemFacilityMappingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item from store id")
 	@RequestMapping(value = "/getItemFromStoreID/{storeID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -257,7 +257,7 @@ public class MItemFacilityMappingController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete item store mapping")
 	@RequestMapping(value = "/deleteItemStoreMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

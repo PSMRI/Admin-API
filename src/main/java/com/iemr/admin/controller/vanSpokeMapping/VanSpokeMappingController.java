@@ -52,7 +52,7 @@ public class VanSpokeMappingController {
 	 * @return
 	 * @throws IEMRException
 	 */
-	@CrossOrigin
+	
 	@Operation(summary = "Save van and spoke mapping")
 	@RequestMapping(value = { "/save/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String saveBenNCDCareNurseData(@RequestBody String requestObj,
@@ -74,7 +74,7 @@ public class VanSpokeMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Get van and spoke mapping")
 	@RequestMapping(value = { "/get/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String getVanSpokeMapping(@RequestBody String requestObj,
@@ -93,7 +93,7 @@ public class VanSpokeMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Delete van and spoke mapping")
 	@RequestMapping(value = { "/delete/vanSpokeMapping" }, method = { RequestMethod.POST })
 	public String deleteVanSpokeMapping(@RequestBody String requestObj,

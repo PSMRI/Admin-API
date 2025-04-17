@@ -48,7 +48,7 @@ public class ManufacturerController {
 	@Autowired
 	private ManufacturerInter manufacturerInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create manufacturer")
 	@RequestMapping(value = "/createManufacturer", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -76,7 +76,7 @@ public class ManufacturerController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get manufacturer")
 	@RequestMapping(value = "/getManufacturer", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -104,7 +104,7 @@ public class ManufacturerController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit manufacturer")
 	@RequestMapping(value = "/editManufacturer", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -144,7 +144,7 @@ public class ManufacturerController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete manufacturer")
 	@RequestMapping(value = "/deleteManufacturer", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -175,7 +175,7 @@ public class ManufacturerController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Check manufacturer code")
 	@RequestMapping(value = "/checkManufacturerCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

@@ -41,7 +41,7 @@ public class StockExitController {
 	@Autowired
 	StockExitService stockExitService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/patientIssue", headers = "Authorization", method = { RequestMethod.POST })
 	public String patientIssue(@RequestBody T_PatientIssue patientIssue) {

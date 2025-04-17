@@ -47,14 +47,14 @@ import io.swagger.v3.oas.annotations.Operation;
 
 
 @RestController
-@CrossOrigin
+
 @RequestMapping(value = "fetosense", headers = "Authorization")
 public class FoetalMonitorController {
 	@Autowired
 	private FoetalMonitorService foetalMonitorService;
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-	@CrossOrigin
+	
 	@Operation(summary = "Create foetal monitor test master by provider admin")
 	@RequestMapping(value = { "/createFetosenseTestMaster" }, method = { RequestMethod.POST })
 	public String createFoetalMonitorTestMaster(@RequestBody String requestOBJ) {
@@ -71,7 +71,7 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Fetch foetal monitor tests master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchFetosenseTestMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchFoetalMonitorTestMaster(@PathVariable("psmID") Integer psmID) {
@@ -89,7 +89,7 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Update foetal monitor tests master for a particular procedure")
 	@RequestMapping(value = { "/updateFetosenseTestMaster" }, method = { RequestMethod.POST })
 	public String updateProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -107,7 +107,7 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Update procedure status for enable or disable")
 	@RequestMapping(value = { "/updateFetosenseTestMasterStatus" }, method = { RequestMethod.POST })
 	public String updateProcedureStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -132,7 +132,7 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "To save foetal monitor device id")
 	@RequestMapping(value = "/createFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveFoetalMonitorDeviceID(
@@ -162,7 +162,7 @@ public class FoetalMonitorController {
 	 * @param authorization
 	 * @return
 	 */
-	@CrossOrigin
+	
 	@Operation(summary = "To save mapping of van id and foetal monitor device id")
 	@RequestMapping(value = "/mapping/vanIDAndDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveVanIDandDeviceIDMapping(
@@ -188,7 +188,7 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Provides the foetal monitor device id")
 	@RequestMapping(value = "/fetch/fetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getFoetalMonitorDeviceID(
@@ -212,7 +212,7 @@ public class FoetalMonitorController {
 	 * @param requestObj
 	 * @return
 	 */
-	@CrossOrigin
+	
 	@Operation(summary = "Provides the van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/vanIDAndFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getVanIDAndDeviceID(
@@ -236,7 +236,7 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Provides the worklist of van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/mappingWorklist", method = RequestMethod.POST, headers = "Authorization")
 	public String getMappedWorklist(
@@ -257,7 +257,7 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Update device id")
 	@RequestMapping(value = "/update/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String updateFoetalMonitorDeviceID(
@@ -291,7 +291,7 @@ public class FoetalMonitorController {
 	 * @param Authorization
 	 * @return
 	 */
-	@CrossOrigin
+	
 	@Operation(summary = "Delete foetal monitor device id")
 	@RequestMapping(value = "/delete/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String deleteFoetalMonitorDeviceID(
@@ -318,7 +318,7 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	@CrossOrigin
+	
 	@Operation(summary = "Update van id and foetal monitor device id mapping")
 	@RequestMapping(value = "/update/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String updateMapping(
@@ -350,7 +350,7 @@ public class FoetalMonitorController {
 	 * @param Authorization
 	 * @return
 	 */
-	@CrossOrigin
+	
 	@Operation(summary = "Deactivate van id and foetal monitor device id mapping ")
 	@RequestMapping(value = "/delete/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String deleteVanIDAndFoetalMonitorDeviceID(

@@ -60,7 +60,7 @@ public class BlockingController {
 		this.blockingInter = blockingInter;
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block provider 1")
 	@RequestMapping(value = "/blockProvider1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -119,7 +119,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block provider")
 	@RequestMapping(value = "/blockProvider", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -178,7 +178,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block provider by service id")
 	@RequestMapping(value = { "/blockProviderByServiceId" }, method = { RequestMethod.POST }, produces = {
 			"application/json" }, headers = "Authorization")
@@ -239,7 +239,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider status")
 	@RequestMapping(value = "/getProviderStatus", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -266,7 +266,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider status 1")
 	@RequestMapping(value = "/getProviderStatus1", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -293,7 +293,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get service liens using provider")
 	@RequestMapping(value = "/getServiceLinesUsingProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -320,7 +320,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider status by provider and service id")
 	@RequestMapping(value = "/getProviderStatusByProviderAndServiceId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -348,7 +348,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block provider by service")
 	@RequestMapping(value = "/blockProviderByService", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -401,7 +401,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider status by service")
 	@RequestMapping(value = "/getProviderStatusByService", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -430,7 +430,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block provider by state")
 	@RequestMapping(value = "/blockProviderByState", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -491,7 +491,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider status by state")
 	@RequestMapping(value = "/getProviderStatusByState", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -520,7 +520,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block user")
 	@RequestMapping(value = "/blockUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -568,7 +568,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get status")
 	@RequestMapping(value = "/getStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -593,7 +593,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Provider state and service lines")
 	@RequestMapping(value = "/addProviderStateAndServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -657,7 +657,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete provider state and service lines")
 	@RequestMapping(value = "/deleteProviderStateAndServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -701,7 +701,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create cit mapping with service lines")
 	@RequestMapping(value = "/createCitMappingwithServiceLines", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -728,7 +728,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get mapped service lines and state to provider")
 	@RequestMapping(value = "/getMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, consumes = { "application/json" }, produces = { "application/json" })
@@ -756,7 +756,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Map provider and service lines")
 	@RequestMapping(value = "/mapServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -822,7 +822,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit mapped service lines and state to provider")
 	@RequestMapping(value = "/editMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -856,7 +856,7 @@ public class BlockingController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete mapped service lines and state to provider")
 	@RequestMapping(value = "/deleteMappedServiceLinesAndStatetoProvider", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

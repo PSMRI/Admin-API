@@ -106,7 +106,7 @@ public class EmployeeMasterController {
 		this.usrAgentMappingService = usrAgentMappingService;
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all role")
 	@RequestMapping(value = "/m/getAllRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -146,7 +146,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee")
 	@RequestMapping(value = "/m/SearchEmployee", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -189,7 +189,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 1")
 	@RequestMapping(value = "/m/SearchEmployee1", headers = "Authorization", method = RequestMethod.POST, produces = "application/json")
 	public String searchEmployee1(@RequestBody String searchEmployee1) {
@@ -231,7 +231,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 2")
 	@RequestMapping(value = "/m/SearchEmployee2", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -278,7 +278,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 3")
 	@RequestMapping(value = "/m/SearchEmployee3", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -318,7 +318,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 4")
 	@RequestMapping(value = "/m/SearchEmployee4", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -356,7 +356,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 5")
 	@RequestMapping(value = "/m/SearchEmployee5", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -382,7 +382,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 6")
 	@RequestMapping(value = "/m/SearchEmployee6", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -410,7 +410,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 7")
 	@RequestMapping(value = "/m/SearchEmployee7", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -437,7 +437,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 8")
 	@RequestMapping(value = "/m/SearchEmployee8", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -464,7 +464,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee 9")
 	@RequestMapping(value = "/m/SearchEmployee9", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -490,7 +490,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search employee filter")
 	@RequestMapping(value = "/m/SearchEmployeeFilter", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -517,7 +517,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get agent id")
 	@RequestMapping(value = "/getAgentID", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -533,7 +533,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Add employee")
 	@RequestMapping(value = "/m/AddEmployee", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -645,7 +645,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit employee")
 	@RequestMapping(value = "/m/editEmployee", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -716,7 +716,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete employee")
 	@RequestMapping(value = "/m/deleteEmployee", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -747,7 +747,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "All title")
 	@RequestMapping(value = "/m/AllTitle", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -771,7 +771,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all gender")
 	@RequestMapping(value = "/m/AllGender", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -797,7 +797,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all location")
 	@RequestMapping(value = "/m/location/getAlllocation22", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -858,7 +858,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Find employee by name")
 	@RequestMapping(value = "/m/FindEmployeeByName", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -886,7 +886,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Qualification")
 	@RequestMapping(value = "/m/Qualification", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -915,7 +915,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Find employee details")
 	@RequestMapping(value = "/m/FindEmployeeDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -946,7 +946,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update employer role")
 	@RequestMapping(value = "/m/updateEmployeeRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -995,7 +995,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete employer role")
 	@RequestMapping(value = "/m/deleteEmployeeRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1033,7 +1033,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get designation")
 	@RequestMapping(value = "/m/getDesignation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1062,7 +1062,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get employee by designation")
 	@RequestMapping(value = "/m/getEmployeeByDesignation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1093,7 +1093,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get available agent ids")
 	@RequestMapping(value = "/getAvailableAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getAvailableAgentIds(@Param("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
@@ -1110,7 +1110,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create USR agent mapping")
 	@RequestMapping(value = "/createUSRAgentMapping", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String createUSRAgentMapping(
@@ -1130,7 +1130,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get available campaigns")
 	@RequestMapping(value = "/getAvailableCampaigns", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getAvailableCampaigns(@Param("{\"providerServiceMapID\":\"Integer: provider service map ID\", "
@@ -1147,7 +1147,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update agent ids")
 	@RequestMapping(value = "/updateAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateAgentIds(@Param("{\"isAvailable\":\"Boolean - is agent ID available for future use\", "
@@ -1165,7 +1165,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "User role and cti mapping")
 	@RequestMapping(value = "/usrRoleAndCtiMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1192,7 +1192,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Find employee details by user name")
 	@RequestMapping(value = "/m/FindEmployeeDetailsByUserName", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1220,7 +1220,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Reset user password")
 	@RequestMapping(value = "/m/ResetUserPassword", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1248,7 +1248,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create provider admin")
 	@RequestMapping(value = "/createProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1278,7 +1278,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get provider admin")
 	@RequestMapping(value = "/getProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1306,7 +1306,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit provider admin")
 	@RequestMapping(value = "/editProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1349,7 +1349,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete provider admin")
 	@RequestMapping(value = "/deleteProviderAdmin", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1381,7 +1381,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create new user")
 	@RequestMapping(value = "/createNewUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -1451,7 +1451,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit user details")
 	@RequestMapping(value = "/editUserDetails", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -1525,7 +1525,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Deleted user details")
 	@RequestMapping(value = "/deletedUserDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1562,7 +1562,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search mapped language by user id")
 	@RequestMapping(value = "/searchMappedLanguageByUserId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1591,7 +1591,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get user mapped language")
 	@RequestMapping(value = "/getUserMappedLanguage", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1619,7 +1619,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "User language mapping")
 	@RequestMapping(value = "/userLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1679,7 +1679,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update user language mapping")
 	@RequestMapping(value = "/updateUserLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1720,7 +1720,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete user language mapping")
 	@RequestMapping(value = "/deleteUserLanguageMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1750,7 +1750,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "User role mapping")
 	@RequestMapping(value = "/userRoleMapping", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -1808,7 +1808,7 @@ public class EmployeeMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "User role mappings")
 	@RequestMapping(value = "/userRoleMappings", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1875,7 +1875,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update user role mapping")
 	@RequestMapping(value = "/updateUserRoleMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1930,7 +1930,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete user role mapping")
 	@RequestMapping(value = "/deleteUserRoleMapping", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1963,7 +1963,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get user role mapped")
 	@RequestMapping(value = "/getUserRoleMapped", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -1993,7 +1993,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search mapped role by name or user id")
 	@RequestMapping(value = "/searchMappedRoleByNameorUserId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -2022,7 +2022,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Complete user detail")
 	@RequestMapping(value = "/completeUserDetails", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -2049,7 +2049,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get religion")
 	@RequestMapping(value = "/getReligion", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -2076,7 +2076,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get community")
 	@RequestMapping(value = "/getCommunity", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -2103,7 +2103,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all agent ids")
 	@RequestMapping(value = "/getAllAgentIds", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getAllAgentIds(@Param("{\"providerServiceMapID\":\"Integer - Provider Service Map ID\", "
@@ -2121,7 +2121,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update CTI campaign name mapping")
 	@RequestMapping(value = "/updateCTICampaignNameMapping", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String updateCTICampaignNameMapping(@Param("{\"cti_CampaignName\":\"String new campaign name\", "
@@ -2138,7 +2138,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get user role TM")
 	@RequestMapping(value = "/getUserRoleTM", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -2166,7 +2166,7 @@ public class EmployeeMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete user role mapping TM")
 	@RequestMapping(value = "/deleteUserRoleMappingTM", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

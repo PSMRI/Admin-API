@@ -49,7 +49,7 @@ public class FacilitytypeController {
 	@Autowired
 	private M_facilitytypeInter m_facilitytypeInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get facility")
 	@RequestMapping(value = "/getFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -76,7 +76,7 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Add facility")
 	@RequestMapping(value = "/addFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -103,7 +103,7 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit facility")
 	@RequestMapping(value = "/editFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -135,7 +135,7 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete facility")
 	@RequestMapping(value = "/deleteFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -165,7 +165,7 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Check facility type code")
 	@RequestMapping(value = "/checkFacilityTypeCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

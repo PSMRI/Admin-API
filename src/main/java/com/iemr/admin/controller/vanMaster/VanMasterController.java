@@ -51,7 +51,7 @@ public class VanMasterController {
 	@Autowired
 	private VanMasterServiceImpl vanMasterServiceImpl;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Store van details")
 	@RequestMapping(value = "/save/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanDetails(
@@ -76,7 +76,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/get/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePoints(
@@ -98,7 +98,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Remove van")
 	@RequestMapping(value = "/remove/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanDetails(
@@ -125,7 +125,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update van details")
 	@RequestMapping(value = "/update/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateZoneData(
@@ -161,7 +161,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Store van type details")
 	@RequestMapping(value = "/save/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanTypeDetails(
@@ -183,7 +183,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get van types")
 	@RequestMapping(value = "/get/vanTypes", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanTypes() {
@@ -199,7 +199,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Remove van type")
 	@RequestMapping(value = "/remove/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanType(
@@ -226,7 +226,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanMaster", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanMaster(
@@ -248,7 +248,7 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanFromFacilityID", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanFromFacilityID(

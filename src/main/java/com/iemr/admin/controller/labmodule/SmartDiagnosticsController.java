@@ -47,7 +47,7 @@ public class SmartDiagnosticsController {
 	@Autowired
 	IOTService iotService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get diagnostic test procedure details")
 	@RequestMapping(value = "/getDiagnosticProcedure", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTProcedure() {
@@ -67,7 +67,7 @@ public class SmartDiagnosticsController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get diagnostic procedure component details")
 	@RequestMapping(value = "/getDiagnosticProcedureComponent", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTComponent() {

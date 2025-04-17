@@ -49,7 +49,7 @@ public class StockEntryController {
 	@Autowired
 	StockEntryService stockEntryService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/physicalStockEntry", headers = "Authorization", method = { RequestMethod.POST })
 	public String physicalStockEntry(@RequestBody PhysicalStockEntry physicalStockEntry) {
@@ -67,7 +67,7 @@ public class StockEntryController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item batch for store id")
 	@RequestMapping(value = "/getItemBatchForStoreID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -91,7 +91,7 @@ public class StockEntryController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Allocate stock from item id")
 	@RequestMapping(value = "/allocateStockFromItemID/{facilityID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

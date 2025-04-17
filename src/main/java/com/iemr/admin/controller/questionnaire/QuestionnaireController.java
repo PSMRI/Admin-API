@@ -44,7 +44,7 @@ public class QuestionnaireController {
 	@Autowired
 	private QuestionnaireServiceImpl questionnaireService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Save questionnaire")
 	@RequestMapping(value = "/saveQuestionnaire", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -64,7 +64,7 @@ public class QuestionnaireController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get questionnaire list")
 	@RequestMapping(value = "/getQuestionnaireList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getQuestionnaireList(
@@ -82,7 +82,7 @@ public class QuestionnaireController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete questionnaire")
 	@RequestMapping(value = "/deleteQuestionnaire", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -100,7 +100,7 @@ public class QuestionnaireController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit questionnaire")
 	@RequestMapping(value = "/editQuestionnaire", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

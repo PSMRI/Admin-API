@@ -53,7 +53,7 @@ public class ItemController {
 	@Autowired
 	private ItemService itemService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item form service map id")
 	@RequestMapping(value = "/getItemForm/{providerservicemapID}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -76,7 +76,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item route")
 	@RequestMapping(value = "/getItemRoute/{providerservicemapID}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -99,7 +99,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item category")
 	@RequestMapping(value = "/getItemCategory/{providerservicemapID}/{bool}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -128,7 +128,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create item master")
 	@RequestMapping(value = "/createItemMaster", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -152,7 +152,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item master")
 	@RequestMapping(value = "/getItemMaster/{providerservicemapID}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -175,7 +175,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block item master")
 	@RequestMapping(value = "/blockItemMaster/{itemmasterid}/{deleteflag}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -199,7 +199,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Discontinue item master")
 	@RequestMapping(value = "/discontinueItemMaster/{itemmasterid}/{deleteflag}", headers = "Authorization", method = {
 			RequestMethod.GET }, produces = { "application/json" })
@@ -223,7 +223,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit item master")
 	@RequestMapping(value = "/editItemMaster", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -256,7 +256,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Configure item issue")
 	@RequestMapping(value = "/configItemIssue", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -280,7 +280,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Configure expiry alert")
 	@RequestMapping(value = "/configexpiryalert", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -304,7 +304,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get item")
 	@RequestMapping(value = "/getItem", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -331,7 +331,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create item category")
 	@RequestMapping(value = "/createItemCategories", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -353,7 +353,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit item category")
 	@RequestMapping(value = "/editItemCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -374,7 +374,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block item category")
 	@RequestMapping(value = "/blockItemCategory", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -395,7 +395,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create item form")
 	@RequestMapping(value = "/createItemForms", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -417,7 +417,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit item form")
 	@RequestMapping(value = "/editItemForm", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -438,7 +438,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block item form")
 	@RequestMapping(value = "/blockItemForm", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -459,7 +459,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create route")
 	@RequestMapping(value = "/createRoutes", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -481,7 +481,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit route")
 	@RequestMapping(value = "/editRoute", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -502,7 +502,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Block route")
 	@RequestMapping(value = "/blockRoute", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -523,7 +523,7 @@ public class ItemController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Check code")
 	@RequestMapping(value = "/checkCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

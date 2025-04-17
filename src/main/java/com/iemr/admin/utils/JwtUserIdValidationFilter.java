@@ -69,17 +69,18 @@ public class JwtUserIdValidationFilter implements Filter {
 			// Determine which token (cookie or header) to validate
 			String jwtToken = jwtTokenFromCookie != null ? jwtTokenFromCookie : jwtTokenFromHeader;
 			if (jwtToken == null) {
+				logger.error("JWT token not found in cookies or headers");
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token not found in cookies or headers");
 				return;
 			}
 
 			// Validate JWT token and userId
-			boolean isValid = jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtToken);
-
-			if (isValid) {
+			if (jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtToken)) {
 				// If token is valid, allow the request to proceed
+				logger.info("Valid JWT token");
 				filterChain.doFilter(servletRequest, servletResponse);
 			} else {
+				logger.error("Invalid JWT token");
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
 			}
 		} catch (Exception e) {
