@@ -50,7 +50,7 @@ public class TeleMedicineController {
 	@Autowired
 	private TMInter tmInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get user")
 	@RequestMapping(value = "/getUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -74,7 +74,7 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get specialization")
 	@RequestMapping(value = "/getSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -98,7 +98,7 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get user specialization")
 	@RequestMapping(value = "/getUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -123,7 +123,7 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Save user specialization")
 	@RequestMapping(value = "/saveUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -148,7 +148,7 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Activate user specialization")
 	@RequestMapping(value = "/activateUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

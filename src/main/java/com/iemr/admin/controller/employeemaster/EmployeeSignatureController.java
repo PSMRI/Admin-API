@@ -58,7 +58,7 @@ public class EmployeeSignatureController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Upload")
 	@RequestMapping(value = "/upload", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -83,7 +83,7 @@ public class EmployeeSignatureController {
 		return response.toString();
 	}
 
-	@CrossOrigin(origins = "*", exposedHeaders = { HttpHeaders.CONTENT_DISPOSITION, "filename" })
+
 	@Operation(summary = "User id")
 	@RequestMapping(value = "/{userID}", headers = "Authorization", method = { RequestMethod.GET })
 	public ResponseEntity<byte[]> fetchFile(@PathVariable("userID") Long userID) throws Exception {
@@ -110,7 +110,7 @@ public class EmployeeSignatureController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Sign exist file")
 	@RequestMapping(value = "/signexist/{userID}", headers = "Authorization", method = { RequestMethod.GET })
 	public String existFile(@PathVariable("userID") Long userID) throws Exception {

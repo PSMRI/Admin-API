@@ -48,7 +48,7 @@ public class DrugStrength {
 	@Autowired
 	private DrugStrangthInter durgStrangthInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create drug strength")
 	@RequestMapping(value = "/createDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -76,7 +76,7 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get drug strength")
 	@RequestMapping(value = "/getDrugStrangth", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -103,7 +103,7 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update drug strength")
 	@RequestMapping(value = "/updateDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -136,7 +136,7 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete drug strength")
 	@RequestMapping(value = "/deleteDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

@@ -48,7 +48,7 @@ public class UomController {
 	@Autowired
 	private UomInter uomInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create Uom")
 	@RequestMapping(value = "/createUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -76,7 +76,7 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get Uom")
 	@RequestMapping(value = "/getUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -102,7 +102,7 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit Uom")
 	@RequestMapping(value = "/editUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -135,7 +135,7 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete Uom")
 	@RequestMapping(value = "/deleteUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -164,7 +164,7 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Check Uom code")
 	@RequestMapping(value = "/checkUomCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

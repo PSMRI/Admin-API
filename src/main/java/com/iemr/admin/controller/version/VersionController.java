@@ -43,7 +43,7 @@ public class VersionController {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Version information")
 	@RequestMapping(value = "/version", method = { RequestMethod.GET })
 	public String versionInformation() {

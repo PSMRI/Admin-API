@@ -64,7 +64,7 @@ public class RoleMasterController {
 	private Role_MasterInter roleMasterInter;
 	private Integer serviceMapid;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/state", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -100,7 +100,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get service by service provider id and state id")
 	@RequestMapping(value = "m/role/service", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -136,7 +136,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get service by provider id")
 	@RequestMapping(value = "m/role/serviceNew", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -173,7 +173,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get state by provider id and service id")
 	@RequestMapping(value = "m/role/stateNew", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -214,7 +214,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/search", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -266,7 +266,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/role/searchNew", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -301,7 +301,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all roles")
 	@RequestMapping(value = "m/role/searchV1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -329,7 +329,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Save role")
 	@RequestMapping(value = "m/role/addRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -389,7 +389,7 @@ public class RoleMasterController {
 		}
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit role")
 	@RequestMapping(value = "m/role/editRole", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -436,7 +436,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete role")
 	@RequestMapping(value = "m/role/deleteRole", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -470,7 +470,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search feature")
 	@RequestMapping(value = "m/searchFeature", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -508,7 +508,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete feature")
 	@RequestMapping(value = "m/deleteFeature", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -548,7 +548,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get role data")
 	@RequestMapping(value = "m/role/search1", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -610,7 +610,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit role feature")
 	@RequestMapping(value = "/mapExterafeature", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -642,7 +642,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Search TM role")
 	@RequestMapping(value = "/searchRoleTM", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -665,7 +665,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all active role")
 	@RequestMapping(value = "m/role/search/active", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -698,7 +698,7 @@ public class RoleMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Configure wrap up time")
 	@RequestMapping(value = "m/role/configWrap", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

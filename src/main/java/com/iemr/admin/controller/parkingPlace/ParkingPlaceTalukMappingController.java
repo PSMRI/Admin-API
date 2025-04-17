@@ -47,7 +47,7 @@ public class ParkingPlaceTalukMappingController {
 	@Autowired
 	private ParkingPlaceTalukMappingServiceImpl parkingPlaceTalukMappingServiceImpl;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Stores parking place and taluk mapping details")
 	@RequestMapping(value = "/create/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -69,7 +69,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update parking place and taluk mapping details")
 	@RequestMapping(value = "/update/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -98,7 +98,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get parking place and taluk mapping by map id")
 	@RequestMapping(value = "/getbyid/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -121,7 +121,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all parking place and taluk mapping based on parking place id")
 	@RequestMapping(value = "/getall/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -142,7 +142,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get all parking place and taluk mapping based on parking place id")
 	@RequestMapping(value = "/getbyppidanddid/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -163,7 +163,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Activate/deactivate parking place and taluk mapping ")
 	@RequestMapping(value = "/activate/parkingPlacesTalukMapping", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -189,7 +189,7 @@ public class ParkingPlaceTalukMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get unmapped taluk by district id")
 	@RequestMapping(value = "/get/unmappedtaluk", headers = "Authorization", method = { RequestMethod.POST })
 	public String getunmappedtaluk(

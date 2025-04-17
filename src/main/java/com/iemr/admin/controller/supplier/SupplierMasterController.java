@@ -49,7 +49,7 @@ public class SupplierMasterController {
 	@Autowired
 	private SupplierInter supplierInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create supplier")
 	@RequestMapping(value = "/createSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -70,7 +70,7 @@ public class SupplierMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get supplier")
 	@RequestMapping(value = "/getSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -88,7 +88,7 @@ public class SupplierMasterController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit supplier")
 	@RequestMapping(value = "/editSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -127,7 +127,7 @@ public class SupplierMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete supplier")
 	@RequestMapping(value = "/deleteSupplier", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -149,7 +149,7 @@ public class SupplierMasterController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Check supplier code")
 	@RequestMapping(value = "/checkSupplierCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

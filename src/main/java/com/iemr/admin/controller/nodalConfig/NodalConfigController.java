@@ -53,7 +53,7 @@ public class NodalConfigController {
 	@Autowired
 	NodalConfigService nodalConfigService;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Save config")
 	@RequestMapping(value = "/saveConf", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String saveConfig(@RequestBody List<CreateNodalEmailRequestModel> createEmailRequests,
@@ -74,7 +74,7 @@ public class NodalConfigController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get nodal email configs")
 	@RequestMapping(value = "/getNodalEmailConfigs", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getNodalEmailConfigs(@RequestBody NodalEmailRequest authEmailRequest, HttpServletRequest request) {
@@ -94,7 +94,7 @@ public class NodalConfigController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Update nodal email config")
 	@RequestMapping(value = "/updateNodalEmailConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String updateNodalEmailConfig(@RequestBody UpdateNodalEmailRequest updateEmailRequest,

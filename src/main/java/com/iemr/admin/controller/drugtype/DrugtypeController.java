@@ -48,7 +48,7 @@ public class DrugtypeController {
 	@Autowired
 	private DrugtypeInter drugtypeInter;
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Create manufacturer")
 	@RequestMapping(value = "/createDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -75,7 +75,7 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Get manufacturer")
 	@RequestMapping(value = "/getDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -102,7 +102,7 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Edit manufacturer")
 	@RequestMapping(value = "/editDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -137,7 +137,7 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
+	
 	@Operation(summary = "Delete manufacturer")
 	@RequestMapping(value = "/deleteDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
