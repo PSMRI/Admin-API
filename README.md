@@ -10,9 +10,9 @@ Admin module provides a user-friendly interface for managing your application. I
 
 ## Building From Source
 This microservice is built on Java, Spring boot framework and MySQL DB.
-
+For steps to clone and set up this Repository, refer to the [Developer Guide](https://piramal-swasthya.gitbook.io/amrit/developer-guide/development-environment-setup)
 Prerequisites 
-* JDK 1.8
+* JDK 17
 * Maven 
 * Springboot V2
 * MySQL
@@ -24,7 +24,7 @@ Prerequisites
 3. Run the spring server with local configuration `mvn spring-boot:run -DENV_VAR=local`
 
 ## Installation
-This service has been tested on Wildfly as the application server. To install the admin module, follow these steps:
+This service has been tested on Wildfly as the application server. To install the admin module, kindly refer to Installation Guide for [API Repository](https://piramal-swasthya.gitbook.io/amrit/developer-guide/development-environment-setup/installation-instructions/for-api-repositories) for guidance.
 
 ## Usage
 All the features have been exposed as REST endpoints.
