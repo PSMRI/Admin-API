@@ -16,6 +16,6 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /app/target/adminapi-v3.0.0.war /usr/local/tomcat/webapps/ROOT.war
 
 # Tomcat port
-EXPOSE 8082
+EXPOSE 8080
 
 CMD ["catalina.sh", "run"]
