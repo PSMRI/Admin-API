@@ -36,3 +36,6 @@ mvnw.cmd
 
 # Properties
 src/main/environment/admin_local.properties
+
+# Ignore the following files and directories
+node_modules/
