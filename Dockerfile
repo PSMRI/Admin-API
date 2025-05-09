@@ -1,25 +1,22 @@
-# Stage 1: Build
-FROM maven:3.8.5-openjdk-17 AS build
+# --- Stage 1: Build the application using Maven ---
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
+
 COPY . .
 
-# Skip tests for faster build and skip git plugin issues
-RUN mvn clean package -DENV_VAR=ci -DskipTests -Dgit.skip=true
+# Build the application while caching Maven dependencies to speed up future builds
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DENV_VAR=ci -DskipTests -Dgit.skip=true
 
-# Stage 2: Runtime
-FROM tomcat:9.0-jdk17-openjdk-slim
+# --- Stage 2: Run the application with a minimal JRE image ---
+FROM eclipse-temurin:17-jre
 
-# Remove default Tomcat applications
-RUN rm -rf /usr/local/tomcat/webapps/*
+WORKDIR /app
 
-# Create log directory
-RUN mkdir -p /usr/local/tomcat/logs
+# Copy the built WAR file from the build stage
+COPY --from=build /app/target/*.war app.war
 
-# Copy the WAR file to Tomcat webapps directory
-COPY --from=build /app/target/adminapi-v3.0.0.war /usr/local/tomcat/webapps/ROOT.war
-
-# Tomcat port
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+ENTRYPOINT ["java", "-jar", "app.war"]
