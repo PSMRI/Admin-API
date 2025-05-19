@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.iemr.admin</groupId>
-	<artifactId>Admin-API</artifactId>
-	<version>1.2.0</version>
+	<artifactId>admin-api</artifactId>
+	<version>3.1.0</version>
 	<packaging>war</packaging>
 	<name>Admin-API</name>
 	<description>Admin Page</description>
@@ -275,7 +275,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>adminapi-v3.0.0</finalName>
+		<finalName>${artifactId}-${version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.owasp</groupId>
