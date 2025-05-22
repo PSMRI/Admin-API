@@ -97,6 +97,7 @@ import com.iemr.admin.repository.provideronboard.M_ServiceMasterRepo;
 import com.iemr.admin.repository.rolemaster.M_UserservicerolemappingForRoleProviderAdminRepo;
 import com.iemr.admin.service.user.EncryptUserPassword;
 import com.iemr.admin.utils.CookieUtil;
+import com.iemr.admin.utils.RestTemplateUtil;
 import com.iemr.admin.utils.config.ConfigProperties;
 import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.http.HttpUtils;
@@ -462,17 +463,11 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	private Set<String> getCTICampaignRoles(String campaignName, String authToken) throws JsonMappingException, JsonProcessingException {
 		RestTemplate restTemplate = new RestTemplate();
 		ObjectMapper objectMapper = new ObjectMapper();
-		HttpServletRequest requestHeader = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-				.getRequest();
-		String jwtTokenFromCookie = cookieUtil.getJwtTokenFromCookie(requestHeader);
 		Set<String> resultSet = new HashSet<String>();
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
-		headers.add("Content-Type", "application/json");
-		headers.add("AUTHORIZATION", authToken);
-		headers.add("Jwttoken", jwtTokenFromCookie);
+		HttpEntity<Object> request = RestTemplateUtil.createRequestEntity(campaignName, authToken);
 		String url = configProperties.getPropertyByName("common-url")  + configProperties.getPropertyByName("create-feedback");
-		HttpEntity<Object> request1 = new HttpEntity<Object>(campaignName, headers);
-		ResponseEntity<String> responseStr = restTemplate.exchange(url, HttpMethod.POST, request1, String.class);
+		
+		ResponseEntity<String> responseStr = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 		OutputResponse response = objectMapper.readValue(responseStr.getBody(), OutputResponse.class);
 		if (response.isSuccess()) {
 			JSONObject obj = new JSONObject(response.getData());
@@ -481,9 +476,6 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 				resultSet.add(roles.getString(roleIndex));
 			}
 		}
-//		JSONObject request = new JSONObject();
-//		request.put("campaign", campaignName);
-
 		return resultSet;
 	}
 
