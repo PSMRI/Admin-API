@@ -44,8 +44,6 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 
-
-
 @RestController
 
 @RequestMapping(value = "fetosense", headers = "Authorization")
@@ -54,7 +52,6 @@ public class FoetalMonitorController {
 	private FoetalMonitorService foetalMonitorService;
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-	
 	@Operation(summary = "Create foetal monitor test master by provider admin")
 	@RequestMapping(value = { "/createFetosenseTestMaster" }, method = { RequestMethod.POST })
 	public String createFoetalMonitorTestMaster(@RequestBody String requestOBJ) {
@@ -71,7 +68,6 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch foetal monitor tests master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchFetosenseTestMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchFoetalMonitorTestMaster(@PathVariable("psmID") Integer psmID) {
@@ -89,7 +85,6 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update foetal monitor tests master for a particular procedure")
 	@RequestMapping(value = { "/updateFetosenseTestMaster" }, method = { RequestMethod.POST })
 	public String updateProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -107,7 +102,6 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update procedure status for enable or disable")
 	@RequestMapping(value = { "/updateFetosenseTestMasterStatus" }, method = { RequestMethod.POST })
 	public String updateProcedureStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -116,8 +110,8 @@ public class FoetalMonitorController {
 			JSONObject jsnOBJ = new JSONObject(requestOBJ);
 			if (jsnOBJ != null && jsnOBJ.has("foetalMonitorTestID") && jsnOBJ.getInt("foetalMonitorTestID") > 0
 					&& jsnOBJ.has("deleted")) {
-				String s = foetalMonitorService.updateFoetalMonitorTestMasterStatus(jsnOBJ.getInt("foetalMonitorTestID"),
-						jsnOBJ.getBoolean("deleted"));
+				String s = foetalMonitorService.updateFoetalMonitorTestMasterStatus(
+						jsnOBJ.getInt("foetalMonitorTestID"), jsnOBJ.getBoolean("deleted"));
 				if (s != null)
 					response.setResponse(s);
 				else
@@ -132,7 +126,6 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "To save foetal monitor device id")
 	@RequestMapping(value = "/createFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveFoetalMonitorDeviceID(
@@ -162,12 +155,11 @@ public class FoetalMonitorController {
 	 * @param authorization
 	 * @return
 	 */
-	
+
 	@Operation(summary = "To save mapping of van id and foetal monitor device id")
 	@RequestMapping(value = "/mapping/vanIDAndDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String saveVanIDandDeviceIDMapping(
-			@Param("\r\n" + "{\r\n" + "      \"spokeID\":this.spokeID,\r\n"
-					+ "      \"deviceID\": this.deviceID,\r\n"
+			@Param("\r\n" + "{\r\n" + "      \"spokeID\":this.spokeID,\r\n" + "      \"deviceID\": this.deviceID,\r\n"
 					+ "      \"providerServiceMapID\": this.providerServiceMapID,\r\n"
 					+ "      \"createdBy\": this.commonDataService.uname\r\n" + " \r\n" + "  }\r\n"
 					+ "") @RequestBody String requestObj,
@@ -177,7 +169,8 @@ public class FoetalMonitorController {
 		OutputResponse output = new OutputResponse();
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			int mappingDone = foetalMonitorService.vanIDAndDeviceIDMapping(foetalMonitorRequest);
 			if (mappingDone == 1)
 				output.setResponse("Mapping Done successfully");
@@ -188,7 +181,6 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Provides the foetal monitor device id")
 	@RequestMapping(value = "/fetch/fetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getFoetalMonitorDeviceID(
@@ -197,7 +189,8 @@ public class FoetalMonitorController {
 		logger.info("Request Object for getting foetal monitor DeviceID - " + requestObj);
 		OutputResponse output = new OutputResponse();
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			String response = foetalMonitorService.getFoetalMonitorDeviceID(foetalMonitorRequest);
 			if (response != null)
 				output.setResponse(response);
@@ -212,7 +205,7 @@ public class FoetalMonitorController {
 	 * @param requestObj
 	 * @return
 	 */
-	
+
 	@Operation(summary = "Provides the van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/vanIDAndFetosenseDeviceID", method = RequestMethod.POST, headers = "Authorization")
 	public String getVanIDAndDeviceID(
@@ -224,7 +217,8 @@ public class FoetalMonitorController {
 		OutputResponse output = new OutputResponse();
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			String response = foetalMonitorService.getvanIDAndFoetalMonitorDeviceID(foetalMonitorRequest);
 			if (response != null)
 				output.setResponse(response);
@@ -236,7 +230,6 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Provides the worklist of van id and foetal monitor device id")
 	@RequestMapping(value = "/fetch/mappingWorklist", method = RequestMethod.POST, headers = "Authorization")
 	public String getMappedWorklist(
@@ -246,7 +239,8 @@ public class FoetalMonitorController {
 		logger.info("Request Object for getting van ID and foetal monitor DeviceID - " + requestObj);
 		OutputResponse output = new OutputResponse();
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			String mappedWorklist = foetalMonitorService.getVanIDMappingWorklist(foetalMonitorRequest);
 			if (mappedWorklist != null)
 				output.setResponse(mappedWorklist);
@@ -257,7 +251,6 @@ public class FoetalMonitorController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Update device id")
 	@RequestMapping(value = "/update/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String updateFoetalMonitorDeviceID(
@@ -274,7 +267,8 @@ public class FoetalMonitorController {
 		logger.info("Request object for foetal monitor data updating  :" + requestObj);
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			int deviceIDUpdated = foetalMonitorService.updateFoetalMonitorDeviceID(foetalMonitorRequest);
 			if (deviceIDUpdated == 1) {
 				response.setResponse("DeviceID updated successfully");
@@ -291,7 +285,7 @@ public class FoetalMonitorController {
 	 * @param Authorization
 	 * @return
 	 */
-	
+
 	@Operation(summary = "Delete foetal monitor device id")
 	@RequestMapping(value = "/delete/fetosenseDeviceID", method = { RequestMethod.POST })
 	public String deleteFoetalMonitorDeviceID(
@@ -307,7 +301,8 @@ public class FoetalMonitorController {
 		logger.info("Request object for deleting foetal monitor deviceID :" + requestObj);
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			int deleteResponse = foetalMonitorService.deleteFoetalMonitorDeviceID(foetalMonitorRequest);
 			if (deleteResponse == 1)
 				response.setResponse("Device ID de-activated successfully");
@@ -318,7 +313,6 @@ public class FoetalMonitorController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update van id and foetal monitor device id mapping")
 	@RequestMapping(value = "/update/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String updateMapping(
@@ -334,7 +328,8 @@ public class FoetalMonitorController {
 		logger.info("Request object for updating vanID and foetal monitor deviceID mapping :" + requestObj);
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			int updateResponse = foetalMonitorService.updatingvanIDAndDeviceIDMapping(foetalMonitorRequest);
 			if (updateResponse == 1)
 				response.setResponse("Mapping updated successfully");
@@ -350,7 +345,7 @@ public class FoetalMonitorController {
 	 * @param Authorization
 	 * @return
 	 */
-	
+
 	@Operation(summary = "Deactivate van id and foetal monitor device id mapping ")
 	@RequestMapping(value = "/delete/vanIDAndFetosenseDeviceIDMapping", method = { RequestMethod.POST })
 	public String deleteVanIDAndFoetalMonitorDeviceID(
@@ -361,7 +356,8 @@ public class FoetalMonitorController {
 		logger.info("Request object for deleting vanID and foetal monitor deviceID mapping :" + requestObj);
 
 		try {
-			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj, FoetalMonitorDeviceID.class);
+			FoetalMonitorDeviceID foetalMonitorRequest = InputMapper.gson().fromJson(requestObj,
+					FoetalMonitorDeviceID.class);
 			int deleteStaus = foetalMonitorService.deleteVanIDAndDeviceIDMapping(foetalMonitorRequest);
 			if (deleteStaus > 0) {
 				response.setResponse("Mapped deactivated successfully");

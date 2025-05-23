@@ -39,8 +39,6 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 
-
-
 @RestController
 @RequestMapping(value = "/villageMaster")
 public class VillageMasterController {
@@ -48,7 +46,6 @@ public class VillageMasterController {
 	@Autowired
 	private VillageMasterServiceImpl villageMasterServiceImpl;
 
-	
 	@Operation(summary = "Store village details")
 	@RequestMapping(value = "/save/VillageDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVillageDetails(
@@ -70,7 +67,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Get village details")
 	@RequestMapping(value = "/get/Villages", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVillages(@Param(value = "{\"blockID\":\"Integer\"}") @RequestBody String villageMaster) {
@@ -90,7 +86,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Remove village")
 	@RequestMapping(value = "/remove/village", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVillage(
@@ -116,7 +111,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Update village details")
 	@RequestMapping(value = "/update/villageData", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateVillageData(

@@ -41,8 +41,6 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 
-
-
 /***
  * @category master creation for lab module
  */
@@ -71,14 +69,12 @@ public class LabModuleController {
 	public void setMastersCreationServiceImpl(MastersCreationServiceImpl mastersCreationServiceImpl) {
 		this.mastersCreationServiceImpl = mastersCreationServiceImpl;
 	}
-	
+
 	@Autowired
 	public void setMastersFetchingServiceImpl(MastersFetchingServiceImpl mastersFetchingServiceImpl) {
 		this.mastersFetchingServiceImpl = mastersFetchingServiceImpl;
 	}
 
-
-	
 	@Operation(summary = "Create procedure master by provider admin")
 	@RequestMapping(value = { "/createProcedureMaster" }, method = { RequestMethod.POST })
 	public String createProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -98,7 +94,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Create component master by provider admin")
 	@RequestMapping(value = { "/createComponentMaster" }, method = { RequestMethod.POST })
 	public String createComponentMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -116,7 +111,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Create procedure - component mapping by provider admin")
 	@RequestMapping(value = { "/createProcedureComponentMapping" }, method = { RequestMethod.POST })
 	public String createProcedureComponentMapping(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -139,7 +133,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch procedure master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchProcedureMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcedureMaster(@PathVariable("psmID") Integer psmID) {
@@ -157,7 +150,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch component master for provider-service-map-id")
 	@RequestMapping(value = { "/fetchComponentMaster/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchComponentMaster(@PathVariable("psmID") Integer psmID) {
@@ -175,7 +167,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch procedure master for provider-service-map-id and deleted is false")
 	@RequestMapping(value = { "/fetchProcedureMasterDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcedureMasterDelFalse(@PathVariable("psmID") Integer psmID) {
@@ -193,7 +184,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch component master for provider-service-map-id and deleted false")
 	@RequestMapping(value = { "/fetchComponentMasterDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchComponentMasterDelFalse(@PathVariable("psmID") Integer psmID) {
@@ -211,7 +201,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch procedure component mapping list for provider-service-map-id and deleted false")
 	@RequestMapping(value = { "/fetchprocCompMappingDelFalse/{psmID}" }, method = { RequestMethod.GET })
 	public String fetchProcCompMappingDelFalse(@PathVariable("psmID") Integer psmID) {
@@ -229,7 +218,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch procedure component mapping list for particular procedure id")
 	@RequestMapping(value = { "/fetchProcCompMappingForSingleProcedure/{pID}" }, method = { RequestMethod.GET })
 	public String fetchProcCompMappingForSingleProcedure(@PathVariable("pID") Integer pID) {
@@ -247,7 +235,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch  component details  for particular component id")
 	@RequestMapping(value = { "/fetchComponentDetailsForComponentID/{cID}" }, method = { RequestMethod.GET })
 	public String fetchComponentDetailsForComponentID(@PathVariable("cID") Integer cID) {
@@ -269,7 +256,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update procedure status for enable or disable")
 	@RequestMapping(value = { "/updateProcedureStatus" }, method = { RequestMethod.POST })
 	public String updateProcedureStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -294,7 +280,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update component status for enable or disable")
 	@RequestMapping(value = { "/updateComponentStatus" }, method = { RequestMethod.POST })
 	public String updateComponentStatus(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -319,7 +304,6 @@ public class LabModuleController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update procedure master for a particular procedure")
 	@RequestMapping(value = { "/updateProcedureMaster" }, method = { RequestMethod.POST })
 	public String updateProcedureMaster(@Param(value = "{}") @RequestBody String requestOBJ) {
@@ -341,7 +325,6 @@ public class LabModuleController {
 
 	}
 
-	
 	@Operation(summary = "Update component master for a particular Component")
 	@RequestMapping(value = { "/updateComponentMaster" }, method = { RequestMethod.POST })
 	public String updateComponentMaster(@Param(value = "{}") @RequestBody String requestOBJ) {

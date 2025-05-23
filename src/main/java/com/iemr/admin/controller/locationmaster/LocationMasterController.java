@@ -60,7 +60,6 @@ public class LocationMasterController {
 
 	private InputMapper inputMapper = new InputMapper();
 
-	
 	@Operation(summary = "get all role 2")
 	@RequestMapping(value = "/m/location/getAlllocation1", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -104,7 +103,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get all location")
 	@RequestMapping(value = "/m/location/getAlllocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -168,7 +166,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get all new location")
 	@RequestMapping(value = "/m/location/getAlllocationNew", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -206,7 +203,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Search role")
 	@RequestMapping(value = "m/location/state", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -236,7 +232,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get service")
 	@RequestMapping(value = "m/location/service", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -265,7 +260,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get all district")
 	@RequestMapping(value = "m/location/findDistrict", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -294,7 +288,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get all role")
 	@RequestMapping(value = "m/location/addLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -343,7 +336,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get edit location")
 	@RequestMapping(value = "m/location/editLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -382,7 +374,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Delete location")
 	@RequestMapping(value = "m/location/deleteLocation", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -415,7 +406,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get location by service id")
 	@RequestMapping(value = "/m/location/getLocationByServiceID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -463,7 +453,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get location by state id")
 	@RequestMapping(value = "/m/location/getLocationByStateId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -512,7 +501,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get office name by map id")
 	@RequestMapping(value = "/m/location/getOfficeNameByMapId", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -558,7 +546,6 @@ public class LocationMasterController {
 
 	}
 
-	
 	@Operation(summary = "Get state by service id")
 	@RequestMapping(value = "/m/location/getStatesByServiceID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

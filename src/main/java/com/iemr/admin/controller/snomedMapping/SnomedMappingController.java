@@ -47,7 +47,6 @@ public class SnomedMappingController {
 	@Autowired
 	private SnomedService snomedService;
 
-	
 	@Operation(summary = "Edit snomed master")
 	@RequestMapping(value = "/editSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -89,7 +88,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Save snomed master")
 	@RequestMapping(value = "/saveSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -131,7 +129,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Fetch snomed worklist")
 	@RequestMapping(value = "/fetchSnomedWorklist", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -162,7 +159,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	
 	@Operation(summary = "Update status")
 	@RequestMapping(value = "/updateStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

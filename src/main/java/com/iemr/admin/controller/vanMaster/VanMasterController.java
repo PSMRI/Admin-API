@@ -42,8 +42,6 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 
-
-
 @RestController
 @RequestMapping(value = "/vanMaster")
 public class VanMasterController {
@@ -51,7 +49,6 @@ public class VanMasterController {
 	@Autowired
 	private VanMasterServiceImpl vanMasterServiceImpl;
 
-	
 	@Operation(summary = "Store van details")
 	@RequestMapping(value = "/save/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanDetails(
@@ -76,7 +73,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/get/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePoints(
@@ -98,7 +94,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Remove van")
 	@RequestMapping(value = "/remove/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanDetails(
@@ -125,7 +120,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Update van details")
 	@RequestMapping(value = "/update/vanDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateZoneData(
@@ -161,7 +155,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Store van type details")
 	@RequestMapping(value = "/save/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanTypeDetails(
@@ -183,7 +176,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Get van types")
 	@RequestMapping(value = "/get/vanTypes", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanTypes() {
@@ -199,7 +191,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Remove van type")
 	@RequestMapping(value = "/remove/vanTypeDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVanType(
@@ -226,11 +217,9 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanMaster", headers = "Authorization", method = { RequestMethod.POST })
-	public String getVanMaster(
-			@Param(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String vanMaster)
+	public String getVanMaster(@Param(value = "{\"providerServiceMapID\":\"integer\"}") @RequestBody String vanMaster)
 			throws IEMRException {
 
 		OutputResponse output = new OutputResponse();
@@ -248,7 +237,6 @@ public class VanMasterController {
 		return output.toString();
 	}
 
-	
 	@Operation(summary = "Get van details")
 	@RequestMapping(value = "/getVanFromFacilityID", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanFromFacilityID(
