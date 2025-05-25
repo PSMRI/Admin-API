@@ -51,7 +51,6 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 
 		// Log headers for debugging
-		String jwtTokenFromHeader = request.getHeader("Jwttoken");
 		logger.info("JWT token from header: ");
 
 		// Skip login and public endpoints
@@ -68,7 +67,7 @@ public class JwtUserIdValidationFilter implements Filter {
 
 		try {
 			String jwtFromCookie = getJwtTokenFromCookies(request);
-			String jwtFromHeader = request.getHeader("JwtToken");
+			String jwtFromHeader = request.getHeader(Constants.JWT_TOKEN);
 			String authHeader = request.getHeader("Authorization");
 
 			if (jwtFromCookie != null) {
@@ -88,7 +87,7 @@ public class JwtUserIdValidationFilter implements Filter {
 					return;
 				}
 			} else {
-				String userAgent = request.getHeader("User-Agent");
+				String userAgent = request.getHeader(Constants.USER_AGENT);
 				logger.info("User-Agent: " + userAgent);
 				if (userAgent != null && isMobileClient(userAgent) && authHeader != null) {
 					try {
@@ -116,13 +115,13 @@ public class JwtUserIdValidationFilter implements Filter {
 		if (userAgent == null)
 			return false;
 		userAgent = userAgent.toLowerCase();
-		return userAgent.contains("okhttp");
+		return userAgent.contains(Constants.OKHTTP);
 	}
 	private String getJwtTokenFromCookies(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("Jwttoken")) {
+				if (cookie.getName().equalsIgnoreCase(Constants.JWT_TOKEN)) {
 					return cookie.getValue();
 				}
 			}
