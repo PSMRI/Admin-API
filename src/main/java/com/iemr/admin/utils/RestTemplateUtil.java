@@ -49,4 +49,27 @@ public class RestTemplateUtil {
         return new HttpEntity<>(body, headers);
     }
 
+	public static void getJwttokenFromHeaders(HttpHeaders headers) {
+		ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder
+				.getRequestAttributes());
+
+		HttpServletRequest requestHeader = servletRequestAttributes.getRequest();
+		String jwtTokenFromCookie = null;
+		try {
+			jwtTokenFromCookie = CookieUtil.getJwtTokenFromCookie(requestHeader);
+
+		} catch (Exception e) {
+			logger.error("Error while getting jwtToken from Cookie" + e.getMessage());
+		}
+		if (null != UserAgentContext.getUserAgent()) {
+			headers.add(HttpHeaders.USER_AGENT, UserAgentContext.getUserAgent());
+		}
+		if (null != jwtTokenFromCookie) {
+			headers.add(Constants.JWT_TOKEN, jwtTokenFromCookie);
+		} else if (null != requestHeader.getHeader(Constants.JWT_TOKEN)) {
+			headers.add(Constants.JWT_TOKEN, requestHeader.getHeader(Constants.JWT_TOKEN));
+		}
+
+	}
+
 }
