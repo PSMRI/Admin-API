@@ -1486,9 +1486,9 @@ public class EmployeeMasterController {
 			getIdforedit.setContactNo(employeeMaster.getContactNo());
 			getIdforedit.setIsExternal(employeeMaster.getIsExternal());
 
-			M_User1 editedData = employeeMasterInter.saveeditedData(getIdforedit);
+			employeeMasterInter.saveeditedData(getIdforedit);
 			M_UserDemographics getdemographicsData = employeeMasterInter.DataByUserID(employeeMaster.getUserID());
-			if (null != demographics) {
+			if (null != getdemographicsData && null != demographics) {
 				getdemographicsData.setFathersName(demographics.getFathersName());
 				getdemographicsData.setMothersName(demographics.getMothersName());
 				getdemographicsData.setCommunityID(demographics.getCommunityID());
@@ -1510,10 +1510,11 @@ public class EmployeeMasterController {
 				getdemographicsData.setIsPresent(demographics.getIsPresent());
 				getdemographicsData.setDistrictID(demographics.getDistrictID());
 				getdemographicsData.setModifiedBy(demographics.getModifiedBy());
-			}
-			M_UserDemographics saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
+			
+				M_UserDemographics saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
 
-			response.setResponse(saveDemoData.toString());
+				response.setResponse(saveDemoData.toString());
+			}
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
