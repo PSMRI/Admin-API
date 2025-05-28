@@ -77,8 +77,10 @@ public class HttpUtils {
 
 	public String get(String uri) {
 		String body;
-		RestTemplateUtil.getJwttokenFromHeaders(headers);
-		HttpEntity<String> requestEntity = new HttpEntity<String>("", headers);
+		HttpHeaders localheaders = new HttpHeaders();
+		localheaders.add("Content-Type", "application/json");
+		RestTemplateUtil.getJwttokenFromHeaders(localheaders);
+		HttpEntity<String> requestEntity = new HttpEntity<String>("", localheaders);
 		ResponseEntity<String> responseEntity = rest.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
 		// if (status == HttpStatus.OK){

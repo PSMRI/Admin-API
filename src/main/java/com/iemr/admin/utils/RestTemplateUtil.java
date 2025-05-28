@@ -25,14 +25,9 @@ public class RestTemplateUtil {
 			return new HttpEntity<>(body, headers);
 		}
 		HttpServletRequest requestHeader = servletRequestAttributes.getRequest();
-        String jwtTokenFromCookie = null;
-		try {
-			jwtTokenFromCookie = CookieUtil.getJwtTokenFromCookie(requestHeader);
-			
-		} catch (Exception e) {
-			logger.error("Error while getting jwtToken from Cookie" + e.getMessage() );
-		}
-
+		
+        String jwtTokenFromCookie = extractJwttoken(requestHeader);
+		
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE + ";charset=utf-8");
         if(null != UserAgentContext.getUserAgent()) {
@@ -49,23 +44,30 @@ public class RestTemplateUtil {
         return new HttpEntity<>(body, headers);
     }
 
-	public static void getJwttokenFromHeaders(HttpHeaders headers) {
-		ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder
-				.getRequestAttributes());
-
-		HttpServletRequest requestHeader = servletRequestAttributes.getRequest();
+	private static String extractJwttoken(HttpServletRequest requestHeader) {
 		String jwtTokenFromCookie = null;
 		try {
 			jwtTokenFromCookie = CookieUtil.getJwtTokenFromCookie(requestHeader);
-
+			
 		} catch (Exception e) {
-			logger.error("Error while getting jwtToken from Cookie" + e.getMessage());
+			logger.error("Error while getting jwtToken from Cookie" + e.getMessage() );
 		}
+		return jwtTokenFromCookie;
+	}
+
+	public static void getJwttokenFromHeaders(HttpHeaders headers) {
+		ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder
+				.getRequestAttributes());
+		if(servletRequestAttributes == null) {
+			return;
+		}
+		HttpServletRequest requestHeader = servletRequestAttributes.getRequest();
+		String jwtTokenFromCookie = extractJwttoken(requestHeader);
 		if (null != UserAgentContext.getUserAgent()) {
 			headers.add(HttpHeaders.USER_AGENT, UserAgentContext.getUserAgent());
 		}
 		if (null != jwtTokenFromCookie) {
-			headers.add(Constants.JWT_TOKEN, jwtTokenFromCookie);
+			headers.add(HttpHeaders.COOKIE, Constants.JWT_TOKEN+"="+jwtTokenFromCookie);
 		} else if (null != requestHeader.getHeader(Constants.JWT_TOKEN)) {
 			headers.add(Constants.JWT_TOKEN, requestHeader.getHeader(Constants.JWT_TOKEN));
 		}
