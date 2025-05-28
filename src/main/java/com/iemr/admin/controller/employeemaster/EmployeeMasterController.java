@@ -1486,33 +1486,35 @@ public class EmployeeMasterController {
 			getIdforedit.setContactNo(employeeMaster.getContactNo());
 			getIdforedit.setIsExternal(employeeMaster.getIsExternal());
 
-			M_User1 editedData = employeeMasterInter.saveeditedData(getIdforedit);
+			employeeMasterInter.saveeditedData(getIdforedit);
 			M_UserDemographics getdemographicsData = employeeMasterInter.DataByUserID(employeeMaster.getUserID());
-			getdemographicsData.setFathersName(demographics.getFathersName());
-			getdemographicsData.setMothersName(demographics.getMothersName());
-			getdemographicsData.setCommunityID(demographics.getCommunityID());
-			getdemographicsData.setReligionID(demographics.getReligionID());
-			getdemographicsData.setAddressLine1(demographics.getAddressLine1());
-			getdemographicsData.setAddressLine2(demographics.getAddressLine2());
+			if (null != getdemographicsData && null != demographics) {
+				getdemographicsData.setFathersName(demographics.getFathersName());
+				getdemographicsData.setMothersName(demographics.getMothersName());
+				getdemographicsData.setCommunityID(demographics.getCommunityID());
+				getdemographicsData.setReligionID(demographics.getReligionID());
+				getdemographicsData.setAddressLine1(demographics.getAddressLine1());
+				getdemographicsData.setAddressLine2(demographics.getAddressLine2());
 
-			getdemographicsData.setPermAddressLine1(demographics.getPermAddressLine1());
-			getdemographicsData.setPermAddressLine2(demographics.getPermAddressLine2());
-			getdemographicsData.setPermStateID(demographics.getPermStateID());
-			getdemographicsData.setPermDistrictID(demographics.getPermDistrictID());
-			getdemographicsData.setPermPinCode(demographics.getPermPinCode());
-			getdemographicsData.setPermanentAddress(demographics.getPermanentAddress());
-			getdemographicsData.setCityID(demographics.getCityID());
-			getdemographicsData.setStateID(demographics.getStateID());
-			getdemographicsData.setCountryID(demographics.getCountryID());
-			getdemographicsData.setPinCode(demographics.getPinCode());
-			getdemographicsData.setIsPermanent(demographics.getIsPermanent());
-			getdemographicsData.setIsPresent(demographics.getIsPresent());
-			getdemographicsData.setDistrictID(demographics.getDistrictID());
-			getdemographicsData.setModifiedBy(demographics.getModifiedBy());
+				getdemographicsData.setPermAddressLine1(demographics.getPermAddressLine1());
+				getdemographicsData.setPermAddressLine2(demographics.getPermAddressLine2());
+				getdemographicsData.setPermStateID(demographics.getPermStateID());
+				getdemographicsData.setPermDistrictID(demographics.getPermDistrictID());
+				getdemographicsData.setPermPinCode(demographics.getPermPinCode());
+				getdemographicsData.setPermanentAddress(demographics.getPermanentAddress());
+				getdemographicsData.setCityID(demographics.getCityID());
+				getdemographicsData.setStateID(demographics.getStateID());
+				getdemographicsData.setCountryID(demographics.getCountryID());
+				getdemographicsData.setPinCode(demographics.getPinCode());
+				getdemographicsData.setIsPermanent(demographics.getIsPermanent());
+				getdemographicsData.setIsPresent(demographics.getIsPresent());
+				getdemographicsData.setDistrictID(demographics.getDistrictID());
+				getdemographicsData.setModifiedBy(demographics.getModifiedBy());
+			
+				M_UserDemographics saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
 
-			M_UserDemographics saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
-
-			response.setResponse(saveDemoData.toString());
+				response.setResponse(saveDemoData.toString());
+			}
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
