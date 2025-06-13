@@ -28,7 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,7 +52,6 @@ public class StoreController {
 	@Autowired
 	private StoreService storeService;
 
-	@CrossOrigin()
 	@Operation(summary = "Create store")
 	@RequestMapping(value = "/createStore", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -80,7 +79,6 @@ public class StoreController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit store")
 	@RequestMapping(value = "/editStore", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -115,7 +113,6 @@ public class StoreController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get all store")
 	@RequestMapping(value = "/getAllStore/{providerServiceMapID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -137,7 +134,6 @@ public class StoreController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get main facility")
 	@RequestMapping(value = "/getMainFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -162,7 +158,6 @@ public class StoreController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get sub facility")
 	@RequestMapping(value = "/getsubFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -187,7 +182,6 @@ public class StoreController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete store")
 	@RequestMapping(value = "/deleteStore", headers = "Authorization", method = {
 
@@ -214,7 +208,6 @@ public class StoreController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Map store")
 	@RequestMapping(value = "/mapStore", headers = "Authorization", method = {
 
@@ -241,7 +234,6 @@ public class StoreController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete map store")
 	@RequestMapping(value = "/deleteMapStore", headers = "Authorization", method = {
 
@@ -268,7 +260,6 @@ public class StoreController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get map store")
 	@RequestMapping(value = "/getMapStore", headers = "Authorization", method = {
 
@@ -295,7 +286,6 @@ public class StoreController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Check store code")
 	@RequestMapping(value = "/checkStoreCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

@@ -33,6 +33,11 @@ public class JwtUserIdValidationFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+			filterChain.doFilter(servletRequest, servletResponse); // allow it through
+			return;
+		}
+
 		String path = request.getRequestURI();
 		String contextPath = request.getContextPath();
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
@@ -111,12 +116,14 @@ public class JwtUserIdValidationFilter implements Filter {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
 		}
 	}
+
 	private boolean isMobileClient(String userAgent) {
 		if (userAgent == null)
 			return false;
 		userAgent = userAgent.toLowerCase();
 		return userAgent.contains(Constants.OKHTTP);
 	}
+
 	private String getJwtTokenFromCookies(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {

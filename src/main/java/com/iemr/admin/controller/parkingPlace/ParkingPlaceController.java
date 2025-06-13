@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,7 +50,6 @@ public class ParkingPlaceController {
 	@Autowired
 	private ParkingPlaceServiceImpl parkingPlaceServiceImpl;
 
-	@CrossOrigin()
 	@Operation(summary = "Stores parking place details")
 	@RequestMapping(value = "/create/parkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveParkingPlace(
@@ -75,7 +74,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get parking place details")
 	@RequestMapping(value = "/get/parkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getParkingPlaces(
@@ -97,7 +95,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Removes parking place")
 	@RequestMapping(value = "/remove/parkingPlace", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteParkingPlace(
@@ -124,7 +121,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update parking place details")
 	@RequestMapping(value = "/update/parkingPlaceDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateParkingPlaceDetails(
@@ -162,7 +158,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get parking place details")
 	@RequestMapping(value = "/getParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getParkingPlacesProviderserviceMap(
@@ -184,7 +179,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get sub district details")
 	@RequestMapping(value = "/getSubDistrictByParkingPlaceID", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -207,7 +201,6 @@ public class ParkingPlaceController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get parking place details by zone id")
 	@RequestMapping(value = "/get/parkingPlacesbyzoneid", headers = "Authorization", method = { RequestMethod.POST })
 	public String getparkingPlacesbyzoneid(
