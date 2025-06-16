@@ -26,7 +26,8 @@ public class Priveleges1097_2 {
 	private Integer roleID;
 	private Boolean inbound;
 	private Boolean outbound;
-	private Boolean isSanjeevani;
+	//private Boolean isSanjeevani;
+	private String teleConsultation;
 	
 	public Integer getRoleID() {
 		return roleID;
@@ -46,11 +47,11 @@ public class Priveleges1097_2 {
 	public void setOutbound(Boolean outbound) {
 		this.outbound = outbound;
 	}
-	public Boolean getIsSanjeevani() {
-		return isSanjeevani;
+	public String getTeleConsultation() {
+		return teleConsultation;
 	}
-	public void setIsSanjeevani(Boolean isSanjeevani) {
-		this.isSanjeevani = isSanjeevani;
+	public void setTeleConsultation(String teleConsultation) {
+		this.teleConsultation = teleConsultation;
 	}
 
 	

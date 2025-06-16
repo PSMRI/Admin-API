@@ -1845,8 +1845,8 @@ public class EmployeeMasterController {
 						resDataMap1.setRoleID(previl1.getRoleID());
 						resDataMap1.setInbound(previl1.getInbound());
 						resDataMap1.setOutbound(previl1.getOutbound());
-						if(previl1.getIsSanjeevani() != null) {
-						resDataMap1.setIsSanjeevani(previl1.getIsSanjeevani());		
+						if(previl1.getTeleConsultation() != null) {
+						resDataMap1.setTeleConsultation(previl1.getTeleConsultation());		
 						}
 						}
 					resDataMap1.setUserID(employeeMaster.get(x).getUserID());
@@ -1905,8 +1905,8 @@ public class EmployeeMasterController {
 			usrRole.setVillageID(pre.getVillageID());
 			usrRole.setVillageName(pre.getVillageName());
 
-			if(pre.getIsSanjeevani() != null) {
-			usrRole.setIsSanjeevani(pre.getIsSanjeevani());
+			if (pre.getTeleConsultation() != null) {
+				usrRole.setTeleConsultation(pre.getTeleConsultation());
 			}
 			
 			if (pre.getInbound() != null) {
