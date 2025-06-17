@@ -26,7 +26,6 @@ public class Priveleges1097_2 {
 	private Integer roleID;
 	private Boolean inbound;
 	private Boolean outbound;
-	//private Boolean isSanjeevani;
 	private String teleConsultation;
 	
 	public Integer getRoleID() {
