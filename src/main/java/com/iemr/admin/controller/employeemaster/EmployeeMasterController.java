@@ -1845,10 +1845,10 @@ public class EmployeeMasterController {
 						resDataMap1.setRoleID(previl1.getRoleID());
 						resDataMap1.setInbound(previl1.getInbound());
 						resDataMap1.setOutbound(previl1.getOutbound());
-						if(previl1.getTeleConsultation() != null) {
-						resDataMap1.setTeleConsultation(previl1.getTeleConsultation());		
+						if (previl1.getTeleConsultation() != null) {
+							resDataMap1.setTeleConsultation(previl1.getTeleConsultation());
 						}
-						}
+					}
 					resDataMap1.setUserID(employeeMaster.get(x).getUserID());
 					resDataMap1.setProviderServiceMapID(previl.getProviderServiceMapID());
 					resDataMap1.setWorkingLocationID(previl.getWorkingLocationID());
