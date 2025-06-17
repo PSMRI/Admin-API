@@ -992,13 +992,12 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 				} else {
 					mapping.setVillageName(new String[0]);
 				}
-				if (mapping.getServiceID()!=null) {
+				if (mapping.getServiceID() != null) {
 					mapping.setBlockID(mapping.getBlockID());
 					mapping.setBlockName(mapping.getBlockName());
 					mapping.setVillageID(mapping.getVillageID());
 					mapping.setVillageName(mapping.getVillageName());
-					if(null != mapping.getIsSanjeevani())
-					mapping.setIsSanjeevani(mapping.getIsSanjeevani());
+
 				} else {
 					mapping.setBlockID(null);
 					mapping.setBlockName(null);
@@ -1006,9 +1005,9 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 					mapping.setVillageName(null);
 					mapping.setVillageidDb(null);
 					mapping.setVillageNameDb(null);
-					mapping.setIsSanjeevani(false);
-					
 				}
+				if(null != mapping.getTeleConsultation())
+					mapping.setTeleConsultation(mapping.getTeleConsultation());
 				mappedRoles.add(mapping);
 			}
 		}
