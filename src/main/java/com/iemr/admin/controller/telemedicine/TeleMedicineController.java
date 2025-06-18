@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,7 +50,6 @@ public class TeleMedicineController {
 	@Autowired
 	private TMInter tmInter;
 
-	@CrossOrigin()
 	@Operation(summary = "Get user")
 	@RequestMapping(value = "/getUser", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -74,7 +73,6 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get specialization")
 	@RequestMapping(value = "/getSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -98,7 +96,6 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get user specialization")
 	@RequestMapping(value = "/getUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -123,7 +120,6 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Save user specialization")
 	@RequestMapping(value = "/saveUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -148,7 +144,6 @@ public class TeleMedicineController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Activate user specialization")
 	@RequestMapping(value = "/activateUserSpecialization", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

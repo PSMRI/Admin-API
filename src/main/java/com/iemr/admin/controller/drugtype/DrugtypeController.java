@@ -28,7 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,7 +48,6 @@ public class DrugtypeController {
 	@Autowired
 	private DrugtypeInter drugtypeInter;
 
-	@CrossOrigin()
 	@Operation(summary = "Create manufacturer")
 	@RequestMapping(value = "/createDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -75,7 +74,6 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get manufacturer")
 	@RequestMapping(value = "/getDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -102,7 +100,6 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit manufacturer")
 	@RequestMapping(value = "/editDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -137,7 +134,6 @@ public class DrugtypeController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete manufacturer")
 	@RequestMapping(value = "/deleteDrugtype", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

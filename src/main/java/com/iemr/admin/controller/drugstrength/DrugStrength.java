@@ -28,7 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,7 +48,6 @@ public class DrugStrength {
 	@Autowired
 	private DrugStrangthInter durgStrangthInter;
 
-	@CrossOrigin()
 	@Operation(summary = "Create drug strength")
 	@RequestMapping(value = "/createDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -76,7 +75,6 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get drug strength")
 	@RequestMapping(value = "/getDrugStrangth", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -103,7 +101,6 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update drug strength")
 	@RequestMapping(value = "/updateDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -136,7 +133,6 @@ public class DrugStrength {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete drug strength")
 	@RequestMapping(value = "/deleteDrugStrangth", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

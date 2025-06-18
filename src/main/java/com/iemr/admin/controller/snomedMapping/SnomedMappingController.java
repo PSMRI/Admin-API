@@ -24,7 +24,7 @@ package com.iemr.admin.controller.snomedMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,7 +47,6 @@ public class SnomedMappingController {
 	@Autowired
 	private SnomedService snomedService;
 
-	@CrossOrigin()
 	@Operation(summary = "Edit snomed master")
 	@RequestMapping(value = "/editSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -89,7 +88,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Save snomed master")
 	@RequestMapping(value = "/saveSnomedMappingData", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -131,7 +129,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Fetch snomed worklist")
 	@RequestMapping(value = "/fetchSnomedWorklist", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -162,7 +159,6 @@ public class SnomedMappingController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update status")
 	@RequestMapping(value = "/updateStatus", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
