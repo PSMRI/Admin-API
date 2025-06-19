@@ -639,6 +639,25 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
+	public String FindEmployeeContact(String contactNo) {
+		M_User1 user = employeeMasterRepoo.findEmployeeByContact(contactNo);
+		if (user == null) {
+			return "contactnotexist";
+		} else {
+			return "contactexist";
+		}	}
+
+	@Override
+	public String FindEmployeeAadhaar(String aadhaarNo) {
+		M_User1 user = employeeMasterRepoo.findEmployeeAadhaarNo(aadhaarNo);
+		if (user == null) {
+			return "aadhaarnotexist";
+		} else {
+			return "aadhaarexist";
+		}
+	}
+
+	@Override
 	public M_User1 FindEmployeeName1(String userName) {
 
 		M_User1 user = employeeMasterRepoo.findEmployeeByName(userName);
