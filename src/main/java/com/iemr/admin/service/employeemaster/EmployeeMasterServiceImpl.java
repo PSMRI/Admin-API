@@ -653,6 +653,25 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
+	public String FindEmployeeContact(String contactNo) {
+		M_User1 user = employeeMasterRepoo.findEmployeeByContact(contactNo);
+		if (user == null) {
+			return "contactnotexist";
+		} else {
+			return "contactexist";
+		}	}
+
+	@Override
+	public String FindEmployeeAadhaar(String aadhaarNo) {
+		M_User1 user = employeeMasterRepoo.findEmployeeAadhaarNo(aadhaarNo);
+		if (user == null) {
+			return "aadhaarnotexist";
+		} else {
+			return "aadhaarexist";
+		}
+	}
+
+	@Override
 	public M_User1 FindEmployeeName1(String userName) {
 
 		M_User1 user = employeeMasterRepoo.findEmployeeByName(userName);
@@ -1189,6 +1208,16 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		dataout = employeeMasterRepo.save(data);
 		dataout.setEmployeeMaster(null);
 		return dataout;
+	}
+
+	@Override
+	public M_User1 saveBulkUserEmployee(M_User1 mUser) {
+		logger.info("EmployeeMasterServiceImpl.saveEmployee - start");
+		M_User1 data = employeeMasterRepo11.save(mUser);
+//        logger.info("Encrypt password returned " + encryptUserPassword.encryptUserCredentials(data).toString());
+		Integer data1 = data.getUserID();
+		logger.info("EmployeeMasterServiceImpl.saveEmployee - finish");
+		return data;
 	}
 
 }

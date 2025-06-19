@@ -24,12 +24,7 @@ package com.iemr.admin.service.rolemaster;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.iemr.admin.data.rolemaster.RoleMaster;
-import com.iemr.admin.data.rolemaster.M_Role104;
-import com.iemr.admin.data.rolemaster.M_Screen;
-import com.iemr.admin.data.rolemaster.M_UserservicerolemappingForRoleProviderAdmin;
-import com.iemr.admin.data.rolemaster.RoleScreenMapping;
-import com.iemr.admin.data.rolemaster.StateServiceMapping;
+import com.iemr.admin.data.rolemaster.*;
 
 public interface Role_MasterInter {
 
@@ -56,7 +51,7 @@ public interface Role_MasterInter {
 	List<RoleScreenMapping> mapScreen(RoleScreenMapping mRoles2);
 
 	String settingScreenId(Integer sRSMappingID, Integer screenID);
-	
+
 	public ArrayList<RoleMaster> getProStateServRoles1(int pssmID);
 
 	List<RoleScreenMapping> mapfeature(List<RoleScreenMapping> mRoles3);
@@ -64,7 +59,7 @@ public interface Role_MasterInter {
 	ArrayList<M_UserservicerolemappingForRoleProviderAdmin> getServiceByServiceProviderIds(Integer userID);
 
 	ArrayList<M_UserservicerolemappingForRoleProviderAdmin> getStateByServiceProviderIdAndServiceLines(Integer userID,
-			Integer serviceID,Boolean isNational);
+																									   Integer serviceID,Boolean isNational);
 
 	ArrayList<StateServiceMapping> getAllByMapId(Integer serviceProviderID, Integer serviceID);
 
@@ -76,8 +71,10 @@ public interface Role_MasterInter {
 
 	RoleMaster configWrapUpTime(RoleMaster role) throws Exception;
 
+	ArrayList<StateMasterForRole> getAllState();
 
-	
+
+
 
 
 }

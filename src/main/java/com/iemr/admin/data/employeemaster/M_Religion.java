@@ -36,8 +36,7 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "m_Religion")
-public class M_Religion
-{
+public class M_Religion {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
