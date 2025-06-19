@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +49,6 @@ import io.swagger.v3.oas.annotations.Operation;
 
 
 @RestController
-@CrossOrigin
 @RequestMapping({ "/uptsu" })
 public class FacilityController {
 	@Autowired
@@ -58,7 +57,6 @@ public class FacilityController {
 
 	@PostMapping(value = "/saveFacility")
 	@Operation(summary = "Save facility")
-	@CrossOrigin
 	public String saveFacilityData(
 			@Param("[\r\n" + "  {\r\n" + "    \"createdBy\": \"String\",\r\n" + "    \"fileName\": \"String\",\r\n"
 					+ "    \"providerServiceMapID\": Integer,\r\n" + "    \"fileExtension\": \"String\"\r\n"
@@ -83,7 +81,6 @@ public class FacilityController {
 		return output.toString();
 	}
 	
-	@CrossOrigin
 	@Operation(summary = "Save cdss details")
 	@RequestMapping(value= "/submit/cdss", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveCdssDetails(@RequestBody String request) {
@@ -102,8 +99,7 @@ public class FacilityController {
 		}
 		return response.toString();
 	}
-	
-	@CrossOrigin
+
 	@Operation(summary = "Fetch Cdss data")
 	@RequestMapping(value="/getCdssData/{psmId}", method = RequestMethod.GET)
 	public String getCdssData(@PathVariable Integer psmId, @RequestHeader(value = "Authorization") String authorization) throws Exception {

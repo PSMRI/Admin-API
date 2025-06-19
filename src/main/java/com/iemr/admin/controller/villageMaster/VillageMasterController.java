@@ -24,7 +24,7 @@ package com.iemr.admin.controller.villageMaster;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,7 +48,6 @@ public class VillageMasterController {
 	@Autowired
 	private VillageMasterServiceImpl villageMasterServiceImpl;
 
-	@CrossOrigin()
 	@Operation(summary = "Store village details")
 	@RequestMapping(value = "/save/VillageDetails", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVillageDetails(
@@ -70,7 +69,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get village details")
 	@RequestMapping(value = "/get/Villages", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVillages(@Param(value = "{\"blockID\":\"Integer\"}") @RequestBody String villageMaster) {
@@ -90,7 +88,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Remove village")
 	@RequestMapping(value = "/remove/village", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteVillage(
@@ -116,7 +113,6 @@ public class VillageMasterController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update village details")
 	@RequestMapping(value = "/update/villageData", headers = "Authorization", method = { RequestMethod.POST })
 	public String updateVillageData(

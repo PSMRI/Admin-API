@@ -1,10 +1,13 @@
 package com.iemr.admin.utils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+
+
+import com.iemr.admin.utils.http.AuthorizationHeaderRequestWrapper;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -15,104 +18,163 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@Component
 public class JwtUserIdValidationFilter implements Filter {
 
-    private final JwtAuthenticationUtil jwtAuthenticationUtil;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+	private final JwtAuthenticationUtil jwtAuthenticationUtil;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+	private final String allowedOrigins;
 
-    public JwtUserIdValidationFilter(JwtAuthenticationUtil jwtAuthenticationUtil) {
-        this.jwtAuthenticationUtil = jwtAuthenticationUtil;
-    }
+	public JwtUserIdValidationFilter(JwtAuthenticationUtil jwtAuthenticationUtil,
+			String allowedOrigins) {
+		this.jwtAuthenticationUtil = jwtAuthenticationUtil;
+		this.allowedOrigins = allowedOrigins;
+	}
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+	@Override
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+			throws IOException, ServletException {
+		HttpServletRequest request = (HttpServletRequest) servletRequest;
+		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        String path = request.getRequestURI();
-        String contextPath = request.getContextPath();
-        logger.info("JwtUserIdValidationFilter invoked for path: " + path);
+		String origin = request.getHeader("Origin");
+		if (origin != null && isOriginAllowed(origin)) {
+			response.setHeader("Access-Control-Allow-Origin", origin);
+			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Jwttoken");
+			response.setHeader("Access-Control-Allow-Credentials", "true");
+		} else {
+			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
+		}
 
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+			logger.info("OPTIONS request - skipping JWT validation");
+			response.setStatus(HttpServletResponse.SC_OK);
+			return;
+		}
 
-        // Log cookies for debugging
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("userId".equals(cookie.getName())) {
-                    logger.warn("userId found in cookies! Clearing it...");
-                    clearUserIdCookie(response); // Explicitly remove userId cookie
-                }
-            }
-        } else {
-            logger.info("No cookies found in the request");
-        }
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
-        // Log headers for debugging
-        String jwtTokenFromHeader = request.getHeader("Jwttoken");
-        logger.info("JWT token from header: ");
+		// Log cookies for debugging
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if ("userId".equals(cookie.getName())) {
+					logger.warn("userId found in cookies! Clearing it...");
+					clearUserIdCookie(response); // Explicitly remove userId cookie
+				}
+			}
+		} else {
+			logger.info("No cookies found in the request");
+		}
 
-        // Skip login and public endpoints
-        if (path.equals(contextPath + "/user/userAuthenticate")
-                || path.equalsIgnoreCase(contextPath + "/user/logOutUserFromConcurrentSession")
-                || path.startsWith(contextPath + "/public") ||
-                path.startsWith(contextPath + "/swagger") ||
-                path.startsWith(contextPath + "/bulkRegistration") ||
-                path.startsWith(contextPath + "/download-error-sheet") ||
-                path.startsWith(contextPath + "/v3/api-docs") ||
-                path.startsWith(contextPath + "/swagger-ui") ||
-                path.startsWith(contextPath + "/swagger-resources")) {
-            logger.info("Skipping filter for path: " + path);
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
-        }
+		// Log headers for debugging
+		logger.info("JWT token from header: ");
 
-        try {
-            // Retrieve JWT token from cookies
-            String jwtTokenFromCookie = getJwtTokenFromCookies(request);
-            logger.info("JWT token from cookie: ");
+		// Skip login and public endpoints
+		if (path.equals(contextPath + "/user/userAuthenticate")
+				|| path.equalsIgnoreCase(contextPath + "/user/logOutUserFromConcurrentSession")
+				|| path.startsWith(contextPath + "/swagger-ui")
+				|| path.startsWith(contextPath + "/v3/api-docs")
+				|| path.startsWith(contextPath + "/user/refreshToken")
+				|| path.startsWith(contextPath + "/public")) {
+			logger.info("Skipping filter for path: " + path);
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
 
-            // Determine which token (cookie or header) to validate
-            String jwtToken = jwtTokenFromCookie != null ? jwtTokenFromCookie : jwtTokenFromHeader;
-            if (jwtToken == null) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT token not found in cookies or headers");
-                return;
-            }
+		try {
+			String jwtFromCookie = getJwtTokenFromCookies(request);
+			String jwtFromHeader = request.getHeader(Constants.JWT_TOKEN);
+			String authHeader = request.getHeader("Authorization");
 
-            // Validate JWT token and userId
-            boolean isValid = jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtToken);
+			if (jwtFromCookie != null) {
+				logger.info("Validating JWT token from cookie");
+				if (jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtFromCookie)) {
+					AuthorizationHeaderRequestWrapper authorizationHeaderRequestWrapper = new AuthorizationHeaderRequestWrapper(
+							request, "");
+					filterChain.doFilter(authorizationHeaderRequestWrapper, servletResponse);
+					return;
+				}
+			} else if (jwtFromHeader != null) {
+				logger.info("Validating JWT token from header");
+				if (jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtFromHeader)) {
+					AuthorizationHeaderRequestWrapper authorizationHeaderRequestWrapper = new AuthorizationHeaderRequestWrapper(
+							request, "");
+					filterChain.doFilter(authorizationHeaderRequestWrapper, servletResponse);
+					return;
+				}
+			} else {
+				String userAgent = request.getHeader(Constants.USER_AGENT);
+				logger.info("User-Agent: " + userAgent);
+				if (userAgent != null && isMobileClient(userAgent) && authHeader != null) {
+					try {
+						UserAgentContext.setUserAgent(userAgent);
+						filterChain.doFilter(servletRequest, servletResponse);
+					} finally {
+						UserAgentContext.clear();
+					}
+					return;
+				}
+			}
 
-            if (isValid) {
-                // If token is valid, allow the request to proceed
-                filterChain.doFilter(servletRequest, servletResponse);
-            } else {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-            }
-        } catch (Exception e) {
-            logger.error("Authorization error: ", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
-        }
-    }
+			logger.warn("No valid authentication token found");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
-    private String getJwtTokenFromCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("Jwttoken")) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
+			logger.warn("No valid authentication token found");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
-    private void clearUserIdCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("userId", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(0); // Invalidate the cookie
-        response.addCookie(cookie);
-    }
+		} catch (Exception e) {
+			logger.error("Authorization error: ", e);
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
+		}
+	}
+
+	private boolean isOriginAllowed(String origin) {
+		if (origin == null || allowedOrigins == null || allowedOrigins.trim().isEmpty()) {
+			logger.warn("No allowed origins configured or origin is null");
+			return false;
+		}
+
+		return Arrays.stream(allowedOrigins.split(","))
+				.map(String::trim)
+				.anyMatch(pattern -> {
+					String regex = pattern
+							.replace(".", "\\.")
+							.replace("*", ".*")
+							.replace("http://localhost:.*", "http://localhost:\\d+"); // special case for wildcard port
+
+					boolean matched = origin.matches(regex);
+					return matched;
+				});
+	}
+
+	private boolean isMobileClient(String userAgent) {
+		if (userAgent == null)
+			return false;
+		userAgent = userAgent.toLowerCase();
+		return userAgent.contains(Constants.OKHTTP);
+	}
+
+	private String getJwtTokenFromCookies(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equalsIgnoreCase(Constants.JWT_TOKEN)) {
+					return cookie.getValue();
+				}
+			}
+		}
+		return null;
+	}
+
+	private void clearUserIdCookie(HttpServletResponse response) {
+		Cookie cookie = new Cookie("userId", null);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setSecure(true);
+		cookie.setMaxAge(0); // Invalidate the cookie
+		response.addCookie(cookie);
+	}
 }

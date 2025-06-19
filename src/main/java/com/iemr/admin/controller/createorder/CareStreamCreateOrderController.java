@@ -29,7 +29,7 @@ import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,7 +49,6 @@ public class CareStreamCreateOrderController {
 	private static final char START_OF_BLOCK = '\u000b';
 	private static final char CARRIAGE_RETURN = 13;
 
-	@CrossOrigin()
 	@Operation(summary = "Create order")
 	@RequestMapping(value = "/createOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -118,7 +117,6 @@ public class CareStreamCreateOrderController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update order")
 	@RequestMapping(value = "/UpdateOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -174,7 +172,6 @@ public class CareStreamCreateOrderController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete order")
 	@RequestMapping(value = "/deleteOrder", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

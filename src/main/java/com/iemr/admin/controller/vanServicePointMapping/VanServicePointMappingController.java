@@ -24,7 +24,7 @@ package com.iemr.admin.controller.vanServicePointMapping;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,7 +50,6 @@ public class VanServicePointMappingController {
 	@Autowired
 	private VanServicePointMappingServiceImpl vanServicePointMappingServiceImpl;
 
-	@CrossOrigin()
 	@Operation(summary = "Store van service point mappings")
 	@RequestMapping(value = "/save/vanServicePointMappings", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveVanServicePointMappings(
@@ -88,7 +87,6 @@ public class VanServicePointMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get van service point mappings")
 	@RequestMapping(value = "/get/vanServicePointMappings", headers = "Authorization", method = { RequestMethod.POST })
 	public String getVanServicePointMappings(
@@ -114,7 +112,6 @@ public class VanServicePointMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get van service point mappings")
 	@RequestMapping(value = "/get/vanServicePointMappingsV1", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -141,7 +138,6 @@ public class VanServicePointMappingController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Remove van service point mapping")
 	@RequestMapping(value = "/remove/vanServicePointMapping", headers = "Authorization", method = {
 			RequestMethod.POST })

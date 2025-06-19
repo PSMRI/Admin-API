@@ -37,6 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.iemr.admin.utils.RestTemplateUtil;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
@@ -76,7 +77,10 @@ public class HttpUtils {
 
 	public String get(String uri) {
 		String body;
-		HttpEntity<String> requestEntity = new HttpEntity<String>("", headers);
+		HttpHeaders localheaders = new HttpHeaders();
+		localheaders.add("Content-Type", "application/json");
+		RestTemplateUtil.getJwttokenFromHeaders(localheaders);
+		HttpEntity<String> requestEntity = new HttpEntity<String>("", localheaders);
 		ResponseEntity<String> responseEntity = rest.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
 		// if (status == HttpStatus.OK){
@@ -98,6 +102,7 @@ public class HttpUtils {
 		} else {
 			headers.add("Content-Type", MediaType.APPLICATION_JSON);
 		}
+		RestTemplateUtil.getJwttokenFromHeaders(headers);
 		HttpEntity<String> requestEntity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> responseEntity = rest.exchange(uri, HttpMethod.GET, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
@@ -107,6 +112,7 @@ public class HttpUtils {
 
 	public String post(String uri, String json) {
 		String body;
+		RestTemplateUtil.getJwttokenFromHeaders(headers);
 		HttpEntity<String> requestEntity = new HttpEntity<String>(json, headers);
 		ResponseEntity<String> responseEntity = rest.exchange(uri, HttpMethod.POST, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
@@ -126,6 +132,7 @@ public class HttpUtils {
 		if (header.containsKey("X-APIkey-Header")) {
 			headers.add("X-APIkey-Header", header.get("X-APIkey-Header").toString());
 		}
+		RestTemplateUtil.getJwttokenFromHeaders(headers);
 		// headers.add("Content-Type", MediaType.APPLICATION_JSON);
 		ResponseEntity<String> responseEntity = new ResponseEntity(HttpStatus.BAD_REQUEST);
 		HttpEntity<String> requestEntity;
@@ -137,6 +144,7 @@ public class HttpUtils {
 	}
 	public String put(String uri, String json) {
 		String body;
+		RestTemplateUtil.getJwttokenFromHeaders(headers);
 		HttpEntity<String> requestEntity = new HttpEntity<String>(json, headers);
 		ResponseEntity<String> responseEntity = rest.exchange(uri, HttpMethod.PUT, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
@@ -159,6 +167,7 @@ public class HttpUtils {
 		// headers.add("Content-Type", MediaType.APPLICATION_JSON);
 		ResponseEntity<String> responseEntity = new ResponseEntity(HttpStatus.BAD_REQUEST);
 		HttpEntity<String> requestEntity;
+		RestTemplateUtil.getJwttokenFromHeaders(headers);
 		requestEntity = new HttpEntity<String>(data, headers);
 		responseEntity = rest.exchange(uri, HttpMethod.PUT, requestEntity, String.class);
 		setStatus((HttpStatus) responseEntity.getStatusCode());
@@ -188,6 +197,7 @@ public class HttpUtils {
 				multiPart.bodyPart(filePart);
 				multiPart.field("docPath", data);
 				headers.add("Content-Type", MediaType.APPLICATION_JSON);
+				RestTemplateUtil.getJwttokenFromHeaders(headers);
 				requestEntity = new HttpEntity<FormDataMultiPart>(multiPart, headers);// new
 																						// HttpEntity<String>(multiPart,
 																						// headers);

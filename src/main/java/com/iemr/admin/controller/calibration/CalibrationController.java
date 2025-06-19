@@ -24,7 +24,7 @@ package com.iemr.admin.controller.calibration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,7 +52,6 @@ public class CalibrationController {
 	 * @param request
 	 * @return CalibrationStripMasterData
 	 */
-	@CrossOrigin()
 	@Operation(summary = "Create calibration strip")
 	@RequestMapping(value = "/createCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -85,7 +84,6 @@ public class CalibrationController {
 	 * @param request
 	 * @return CalibrationStripList
 	 */
-	@CrossOrigin()
 	@Operation(summary = "Fetch calibration strip")
 	@RequestMapping(value = "/fetchCalibrationStrips", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -113,7 +111,6 @@ public class CalibrationController {
 	 * @param request
 	 * @return Response
 	 */
-	@CrossOrigin()
 	@Operation(summary = "Delete calibration strip")
 	@RequestMapping(value = "/deleteCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -141,7 +138,6 @@ public class CalibrationController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update calibration strip")
 	@RequestMapping(value = "/updateCalibrationStrip", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

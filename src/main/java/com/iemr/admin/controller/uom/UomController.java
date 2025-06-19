@@ -28,7 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,7 +48,6 @@ public class UomController {
 	@Autowired
 	private UomInter uomInter;
 
-	@CrossOrigin()
 	@Operation(summary = "Create Uom")
 	@RequestMapping(value = "/createUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -76,7 +75,6 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get Uom")
 	@RequestMapping(value = "/getUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -102,7 +100,6 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit Uom")
 	@RequestMapping(value = "/editUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -135,7 +132,6 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete Uom")
 	@RequestMapping(value = "/deleteUom", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -164,7 +160,6 @@ public class UomController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Check Uom code")
 	@RequestMapping(value = "/checkUomCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })

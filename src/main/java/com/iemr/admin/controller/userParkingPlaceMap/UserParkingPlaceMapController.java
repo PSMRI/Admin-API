@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,7 +53,6 @@ public class UserParkingPlaceMapController {
 	@Autowired
 	private UserParkingPlaceMapServiceImpl userParkingPlaceMapServiceImpl;
 
-	@CrossOrigin()
 	@Operation(summary = "Save user parking places")
 	@RequestMapping(value = "/save/userParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveuserParkingPlaces(
@@ -78,7 +77,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get user parking places")
 	@RequestMapping(value = "/get/userParkingPlaces", headers = "Authorization", method = { RequestMethod.POST })
 	public String getuserParkingPlaces(
@@ -103,7 +101,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get user parking places designation")
 	@RequestMapping(value = "/get/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String getuserParkingPlacesDesiganation(
@@ -129,7 +126,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Remove user parking place")
 	@RequestMapping(value = "/remove/userParkingPlace", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteuserParkingPlaceDetails(
@@ -157,7 +153,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit user parking places")
 	@RequestMapping(value = "/edit/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String edituserParkingPlaces(
@@ -186,7 +181,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete user parking places")
 	@RequestMapping(value = "/delete/userParkingPlaces1", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteuserParkingPlaces(
@@ -219,7 +213,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Fetch un-mapped users")
 	@RequestMapping(value = "/get/unmappeduser", headers = "Authorization", method = { RequestMethod.POST })
 	public String unmappeduser(@Param(value = "{ \"providerServiceMapID\":\"integer\","
@@ -241,7 +234,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Fetch mapped vans for user PP id")
 	@RequestMapping(value = "/get/mappedvan/{userppID}", headers = "Authorization", method = { RequestMethod.POST })
 	public String mappedvan(@PathVariable("userppID") Integer userParkingPlacesID) throws IEMRException {
@@ -259,7 +251,6 @@ public class UserParkingPlaceMapController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete mapped vans for user")
 	@RequestMapping(value = "/delete/mappedvan", headers = "Authorization", method = { RequestMethod.POST })
 	public String deletemappedvan(@RequestBody String userpvanmapID) throws IEMRException {

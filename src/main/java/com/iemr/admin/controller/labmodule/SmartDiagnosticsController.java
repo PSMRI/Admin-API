@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,7 +47,6 @@ public class SmartDiagnosticsController {
 	@Autowired
 	IOTService iotService;
 
-	@CrossOrigin()
 	@Operation(summary = "Get diagnostic test procedure details")
 	@RequestMapping(value = "/getDiagnosticProcedure", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTProcedure() {
@@ -67,7 +66,6 @@ public class SmartDiagnosticsController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get diagnostic procedure component details")
 	@RequestMapping(value = "/getDiagnosticProcedureComponent", headers = "Authorization", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, consumes = MediaType.APPLICATION_JSON)
 	public String getIOTComponent() {

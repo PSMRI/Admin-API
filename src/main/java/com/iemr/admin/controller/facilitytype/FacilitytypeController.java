@@ -28,7 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,7 +49,6 @@ public class FacilitytypeController {
 	@Autowired
 	private M_facilitytypeInter m_facilitytypeInter;
 
-	@CrossOrigin()
 	@Operation(summary = "Get facility")
 	@RequestMapping(value = "/getFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -76,7 +75,6 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Add facility")
 	@RequestMapping(value = "/addFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -103,7 +101,6 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit facility")
 	@RequestMapping(value = "/editFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -135,7 +132,6 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Delete facility")
 	@RequestMapping(value = "/deleteFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -165,7 +161,6 @@ public class FacilitytypeController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Check facility type code")
 	@RequestMapping(value = "/checkFacilityTypeCode", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

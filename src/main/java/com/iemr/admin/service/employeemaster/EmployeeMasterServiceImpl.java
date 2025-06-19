@@ -32,6 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -42,10 +44,19 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import com.iemr.admin.data.blocking.M_Providerservicemapping_Blocking;
 import com.iemr.admin.data.employeemaster.M_Community;
@@ -85,11 +96,15 @@ import com.iemr.admin.repo.employeemaster.V_UserservicerolemappingRepo;
 import com.iemr.admin.repository.provideronboard.M_ServiceMasterRepo;
 import com.iemr.admin.repository.rolemaster.M_UserservicerolemappingForRoleProviderAdminRepo;
 import com.iemr.admin.service.user.EncryptUserPassword;
+import com.iemr.admin.utils.CookieUtil;
+import com.iemr.admin.utils.RestTemplateUtil;
 import com.iemr.admin.utils.config.ConfigProperties;
 import com.iemr.admin.utils.exception.IEMRException;
 import com.iemr.admin.utils.http.HttpUtils;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
@@ -124,6 +139,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Autowired
 	private EncryptUserPassword encryptUserPassword;
+	@Autowired
+	private CookieUtil cookieUtil;
 	private InputMapper inputMapper = new InputMapper();
 	private Logger logger = LoggerFactory.getLogger(EmployeeMasterServiceImpl.class);
 
@@ -305,7 +322,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
-	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) {
+	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) throws JsonMappingException, JsonProcessingException {
 		ArrayList<M_UserServiceRoleMapping2> reslist = (ArrayList<M_UserServiceRoleMapping2>) employeeMasterRepo
 				.saveAll(resList1);
 		if (ENABLE_CTI_USER_CREATION) {
@@ -375,7 +392,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Async
-	private void updateSupervisorRoleInCTI(List<M_UserServiceRoleMapping2> resList1, String authToken) {
+	private void updateSupervisorRoleInCTI(List<M_UserServiceRoleMapping2> resList1, String authToken) throws JsonMappingException, JsonProcessingException {
 		Map<Integer, UserServiceLine> userServiceLineMap = new HashMap<Integer, UserServiceLine>();
 		Set<Integer> providerMapIds = new HashSet<Integer>();
 		for (M_UserServiceRoleMapping2 userRole : resList1) {
@@ -443,18 +460,15 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		}
 	}
 
-	private Set<String> getCTICampaignRoles(String campaignName, String authToken) {
+	private Set<String> getCTICampaignRoles(String campaignName, String authToken) throws JsonMappingException, JsonProcessingException {
+		RestTemplate restTemplate = new RestTemplate();
+		ObjectMapper objectMapper = new ObjectMapper();
 		Set<String> resultSet = new HashSet<String>();
-		HttpUtils httpUtils = new HttpUtils();
-		HashMap<String, Object> headers = new HashMap<String, Object>();
-		headers.put("Authorization", authToken);
-		String getRolesURL = configProperties.getPropertyByName("common-url")
-				+ configProperties.getPropertyByName("campaign-roles-url");
-		JSONObject request = new JSONObject();
-		request.put("campaign", campaignName);
-
-		OutputResponse response = inputMapper.gson().fromJson(httpUtils.post(getRolesURL, request.toString(), headers),
-				OutputResponse.class);
+		HttpEntity<Object> request = RestTemplateUtil.createRequestEntity(campaignName, authToken);
+		String url = configProperties.getPropertyByName("common-url")  + configProperties.getPropertyByName("create-feedback");
+		
+		ResponseEntity<String> responseStr = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+		OutputResponse response = objectMapper.readValue(responseStr.getBody(), OutputResponse.class);
 		if (response.isSuccess()) {
 			JSONObject obj = new JSONObject(response.getData());
 			JSONArray roles = obj.getJSONArray("roles");
@@ -925,7 +939,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
-	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) {
+	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException {
 
 		M_UserServiceRoleMapping2 data = employeeMasterRepo.save(usrRole);
 		if (ENABLE_CTI_USER_CREATION) {
@@ -997,13 +1011,12 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 				} else {
 					mapping.setVillageName(new String[0]);
 				}
-				if (mapping.getServiceID()!=null) {
+				if (mapping.getServiceID() != null) {
 					mapping.setBlockID(mapping.getBlockID());
 					mapping.setBlockName(mapping.getBlockName());
 					mapping.setVillageID(mapping.getVillageID());
 					mapping.setVillageName(mapping.getVillageName());
-					if(null != mapping.getIsSanjeevani())
-					mapping.setIsSanjeevani(mapping.getIsSanjeevani());
+
 				} else {
 					mapping.setBlockID(null);
 					mapping.setBlockName(null);
@@ -1011,9 +1024,9 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 					mapping.setVillageName(null);
 					mapping.setVillageidDb(null);
 					mapping.setVillageNameDb(null);
-					mapping.setIsSanjeevani(false);
-					
 				}
+				if(null != mapping.getTeleConsultation())
+					mapping.setTeleConsultation(mapping.getTeleConsultation());
 				mappedRoles.add(mapping);
 			}
 		}

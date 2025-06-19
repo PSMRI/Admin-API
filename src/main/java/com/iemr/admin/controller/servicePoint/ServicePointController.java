@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,7 +52,6 @@ public class ServicePointController {
 	@Autowired
 	private ServicePointServiceImpl ServicePointServiceImpl;
 
-	@CrossOrigin()
 	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/create/servicePoints", headers = "Authorization", method = { RequestMethod.POST })
 	public String saveServicePoint(
@@ -77,7 +76,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get service point details")
 	@RequestMapping(value = "/get/servicePoints", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePoints(
@@ -100,7 +98,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Remove service point")
 	@RequestMapping(value = "/remove/servicePoint", headers = "Authorization", method = { RequestMethod.POST })
 	public String deleteServicePoint(
@@ -127,7 +124,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit service point")
 	@RequestMapping(value = "/edit/servicePoint", headers = "Authorization", method = { RequestMethod.POST })
 	public String editServicePoint(
@@ -160,7 +156,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Store service point details by village map")
 	@RequestMapping(value = "/create/servicePointVillageMaps", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -185,7 +180,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get service point details by village map")
 	@RequestMapping(value = "/get/servicePointVillageMaps", headers = "Authorization", method = { RequestMethod.POST })
 	public String getServicePointVillageMaps(
@@ -209,7 +203,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Remove service point by village map")
 	@RequestMapping(value = "/remove/servicePointVillageMap", headers = "Authorization", method = {
 			RequestMethod.POST })
@@ -238,7 +231,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Edit service point by village map")
 	@RequestMapping(value = "/edit/servicePointVillageMap", headers = "Authorization", method = { RequestMethod.POST })
 	public String editServicePointVillageMap(
@@ -268,7 +260,6 @@ public class ServicePointController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get unmapped villages")
 	@RequestMapping(value = "/get/unmappedvillages", headers = "Authorization", method = { RequestMethod.POST })
 	public String unmappedvillages(

@@ -24,6 +24,8 @@ package com.iemr.admin.service.employeemaster;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.iemr.admin.data.employeemaster.M_Community;
 import com.iemr.admin.data.employeemaster.M_Gender;
 import com.iemr.admin.data.employeemaster.M_ProviderServiceMap1;
@@ -60,7 +62,8 @@ public interface EmployeeMasterInter {
 
 	ArrayList<M_UserLangMapping> mapLanguage(List<M_UserLangMapping> resList);
 
-	ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken);
+//	ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken);
+	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) throws JsonMappingException, JsonProcessingException;
 
 	M_UserDemographics mdedit(Integer userID);
 
@@ -157,7 +160,8 @@ public interface EmployeeMasterInter {
 
 	M_UserServiceRoleMapping2 getDataUsrId(Integer uSRMappingID);
 
-	M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String string);
+//	M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String string);
+	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException;
 
 	// ArrayList<M_UserLangMapping> getMappedLanguge();
 
