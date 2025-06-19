@@ -86,6 +86,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
         } catch (Exception e) {
             logger.error("Exception:" + e.getMessage());
+            errorLogs.add("Data is invalid or empty");
+
         }
 
 
