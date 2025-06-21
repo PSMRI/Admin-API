@@ -351,7 +351,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             m_userServiceRoleMapping.setRoleID(133);
                             m_userServiceRoleMapping.setProviderServiceMapID(1);
                             //m_userServiceRoleMapping.setWorkingLocationID(117);
-                            m_userServiceRoleMapping.setIsSanjeevani(false);
                             m_userServiceRoleMapping.setBlockName("Biswanath");
                             String[] villageName = {"Bagijuli"};
                             m_userServiceRoleMapping.setVillageName(villageName);
