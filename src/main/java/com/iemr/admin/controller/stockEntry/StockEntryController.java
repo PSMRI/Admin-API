@@ -26,7 +26,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +49,6 @@ public class StockEntryController {
 	@Autowired
 	StockEntryService stockEntryService;
 
-	@CrossOrigin()
 	@Operation(summary = "Store service point details")
 	@RequestMapping(value = "/physicalStockEntry", headers = "Authorization", method = { RequestMethod.POST })
 	public String physicalStockEntry(@RequestBody PhysicalStockEntry physicalStockEntry) {
@@ -67,7 +66,6 @@ public class StockEntryController {
 		return output.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get item batch for store id")
 	@RequestMapping(value = "/getItemBatchForStoreID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -91,7 +89,6 @@ public class StockEntryController {
 		return response.toString();
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Allocate stock from item id")
 	@RequestMapping(value = "/allocateStockFromItemID/{facilityID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

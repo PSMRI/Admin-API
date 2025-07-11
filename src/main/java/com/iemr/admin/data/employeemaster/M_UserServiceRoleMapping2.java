@@ -107,8 +107,8 @@ public class M_UserServiceRoleMapping2 {
 	private Boolean deleted=false;
 	
 	@Expose
-	@Column(name = "isSanjeevani")
-	private Boolean isSanjeevani;
+	@Column(name = "teleConsultation")
+	private String teleConsultation;
 	
 	@Expose
 	@Column(name = "CreatedBy")

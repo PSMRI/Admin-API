@@ -29,7 +29,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,7 +52,6 @@ public class EmailConfigController {
 	@Autowired
 	EmailConfigService emailConfigService;
 
-	@CrossOrigin()
 	@Operation(summary = "Save configuration")
 	@RequestMapping(value = "/saveConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String saveConfig(@RequestBody List<CreateAuthEmailRequestModel> createEmailRequests,
@@ -73,7 +72,6 @@ public class EmailConfigController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Get email configuration")
 	@RequestMapping(value = "/getEmailConfigs", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String getEmailConfigs(@RequestBody AuthEmailRequest authEmailRequest, HttpServletRequest request) {
@@ -93,7 +91,6 @@ public class EmailConfigController {
 
 	}
 
-	@CrossOrigin()
 	@Operation(summary = "Update email configuration")
 	@RequestMapping(value = "/updateEmailConfig", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String updateEmailConfig(@RequestBody UpdateAuthEmailRequest updateEmailRequest,
