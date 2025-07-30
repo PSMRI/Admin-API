@@ -119,7 +119,7 @@ public class JwtAuthenticationUtil {
 			userHash.setUserName(user.getUserName());
 
 			// Cache the minimal user in Redis for future requests (cache for 30 minutes)
-			redisTemplate.opsForValue().set(redisKey, userHash, 30, TimeUnit.MINUTES);
+			redisTemplate.opsForValue().set(redisKey, userHash, 10, TimeUnit.MINUTES);
 
 			// Log that the user has been stored in Redis
 			logger.info("User stored in Redis with key: " + redisKey);
