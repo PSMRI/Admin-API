@@ -107,6 +107,7 @@ public class JwtAuthenticationUtil {
 	private M_User fetchUserFromDB(String userId) {
 		// This method will only be called if the user is not found in Redis.
 		String redisKey = "user_" + userId; // Redis key format
+		logger.info("User stored in Redis with key before: " + redisKey);
 
 		// Fetch user from DB
 		M_User user = userLoginRepo.getUserByUserID(Long.parseLong(userId));
