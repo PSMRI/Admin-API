@@ -272,7 +272,7 @@ public class M_User implements Serializable {
 	}
 
 	public boolean isDeleted() {
-		return Deleted;
+		return Boolean.TRUE.equals(Deleted);
 	}
 
 	public void setDeleted(boolean deleted) {
