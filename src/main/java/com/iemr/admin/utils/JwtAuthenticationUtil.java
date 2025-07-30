@@ -111,6 +111,7 @@ public class JwtAuthenticationUtil {
 
 		// Fetch user from DB
 		M_User user = userLoginRepo.getUserByUserID(Long.parseLong(userId));
+		logger.info("User stored in Redis with key User: " + user);
 
 		if (user != null) {
 			M_User userHash = new M_User();

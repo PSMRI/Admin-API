@@ -263,7 +263,7 @@ public class M_User implements Serializable {
 		EmergencyContactNo = emergencyContactNo;
 	}
 
-	public boolean isIsSupervisor() {
+	public Boolean isIsSupervisor() {
 		return IsSupervisor;
 	}
 
