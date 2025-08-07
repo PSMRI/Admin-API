@@ -5,13 +5,11 @@ import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.iemr.admin.utils.http.AuthorizationHeaderRequestWrapper;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -21,48 +19,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtUserIdValidationFilter implements Filter {
 
-	private JwtAuthenticationUtil jwtAuthenticationUtil;
+	private final JwtAuthenticationUtil jwtAuthenticationUtil;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-	private String allowedOrigins;
-	
-	// FilterConfig for storing initialization parameters
-	private FilterConfig filterConfig;
+	private final String allowedOrigins;
 
-	// Add no-args constructor for bean creation in FilterRegistrationBean
-	public JwtUserIdValidationFilter() {
-		// Default constructor for Spring to instantiate
-		this.allowedOrigins = "*";
-	}
-	
 	public JwtUserIdValidationFilter(JwtAuthenticationUtil jwtAuthenticationUtil,
 			String allowedOrigins) {
 		this.jwtAuthenticationUtil = jwtAuthenticationUtil;
 		this.allowedOrigins = allowedOrigins;
-	}
-	
-	// Store FilterConfig during initialization
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		this.filterConfig = filterConfig;
-	}
-
-	// Method to check if a URL is in the excluded list
-	private boolean isExcludedUrl(String path) {
-		if (filterConfig == null) {
-			return false;
-		}
-		
-		String excludedUrls = filterConfig.getInitParameter("excludedUrls");
-		if (excludedUrls != null) {
-			String[] urls = excludedUrls.split(",");
-			for (String url : urls) {
-				if (path.equals(url.trim())) {
-					logger.info("Skipping JWT validation for excluded URL: {}", path);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -70,12 +34,14 @@ public class JwtUserIdValidationFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		
-		// Check for excluded URLs first
+
 		String path = request.getRequestURI();
-		if (isExcludedUrl(path) || 
-		    path.equals("/health") ||
-		    path.equals("/version")) {
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals("/health") || path.equals("/version") || 
+		    path.equals(contextPath + "/health") || path.equals(contextPath + "/version")) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
@@ -96,7 +62,6 @@ public class JwtUserIdValidationFilter implements Filter {
 			return;
 		}
 
-		String contextPath = request.getContextPath();
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
 		// Log cookies for debugging
@@ -132,7 +97,7 @@ public class JwtUserIdValidationFilter implements Filter {
 			String jwtFromHeader = request.getHeader(Constants.JWT_TOKEN);
 			String authHeader = request.getHeader("Authorization");
 
-			if (jwtFromCookie != null && jwtAuthenticationUtil != null) {
+			if (jwtFromCookie != null) {
 				logger.info("Validating JWT token from cookie");
 				if (jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtFromCookie)) {
 					AuthorizationHeaderRequestWrapper authorizationHeaderRequestWrapper = new AuthorizationHeaderRequestWrapper(
@@ -140,7 +105,7 @@ public class JwtUserIdValidationFilter implements Filter {
 					filterChain.doFilter(authorizationHeaderRequestWrapper, servletResponse);
 					return;
 				}
-			} else if (jwtFromHeader != null && jwtAuthenticationUtil != null) {
+			} else if (jwtFromHeader != null) {
 				logger.info("Validating JWT token from header");
 				if (jwtAuthenticationUtil.validateUserIdAndJwtToken(jwtFromHeader)) {
 					AuthorizationHeaderRequestWrapper authorizationHeaderRequestWrapper = new AuthorizationHeaderRequestWrapper(
@@ -165,12 +130,9 @@ public class JwtUserIdValidationFilter implements Filter {
 			logger.warn("No valid authentication token found");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
-			logger.warn("No valid authentication token found");
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
-
 		} catch (Exception e) {
 			logger.error("Authorization error: ", e);
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: " + e.getMessage());
 		}
 	}
 
@@ -219,18 +181,5 @@ public class JwtUserIdValidationFilter implements Filter {
 		cookie.setSecure(true);
 		cookie.setMaxAge(0); // Invalidate the cookie
 		response.addCookie(cookie);
-	}
-	
-	// Setter methods for Spring to inject dependencies
-	@Autowired(required = false)
-	public void setJwtAuthenticationUtil(JwtAuthenticationUtil jwtAuthenticationUtil) {
-		this.jwtAuthenticationUtil = jwtAuthenticationUtil;
-	}
-	
-	@Autowired(required = false)
-	public void setAllowedOrigins(String allowedOrigins) {
-		if (allowedOrigins != null) {
-			this.allowedOrigins = allowedOrigins;
-		}
 	}
 }

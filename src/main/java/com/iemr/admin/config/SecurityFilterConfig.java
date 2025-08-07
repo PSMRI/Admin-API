@@ -23,9 +23,10 @@ public class SecurityFilterConfig {
         FilterRegistrationBean<JwtUserIdValidationFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new JwtUserIdValidationFilter(jwtAuthenticationUtil, allowedOrigins));
         registration.addUrlPatterns("/*");
+        registration.setOrder(1);
         
-        // Exclude health and version endpoints
-        registration.addInitParameter("excludedUrls", "/health,/version");
+        // Set name for easier debugging
+        registration.setName("JwtUserIdValidationFilter");
         
         return registration;
     }
