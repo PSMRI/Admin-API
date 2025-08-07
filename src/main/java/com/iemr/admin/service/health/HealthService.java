@@ -33,6 +33,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,9 @@ public class HealthService {
 
     @Autowired
     private DataSource dataSource;
+
+    @Value("${app.version:unknown}")
+    private String appVersion;
 
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
@@ -78,7 +83,7 @@ public class HealthService {
         healthStatus.put("services", services);
         healthStatus.put("timestamp", Instant.now().toString());
         healthStatus.put("application", "admin-api");
-        healthStatus.put("version", "3.1.0");
+        healthStatus.put("version", appVersion);
 
         logger.info("Health check completed - Overall status: {}", overallHealth ? "UP" : "DOWN");
         return healthStatus;
@@ -138,8 +143,10 @@ public class HealthService {
         long startTime = System.currentTimeMillis();
         
         try {
-            // Test Redis connection with ping
-            String pong = redisTemplate.getConnectionFactory().getConnection().ping();
+            // Test Redis connection with ping using explicit RedisCallback
+            String pong = redisTemplate.execute((RedisCallback<String>) connection -> {
+                return connection.ping();
+            });
             
             if ("PONG".equals(pong)) {
                 long responseTime = System.currentTimeMillis() - startTime;
