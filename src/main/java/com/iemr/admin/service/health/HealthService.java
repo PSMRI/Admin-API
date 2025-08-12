@@ -106,9 +106,6 @@ public class HealthService {
                         long responseTime = System.currentTimeMillis() - startTime;
                         
                         dbStatus.put("status", "UP");
-                        dbStatus.put("database", connection.getMetaData().getDatabaseProductName());
-                        dbStatus.put("driver", connection.getMetaData().getDriverName());
-                        dbStatus.put("url", sanitizeUrl(connection.getMetaData().getURL()));
                         dbStatus.put("responseTime", responseTime + "ms");
                         dbStatus.put("message", "Database connection successful");
                         
@@ -128,11 +125,10 @@ public class HealthService {
         } catch (Exception e) {
             long responseTime = System.currentTimeMillis() - startTime;
             dbStatus.put("status", "DOWN");
-            dbStatus.put("message", "Database connection failed: " + e.getMessage());
             dbStatus.put("responseTime", responseTime + "ms");
             dbStatus.put("error", e.getClass().getSimpleName());
             
-            logger.error("Database health check failed", e);
+            logger.error("Database health check failed: {}", e.getMessage(), e);
         }
         
         return dbStatus;
@@ -188,18 +184,5 @@ public class HealthService {
         }
         
         return redisStatus;
-    }
-
-    /**
-     * Sanitize database URL to remove sensitive information like passwords
-     */
-    private String sanitizeUrl(String url) {
-        if (url == null) {
-            return "unknown";
-        }
-        
-        // Remove password parameter if present
-        return url.replaceAll("password=[^&]*", "password=***")
-                 .replaceAll("pwd=[^&]*", "pwd=***");
     }
 }
