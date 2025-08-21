@@ -340,10 +340,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                             }
                             mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
-                            //mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
-                            mUser.setCreatedBy("Psmril2");
-                            //mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
-                            mUser.setModifiedBy("Psmril2");
+                            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
+//                            mUser.setCreatedBy("Psmril2");
+                            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
+//                            mUser.setModifiedBy("Psmril2");
                             mUser.setStatusID(1);
                             mUser.setIsSupervisor(false);
                             mUser.setServiceProviderID(15);
@@ -353,10 +353,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             logger.info("BulkUser:" + bulkUserID);
                             m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
                             m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
-                            m_userServiceRoleMapping.setCreatedBy("Psmril2");
-                            m_userServiceRoleMapping.setRoleID(133);
+                            m_userServiceRoleMapping.setCreatedBy(jwtUtil.extractUsername(authorization));
+                            m_userServiceRoleMapping.setRoleID(122);
                             m_userServiceRoleMapping.setProviderServiceMapID(1);
-                            //m_userServiceRoleMapping.setWorkingLocationID(117);
+//                            m_userServiceRoleMapping.setWorkingLocationID(117);
                             m_userServiceRoleMapping.setBlockName("Biswanath");
                             String[] villageName = {"Bagijuli"};
                             m_userServiceRoleMapping.setVillageName(villageName);
