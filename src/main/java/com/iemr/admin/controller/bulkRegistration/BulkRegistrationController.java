@@ -39,7 +39,6 @@ public class BulkRegistrationController {
     private LocationMasterServiceInter locationMasterServiceInter;
     private Map<String, Object> response = new HashMap<>();
 
-    @CrossOrigin()
     @PostMapping(value = "/bulkRegistration", headers = "Authorization")
     public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user, @RequestHeader String authorization) {
         bulkRegistrationServiceimpl.bulkRegistrationErrors.clear();
@@ -66,8 +65,7 @@ public class BulkRegistrationController {
 
     }
 
-    @CrossOrigin()
-    @GetMapping("/download-error-sheet")
+    @GetMapping(value = "/download-error-sheet", headers = "Authorization")
     public ResponseEntity<byte[]> downloadErrorSheet() {
         try {
             byte[] fileContent = bulkRegistrationServiceimpl.insertErrorLog();
