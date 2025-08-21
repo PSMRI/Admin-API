@@ -69,6 +69,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     @Override
     public void registerBulkUser(String xml, String authorization) {
         try {
+            xml = escapeXmlSpecialChars(xml);
+
             EmployeeList employeeList = employeeXmlService.parseXml(xml);
             if (!employeeList.getEmployees().isEmpty()) {
                 logger.info("employee_list" + employeeList.getEmployees().toString());
@@ -91,6 +93,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
 
+    }
+    public static String escapeXmlSpecialChars(String xml) {
+        // Only escape & that are not already part of valid XML entities
+        return xml.replaceAll("&(?!amp;|lt;|gt;|apos;|quot;|#\\d+;)", "&amp;");
     }
 
 
