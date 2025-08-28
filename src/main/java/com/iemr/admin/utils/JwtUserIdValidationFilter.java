@@ -76,8 +76,6 @@ public class JwtUserIdValidationFilter implements Filter {
 		if (path.equals(contextPath + "/user/userAuthenticate")
 				|| path.equalsIgnoreCase(contextPath + "/user/logOutUserFromConcurrentSession")
 				|| path.startsWith(contextPath + "/swagger-ui")
-				|| path.startsWith(contextPath + "/bulkRegistration")
-				|| path.startsWith(contextPath + "/download-error-sheet")
 				|| path.startsWith(contextPath + "/v3/api-docs")
 				|| path.startsWith(contextPath + "/user/refreshToken")
 				|| path.startsWith(contextPath + "/public")) {
