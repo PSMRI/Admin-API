@@ -21,13 +21,16 @@
 */
 package com.iemr.admin.controller.employeemaster;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -39,7 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
-import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,8 +55,6 @@ public class EmployeeSignatureController {
 
 	@Autowired
 	EmployeeSignatureServiceImpl employeeSignatureServiceImpl;
-
-	private InputMapper inputMapper = new InputMapper();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
@@ -92,12 +92,19 @@ public class EmployeeSignatureController {
 
 			EmployeeSignature userSignID = employeeSignatureServiceImpl.fetchSignature(userID);
 			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-					"inline; filename=\"" + userSignID.getFileName() + "\"");
-			responseHeaders.set("filename", userSignID.getFileName());
+			ContentDisposition contentDisposition = ContentDisposition.attachment()
+					.filename(userSignID.getFileName(), StandardCharsets.UTF_8).build();
+			responseHeaders.setContentDisposition(contentDisposition);
 
-			return ResponseEntity.ok().contentType(MediaType.parseMediaType(userSignID.getFileType()))
-					.headers(responseHeaders).body(userSignID.getSignature());
+			MediaType mediaType;
+			try {
+				mediaType = MediaType.parseMediaType(userSignID.getFileType());
+			} catch (InvalidMediaTypeException | NullPointerException ex) {
+				mediaType = MediaType.APPLICATION_OCTET_STREAM;
+			}
+
+			return ResponseEntity.ok().contentType(mediaType).headers(responseHeaders)
+					.contentLength(userSignID.getSignature().length).body(userSignID.getSignature());
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
