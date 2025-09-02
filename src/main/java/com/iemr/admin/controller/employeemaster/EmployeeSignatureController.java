@@ -21,6 +21,8 @@
 */
 package com.iemr.admin.controller.employeemaster;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.slf4j.Logger;
@@ -30,8 +32,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,7 +42,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
-import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,12 +56,10 @@ public class EmployeeSignatureController {
 	@Autowired
 	EmployeeSignatureServiceImpl employeeSignatureServiceImpl;
 
-	private InputMapper inputMapper = new InputMapper();
-
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
 	@Operation(summary = "Upload")
-	@RequestMapping(value = "/upload", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+	@PostMapping(value = "/upload", headers = "Authorization", produces = {
 			"application/json" })
 	public String uploadFile(@RequestBody EmployeeSignature emp) {
 		OutputResponse response = new OutputResponse();
@@ -83,21 +83,22 @@ public class EmployeeSignatureController {
 	}
 
 	@Operation(summary = "User id")
-	@RequestMapping(value = "/{userID}", headers = "Authorization", method = { RequestMethod.GET })
+	@GetMapping(value = "/{userID}", headers = "Authorization")
 	public ResponseEntity<byte[]> fetchFile(@PathVariable("userID") Long userID) throws Exception {
-		OutputResponse response = new OutputResponse();
 		logger.debug("File download for userID" + userID);
 
 		try {
 
 			EmployeeSignature userSignID = employeeSignatureServiceImpl.fetchSignature(userID);
 			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-					"inline; filename=\"" + userSignID.getFileName() + "\"");
-			responseHeaders.set("filename", userSignID.getFileName());
+			String fileName = URLEncoder.encode(userSignID.getFileName(), StandardCharsets.UTF_8);
+			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+			responseHeaders.set("filename", fileName);
 
-			return ResponseEntity.ok().contentType(MediaType.parseMediaType(userSignID.getFileType()))
-					.headers(responseHeaders).body(userSignID.getSignature());
+			return ResponseEntity.ok()
+			        .contentType(MediaType.parseMediaType(userSignID.getFileType())) // or MediaType.APPLICATION_PDF
+			        .headers(responseHeaders)
+			        .body(userSignID.getSignature());
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
