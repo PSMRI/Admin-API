@@ -21,6 +21,8 @@
 */
 package com.iemr.admin.controller.employeemaster;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import org.slf4j.Logger;
@@ -92,13 +94,14 @@ public class EmployeeSignatureController {
 
 			EmployeeSignature userSignID = employeeSignatureServiceImpl.fetchSignature(userID);
 			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-					"inline; filename=\"" + userSignID.getFileName() + "\"");
-			responseHeaders.set("filename", userSignID.getFileName());
+			String fileName = URLEncoder.encode(userSignID.getFileName(), StandardCharsets.UTF_8);
+			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+			responseHeaders.set("filename", fileName);
 
-			return ResponseEntity.ok().contentType(MediaType.parseMediaType(userSignID.getFileType()))
-					.headers(responseHeaders).body(userSignID.getSignature());
-
+			return ResponseEntity.ok()
+			        .contentType(MediaType.parseMediaType(userSignID.getFileType())) // or MediaType.APPLICATION_PDF
+			        .headers(responseHeaders)
+			        .body(userSignID.getSignature());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
 			logger.error("File download for userID failed with exception " + e.getMessage(), e);
