@@ -72,15 +72,13 @@ public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
 	public EmployeeSignature updateUserSignatureStatus(String activateUser) {
 		JSONObject obj = new JSONObject(activateUser);
 		Long userID = obj.getLong("userID");
-		//String role = obj.getString("role");
+		// String role = obj.getString("role");
 		boolean active = obj.getBoolean("active");
 		EmployeeSignature signature = employeeSignatureRepo.findOneByUserID(userID);
-		if (active) {
-			signature.setDeleted(false);
-		} else {
-			signature.setDeleted(true);
+		if (signature == null) {
+			throw new IllegalArgumentException("No signature found for userID: " + userID);
 		}
+		signature.setDeleted(!active);
 		return employeeSignatureRepo.save(signature);
 	}
-
 }

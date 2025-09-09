@@ -1050,11 +1050,8 @@ public class EmployeeMasterController {
 
 			ArrayList<M_User1> employeeBydesiganation = employeeMasterInter.getEmployeeByDesiganationID(
 					employeeMaster.getDesignationID(), employeeMaster1.getServiceProviderID());
-			Gson gson = new GsonBuilder()
-				    .excludeFieldsWithoutExposeAnnotation() // Only serialize fields with @Expose
-				    .create();
-			String json = gson.toJson(employeeBydesiganation);
-			response.setResponse(json);
+			
+			response.setResponse(employeeBydesiganation.toString());
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
