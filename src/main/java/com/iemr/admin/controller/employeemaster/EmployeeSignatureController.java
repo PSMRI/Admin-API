@@ -104,12 +104,9 @@ public class EmployeeSignatureController {
 			} catch (InvalidMediaTypeException | NullPointerException e) {
 				mediaType = MediaType.APPLICATION_OCTET_STREAM;
 			}
-
 			byte[] fileBytes = userSignID.getSignature(); // MUST be byte[]
-
 			return ResponseEntity.ok().headers(responseHeaders).contentType(mediaType).contentLength(fileBytes.length)
 					.body(fileBytes);
-
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
 			logger.error("File download for userID failed with exception " + e.getMessage(), e);
