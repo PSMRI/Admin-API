@@ -47,6 +47,7 @@ import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @PropertySource("classpath:application.properties")
@@ -140,6 +141,20 @@ public class EmployeeSignatureController {
 		}
 
 		logger.debug("response" + response);
+		return response.toString();
+	}
+	@Operation(summary = "Active or DeActive user Signature")
+	@RequestMapping(value = "/activateOrdeActivateSignature", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String ActivateUser(@RequestBody String activateUser, HttpServletRequest request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			EmployeeSignature empSignature = employeeSignatureServiceImpl.updateUserSignatureStatus(activateUser);
+			response.setResponse(empSignature.toString());
+		} catch (Exception e) {
+			logger.error("Active or Deactivate User Signature failed with exception " + e.getMessage(), e);
+			response.setError(e);
+		}
 		return response.toString();
 	}
 }

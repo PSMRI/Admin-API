@@ -59,6 +59,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import com.iemr.admin.data.blocking.M_Providerservicemapping_Blocking;
+import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.data.employeemaster.M_Community;
 import com.iemr.admin.data.employeemaster.M_Gender;
 import com.iemr.admin.data.employeemaster.M_ProviderServiceMap1;
@@ -80,6 +81,7 @@ import com.iemr.admin.exceptionhandler.DataNotFound;
 import com.iemr.admin.repo.blocking.MProviderservicemappingBlockingRepo;
 import com.iemr.admin.repo.employeemaster.EmployeeMasterRepo;
 import com.iemr.admin.repo.employeemaster.EmployeeMasterRepoo;
+import com.iemr.admin.repo.employeemaster.EmployeeSignatureRepo;
 import com.iemr.admin.repo.employeemaster.M_CommunityRepo;
 import com.iemr.admin.repo.employeemaster.M_GenderRepo;
 import com.iemr.admin.repo.employeemaster.M_ProviderServiceMap1Repo;
@@ -104,7 +106,6 @@ import com.iemr.admin.utils.http.HttpUtils;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
@@ -190,6 +191,9 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Autowired
 	M_ServiceMasterRepo serviceMasterRepo;
+	
+	@Autowired
+	private EmployeeSignatureRepo employeeSignatureRepo;
 	/*
 	 * @Override public ArrayList<M_Role> getAllRole() { //ArrayList<M_Role> resSet
 	 * = new ArrayList<M_Role>(); //resSet =
@@ -1089,6 +1093,19 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	public ArrayList<M_User1> getEmployeeByDesiganationID(Integer designationID, Integer serviceProviderID) {
 		ArrayList<M_User1> getEmpByDesiganation = employeeMasterRepoo.getempByDesiganation(designationID,
 				serviceProviderID);
+		for (M_User1 user : getEmpByDesiganation) {
+			Integer userID = user.getUserID();
+			EmployeeSignature signature = employeeSignatureRepo.findOneByUserID(Long.valueOf(userID));
+			if (null != signature) {
+				if (signature.getDeleted()) {
+					user.setSignatureStatus("InActive");
+				} else {
+					user.setSignatureStatus("Active");
+				}
+			} else {
+				user.setSignatureStatus(null);
+			}
+		}
 		return getEmpByDesiganation;
 	}
 
