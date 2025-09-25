@@ -47,6 +47,7 @@ import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 
 
 @PropertySource("classpath:application.properties")
@@ -93,26 +94,19 @@ public class EmployeeSignatureController {
 
 			EmployeeSignature userSignID = employeeSignatureServiceImpl.fetchSignature(userID);
 			HttpHeaders responseHeaders = new HttpHeaders();
-			String fileName = URLEncoder.encode(userSignID.getFileName(), StandardCharsets.UTF_8);
-
-			responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
-			    "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + fileName);
+			ContentDisposition cd = ContentDisposition.attachment()
+					.filename(userSignID.getFileName(), StandardCharsets.UTF_8).build();
+			responseHeaders.setContentDisposition(cd);
 
 			MediaType mediaType;
 			try {
-			    mediaType = MediaType.parseMediaType(userSignID.getFileType());
+				mediaType = MediaType.parseMediaType(userSignID.getFileType());
 			} catch (InvalidMediaTypeException | NullPointerException e) {
-			    mediaType = MediaType.APPLICATION_OCTET_STREAM;
+				mediaType = MediaType.APPLICATION_OCTET_STREAM;
 			}
-
 			byte[] fileBytes = userSignID.getSignature(); // MUST be byte[]
-
-			return ResponseEntity.ok()
-			    .headers(responseHeaders)
-			    .contentType(mediaType)
-			    .contentLength(fileBytes.length)
-			    .body(fileBytes);
-
+			return ResponseEntity.ok().headers(responseHeaders).contentType(mediaType).contentLength(fileBytes.length)
+					.body(fileBytes);
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
 			logger.error("File download for userID failed with exception " + e.getMessage(), e);
