@@ -1051,7 +1051,7 @@ public class EmployeeMasterController {
 
 			ArrayList<M_User1> employeeBydesiganation = employeeMasterInter.getEmployeeByDesiganationID(
 					employeeMaster.getDesignationID(), employeeMaster1.getServiceProviderID());
-
+			
 			response.setResponse(employeeBydesiganation.toString());
 
 		} catch (Exception e) {
