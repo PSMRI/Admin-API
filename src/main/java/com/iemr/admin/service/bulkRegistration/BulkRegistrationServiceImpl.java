@@ -342,7 +342,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
 //                            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
                             mUser.setCreatedBy("HWCTMAdmin");
-                            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
+//                            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
                             mUser.setModifiedBy("HWCTMAdmin");
                             mUser.setStatusID(1);
                             mUser.setIsSupervisor(false);
