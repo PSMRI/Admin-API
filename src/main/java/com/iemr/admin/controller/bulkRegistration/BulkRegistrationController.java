@@ -6,6 +6,7 @@ import com.iemr.admin.service.bulkRegistration.BulkRegistrationServiceImpl;
 import com.iemr.admin.service.bulkRegistration.EmployeeXmlService;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,21 @@ public class BulkRegistrationController {
     @PostMapping(value = "/bulkRegistration", headers = "Authorization")
     public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user, @RequestHeader String authorization,        HttpServletRequest request
     ) {
+        String jwtToken = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equalsIgnoreCase(cookie.getName())) {   // Cookie name == jwt
+                    jwtToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        logger.info("JWT Token From Cookie: " + jwtToken);
+        logger.info("M_user Request: " + m_user);
+
         String authHeader = request.getHeader("Authorization");
         logger.info("Authorization Token: " + authHeader);
 
