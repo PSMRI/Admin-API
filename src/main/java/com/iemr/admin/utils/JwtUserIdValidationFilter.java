@@ -73,21 +73,17 @@ public class JwtUserIdValidationFilter implements Filter {
 		logger.info("JWT token from header: ");
 
 		// Skip login and public endpoints
-//		if (path.equals(contextPath + "/user/userAuthenticate")
-//				|| path.equalsIgnoreCase(contextPath + "/user/logOutUserFromConcurrentSession")
-//				|| path.startsWith(contextPath + "/swagger-ui")
-//				|| path.startsWith(contextPath + "/v3/api-docs")
-//				|| path.startsWith(contextPath + "/user/refreshToken")
-//				|| path.startsWith(contextPath + "/public")) {
-//			logger.info("Skipping filter for path: " + path);
-//			filterChain.doFilter(servletRequest, servletResponse);
-//			return;
-//		}
-
-				if (true){
+		if (path.equals(contextPath + "/user/userAuthenticate")
+				|| path.equalsIgnoreCase(contextPath + "/user/logOutUserFromConcurrentSession")
+				|| path.startsWith(contextPath + "/swagger-ui")
+				|| path.startsWith(contextPath + "/v3/api-docs")
+				|| path.startsWith(contextPath + "/user/refreshToken")
+				|| path.startsWith(contextPath + "/public")) {
+			logger.info("Skipping filter for path: " + path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
+
 
 
 		try {

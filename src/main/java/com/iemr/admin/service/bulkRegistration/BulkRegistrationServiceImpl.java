@@ -340,8 +340,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                             }
                             mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
-                            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
+//                            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
+                            mUser.setCreatedBy("HWCTMAdmin");
                             mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
+                            mUser.setModifiedBy("HWCTMAdmin");
                             mUser.setStatusID(1);
                             mUser.setIsSupervisor(false);
                             mUser.setServiceProviderID(15);
@@ -351,7 +353,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             logger.info("BulkUser:" + bulkUserID);
                             m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
                             m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
-                            m_userServiceRoleMapping.setCreatedBy(jwtUtil.extractUsername(authorization));
+//                            m_userServiceRoleMapping.setCreatedBy(jwtUtil.extractUsername(authorization));
+                            m_userServiceRoleMapping.setCreatedBy("HWCTMAdmin");
                             m_userServiceRoleMapping.setRoleID(122);
                             m_userServiceRoleMapping.setProviderServiceMapID(1);
 //                            m_userServiceRoleMapping.setWorkingLocationID(117);
@@ -373,7 +376,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                             }
 //                  mUserDemographics.setReligionID(1);
-                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername(authorization));
+//                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername(authorization));
+                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername("HWCTMAdmin"));
 //                            mUserDemographics.setCreatedBy("Psmril2");
                             // Permanent Address
                             if (!employee.getPermanentAddressLine1().isEmpty()) {

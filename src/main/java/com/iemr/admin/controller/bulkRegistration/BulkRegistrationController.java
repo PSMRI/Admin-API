@@ -41,6 +41,7 @@ public class BulkRegistrationController {
 
     @PostMapping(value = "/bulkRegistration", headers = "Authorization")
     public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user, @RequestHeader String authorization) {
+
         bulkRegistrationServiceimpl.bulkRegistrationErrors.clear();
         logger.info("Bulk registration request received. Request payload is omitted from logs.");
         try {
