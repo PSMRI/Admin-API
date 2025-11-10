@@ -344,8 +344,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setCreatedBy("HWCTMAdmin");
 //                            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
                             mUser.setModifiedBy("HWCTMAdmin");
-                            mUser.setStatusID(1);
-                            mUser.setIsSupervisor(false);
+                            mUser.setStatusID(2);
+                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setServiceProviderID(15);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             logger.info("Register_user:" + mUser);
@@ -377,7 +377,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             }
 //                  mUserDemographics.setReligionID(1);
 //                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername(authorization));
-                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername("HWCTMAdmin"));
+                  mUserDemographics.setCreatedBy("HWCTMAdmin");
 //                            mUserDemographics.setCreatedBy("Psmril2");
                             // Permanent Address
                             if (!employee.getPermanentAddressLine1().isEmpty()) {
