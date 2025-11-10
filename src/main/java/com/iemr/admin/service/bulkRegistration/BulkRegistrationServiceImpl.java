@@ -7,6 +7,7 @@ import com.iemr.admin.data.employeemaster.*;
 import com.iemr.admin.data.locationmaster.M_District;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
 import com.iemr.admin.data.user.M_UserServiceRoleMapping;
+import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import com.iemr.admin.service.rolemaster.Role_MasterInter;
@@ -54,6 +55,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private EmployeeMasterInter employeeMasterInter;
     @Autowired
     private Role_MasterInter roleMasterInter;
+
+    @Autowired
+    private V_ShowuserRepo showuserRepo;
     @Autowired
     private LocationMasterServiceInter locationMasterServiceInter;
 
@@ -67,7 +71,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization) {
+    public void registerBulkUser(String xml, String authorization,String userName) {
         try {
             xml = escapeXmlSpecialChars(xml);
 
@@ -76,7 +80,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 logger.info("employee_list" + employeeList.getEmployees().toString());
                 totalEmployeeListSize = employeeList.getEmployees().size();
                 for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    saveUserUser(employeeList.getEmployees().get(i), i, authorization);
+                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName);
 
 
                 }
@@ -100,7 +104,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
 
-    private void saveUserUser(Employee employee, Integer row, String authorization) throws Exception {
+    private void saveUserUser(Employee employee, Integer row, String authorization,String createdBy) throws Exception {
         List<String> validationErrors = new ArrayList<>();
         BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
         M_User1 mUser = new M_User1();
@@ -334,37 +338,24 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setMaritalStatusID(1);
                             mUser.setEmailID(employee.getEmail());
                             mUser.setGenderID(Short.parseShort(String.valueOf(getGenderId(employee.getGender()))));
-                            mUser.setQualificationID(4);
                             if (!employee.getQualification().isEmpty()) {
                                 mUser.setQualificationID(getQualificationId(employee.getQualification()));
 
                             }
                             mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
-//                            mUser.setCreatedBy(jwtUtil.extractUsername(authorization));
-                            mUser.setCreatedBy("HWCTMAdmin");
-//                            mUser.setModifiedBy(jwtUtil.extractUsername(authorization));
-                            mUser.setModifiedBy("HWCTMAdmin");
+                            mUser.setCreatedBy(createdBy);
+                            mUser.setModifiedBy(createdBy);
                             mUser.setStatusID(2);
                             mUser.setEmployeeID(employee.getUserName());
-                            mUser.setServiceProviderID(15);
+                            mUser.setServiceProviderID(showuserRepo.findByUserName(createdBy).getServiceProviderID());
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             logger.info("Register_user:" + mUser);
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
                             logger.info("BulkUser:" + bulkUserID);
                             m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
                             m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
-//                            m_userServiceRoleMapping.setCreatedBy(jwtUtil.extractUsername(authorization));
-                            m_userServiceRoleMapping.setCreatedBy("HWCTMAdmin");
+                            m_userServiceRoleMapping.setCreatedBy(createdBy);
                             m_userServiceRoleMapping.setRoleID(122);
-                            m_userServiceRoleMapping.setProviderServiceMapID(1);
-//                            m_userServiceRoleMapping.setWorkingLocationID(117);
-                            m_userServiceRoleMapping.setBlockName("Biswanath");
-                            String[] villageName = {"Bagijuli"};
-                            m_userServiceRoleMapping.setVillageName(villageName);
-                            String[] villageID = {"25460"};
-                            m_userServiceRoleMapping.setVillageID(villageID);
-                            m_userServiceRoleMapping.setBlockID(920);
-
                             mUserDemographics.setUserID(bulkUserID.getUserID());
                             mUserDemographics.setCountryID(91);
                             if (!employee.getCommunity().isEmpty()) {
@@ -375,10 +366,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                                 mUserDemographics.setReligionID(getReligionStringId(employee.getReligion()));
 
                             }
-//                  mUserDemographics.setReligionID(1);
-//                  mUserDemographics.setCreatedBy(jwtUtil.extractUsername(authorization));
-                  mUserDemographics.setCreatedBy("HWCTMAdmin");
-//                            mUserDemographics.setCreatedBy("Psmril2");
+                        mUserDemographics.setCreatedBy(createdBy);
                             // Permanent Address
                             if (!employee.getPermanentAddressLine1().isEmpty()) {
                                 mUserDemographics.setPermAddressLine1(employee.getPermanentAddressLine1());
