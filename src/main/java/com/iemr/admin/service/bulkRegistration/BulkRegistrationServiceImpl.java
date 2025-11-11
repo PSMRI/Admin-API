@@ -67,7 +67,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID,Integer serviceProviderMapID) {
+    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID) {
         try {
             xml = escapeXmlSpecialChars(xml);
 
@@ -76,7 +76,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 logger.info("employee_list" + employeeList.getEmployees().toString());
                 totalEmployeeListSize = employeeList.getEmployees().size();
                 for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID,serviceProviderMapID);
+                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
 
 
                 }
@@ -100,7 +100,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
 
-    private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID, Integer serviceProviderMapID) throws Exception {
+    private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
         List<String> validationErrors = new ArrayList<>();
         BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
         M_User1 mUser = new M_User1();
