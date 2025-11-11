@@ -346,6 +346,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setCreatedBy(createdBy);
                             mUser.setModifiedBy(createdBy);
                             mUser.setStatusID(2);
+                            mUser.setDeleted(false);
                             mUser.setEmployeeID(employee.getUserName());
                             mUser.setServiceProviderID(showuserRepo.findByUserName(createdBy).getServiceProviderID());
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
@@ -414,7 +415,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             employeeMasterInter.saveDemography(mUserDemographics);
                             m_bulkUser.add(mUser);
                             m_UserDemographics.add(mUserDemographics);
-                            employeeMasterInter.saveRoleMappingeditedData(m_userServiceRoleMapping, authorization);
+//                            employeeMasterInter.saveRoleMappingeditedData(m_userServiceRoleMapping, authorization);
 
                         } catch (Exception e) {
                             errorLogs.add("Row :" + (row + 1) + e.getMessage());
