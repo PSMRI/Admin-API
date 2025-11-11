@@ -348,15 +348,15 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setStatusID(2);
                             mUser.setDeleted(false);
                             mUser.setEmployeeID(employee.getUserName());
-                            mUser.setServiceProviderID(showuserRepo.findByUserName(createdBy).getServiceProviderID());
+                            mUser.setServiceProviderID(13);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             logger.info("Register_user:" + mUser);
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
                             logger.info("BulkUser:" + bulkUserID);
-                            m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
-                            m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
-                            m_userServiceRoleMapping.setCreatedBy(createdBy);
-                            m_userServiceRoleMapping.setRoleID(122);
+//                            m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
+//                            m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
+//                            m_userServiceRoleMapping.setCreatedBy(createdBy);
+//                            m_userServiceRoleMapping.setRoleID(122);
                             mUserDemographics.setUserID(bulkUserID.getUserID());
                             mUserDemographics.setCountryID(91);
                             if (!employee.getCommunity().isEmpty()) {
