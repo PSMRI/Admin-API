@@ -6,7 +6,6 @@ import com.iemr.admin.data.bulkuser.EmployeeList;
 import com.iemr.admin.data.employeemaster.*;
 import com.iemr.admin.data.locationmaster.M_District;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
-import com.iemr.admin.data.user.M_UserServiceRoleMapping;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
@@ -20,7 +19,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKeyFactory;
@@ -31,10 +29,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Date;
-import java.text.ParseException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,7 +67,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization,String userName) {
+    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID,Integer serviceProviderMapID) {
         try {
             xml = escapeXmlSpecialChars(xml);
 
@@ -80,7 +76,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 logger.info("employee_list" + employeeList.getEmployees().toString());
                 totalEmployeeListSize = employeeList.getEmployees().size();
                 for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName);
+                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID,serviceProviderMapID);
 
 
                 }
@@ -104,7 +100,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
 
-    private void saveUserUser(Employee employee, Integer row, String authorization,String createdBy) throws Exception {
+    private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID, Integer serviceProviderMapID) throws Exception {
         List<String> validationErrors = new ArrayList<>();
         BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
         M_User1 mUser = new M_User1();
@@ -348,7 +344,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setStatusID(2);
                             mUser.setDeleted(false);
                             mUser.setEmployeeID(employee.getUserName());
-                            mUser.setServiceProviderID(13);
+                            mUser.setServiceProviderID(serviceProviderID);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             logger.info("Register_user:" + mUser);
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
