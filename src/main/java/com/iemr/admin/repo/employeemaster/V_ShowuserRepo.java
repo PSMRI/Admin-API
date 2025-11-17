@@ -23,6 +23,7 @@ package com.iemr.admin.repo.employeemaster;
 
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -43,5 +44,8 @@ public interface V_ShowuserRepo extends CrudRepository<V_Showuser, Integer>{
 	
 	@Query("SELECT u FROM V_Showuser u WHERE u.serviceProviderID= :serviceProviderID ORDER By u.userName")
 	ArrayList<V_Showuser> EmployeeDetails4(@Param("serviceProviderID") Integer serviceProviderID);
+
+	@Query("SELECT u FROM V_Showuser u WHERE u.userName = :userName ORDER BY u.userName")
+	V_Showuser findByUserName(@Param("userName") String userName);
 
 }

@@ -29,4 +29,6 @@ public interface EmployeeSignatureService {
 
 	Long uploadSignature(EmployeeSignature empSign);
 
+	EmployeeSignature updateUserSignatureStatus(String activateUser);
+
 }
