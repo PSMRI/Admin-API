@@ -69,27 +69,23 @@ public class JwtUserIdValidationFilter implements Filter {
 		String path = request.getRequestURI();
 		String contextPath = request.getContextPath();
 
+		// Set CORS headers and handle OPTIONS request only if origin is valid and allowed
 		if (origin != null && isOriginAllowed(origin)) {
-			response.setHeader("Access-Control-Allow-Origin", origin); // Never use wildcard
-			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-			response.setHeader("Access-Control-Allow-Headers",
-					"Authorization, Content-Type, Accept, Jwttoken, serverAuthorization, ServerAuthorization, serverauthorization, Serverauthorization");
-			response.setHeader("Access-Control-Allow-Credentials", "true");
-			response.setHeader("Access-Control-Max-Age", "3600");
+			addCorsHeaders(response, origin);
 			logger.info("Origin Validated | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+			
+			if ("OPTIONS".equalsIgnoreCase(method)) {
+				// OPTIONS (preflight) - respond with full allowed methods
+				response.setStatus(HttpServletResponse.SC_OK);
+				return;
+			}
 		} else {
 			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
-		}
-
-		if ("OPTIONS".equalsIgnoreCase(method)) {
-			// OPTIONS (preflight) - respond with full allowed methods
-			response.setHeader("Access-Control-Allow-Origin", origin);
-			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-			response.setHeader("Access-Control-Allow-Headers",
-					"Authorization, Content-Type, Accept, Jwttoken, serverAuthorization, ServerAuthorization, serverauthorization, Serverauthorization");
-			response.setHeader("Access-Control-Allow-Credentials", "true");
-			response.setStatus(HttpServletResponse.SC_OK);
-			return;
+			
+			if ("OPTIONS".equalsIgnoreCase(method)) {
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed for OPTIONS request");
+				return;
+			}
 		}
 
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
@@ -169,6 +165,15 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 	}
 
+	private void addCorsHeaders(HttpServletResponse response, String origin) {
+		response.setHeader("Access-Control-Allow-Origin", origin); // Never use wildcard
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+		response.setHeader("Access-Control-Allow-Headers",
+				"Authorization, Content-Type, Accept, Jwttoken, serverAuthorization, ServerAuthorization, serverauthorization, Serverauthorization");
+		response.setHeader("Access-Control-Allow-Credentials", "true");
+		response.setHeader("Access-Control-Max-Age", "3600");
+	}
+
 	private boolean isOriginAllowed(String origin) {
 		if (origin == null || allowedOrigins == null || allowedOrigins.trim().isEmpty()) {
 			logger.warn("No allowed origins configured or origin is null");
@@ -185,9 +190,7 @@ public class JwtUserIdValidationFilter implements Filter {
 					boolean matched = origin.matches(regex);
 					return matched;
 				});
-	}
-
-	private boolean isMobileClient(String userAgent) {
+	}	private boolean isMobileClient(String userAgent) {
 		if (userAgent == null)
 			return false;
 		userAgent = userAgent.toLowerCase();
