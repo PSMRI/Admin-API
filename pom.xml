@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.iemr.admin</groupId>
 	<artifactId>admin-api</artifactId>
-	<version>3.6.1</version>
+	<version>3.6.0</version>
 	<packaging>war</packaging>
 	<name>Admin-API</name>
 	<description>Admin Page</description>
