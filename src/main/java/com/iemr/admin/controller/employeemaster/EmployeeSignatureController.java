@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.JsonObject;
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.service.employeemaster.EmployeeSignatureServiceImpl;
 import com.iemr.admin.utils.response.OutputResponse;
@@ -125,7 +126,15 @@ public class EmployeeSignatureController {
 		try {
 
 			Boolean userSignID = employeeSignatureServiceImpl.existSignature(userID);
-			response.setResponse(userSignID.toString());
+			Boolean signatureActive = employeeSignatureServiceImpl.isSignatureActive(userID);
+
+			// Create JSON response with both fields
+			JsonObject responseData = new JsonObject();
+			responseData.addProperty("response", userSignID.toString());
+			responseData.addProperty("signStatus", signatureActive.toString());
+
+			// Set the response (existing setResponse method will handle it)
+			response.setResponse(responseData.toString());
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);

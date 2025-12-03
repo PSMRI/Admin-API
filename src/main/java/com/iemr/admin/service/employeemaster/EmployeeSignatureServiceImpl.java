@@ -21,6 +21,7 @@
 */
 package com.iemr.admin.service.employeemaster;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +66,7 @@ public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
 
 	public Boolean existSignature(Long userID) {
 		// TODO Auto-generated method stub
-		return employeeSignatureRepo.countByUserIDAndSignatureNotNull(userID)>0;
+		return employeeSignatureRepo.countByUserIDAndSignatureNotNull(userID) > 0;
 	}
 
 	@Override
