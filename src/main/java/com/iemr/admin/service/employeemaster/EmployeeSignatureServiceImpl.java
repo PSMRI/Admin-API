@@ -72,6 +72,7 @@ public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
 		return employeeSignatureRepo.countByUserIDAndSignatureNotNullAndDeletedFalse(userID) > 0;
 	}
 
+
 	@Override
 	public EmployeeSignature updateUserSignatureStatus(String activateUser) {
 		JSONObject obj = new JSONObject(activateUser);
