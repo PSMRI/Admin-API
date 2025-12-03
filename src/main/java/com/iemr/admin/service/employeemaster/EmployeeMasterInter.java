@@ -113,6 +113,9 @@ public interface EmployeeMasterInter {
 	ArrayList<Showofficedetails1> getlocationByMapid2(int tempProSerStatMapID, Integer districtID);
 
 	String FindEmployeeName(String userName);
+	String FindEmployeeContact(String contactNo);
+	String FindEmployeeAadhaar(String aadhaarNo);
+
 
 	public M_User1 FindEmployeeName1(String userName);
 
@@ -188,4 +191,5 @@ public interface EmployeeMasterInter {
 
 	M_UserServiceRoleMapping2 deleteuserrolemapTM(M_UserServiceRoleMapping2 pre) throws Exception;
 
+    M_User1 saveBulkUserEmployee(M_User1 mUser);
 }

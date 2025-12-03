@@ -109,7 +109,7 @@ public class JwtAuthenticationUtil {
 		String redisKey = "user_" + userId; // Redis key format
 
 		// Fetch user from DB
-		M_User user = userLoginRepo.getUserByUserID(Long.parseLong(userId));
+		M_User user = userLoginRepo.findByUserID(Integer.parseInt(userId));
 
 		if (user != null) {
 			M_User userHash = new M_User();

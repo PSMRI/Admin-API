@@ -21,11 +21,13 @@
 */
 package com.iemr.admin.service.employeemaster;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.repo.employeemaster.EmployeeSignatureRepo;
+import org.json.JSONObject;
 
 @Service
 public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
@@ -64,7 +66,26 @@ public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
 
 	public Boolean existSignature(Long userID) {
 		// TODO Auto-generated method stub
-		return employeeSignatureRepo.countByUserIDAndSignatureNotNull(userID)>0;
+		return employeeSignatureRepo.countByUserIDAndSignatureNotNull(userID) > 0;
 	}
 
+	public Boolean isSignatureActive(Long userID) {
+		return employeeSignatureRepo.countByUserIDAndSignatureNotNullAndDeletedFalse(userID) > 0;
+	}
+
+
+
+	@Override
+	public EmployeeSignature updateUserSignatureStatus(String activateUser) {
+		JSONObject obj = new JSONObject(activateUser);
+		Long userID = obj.getLong("userID");
+		// String role = obj.getString("role");
+		boolean active = obj.getBoolean("active");
+		EmployeeSignature signature = employeeSignatureRepo.findOneByUserID(userID);
+		if (signature == null) {
+			throw new IllegalArgumentException("No signature found for userID: " + userID);
+		}
+		signature.setDeleted(!active);
+		return employeeSignatureRepo.save(signature);
+	}
 }
