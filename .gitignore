@@ -39,3 +39,5 @@ mvnw.cmd
 
 # Properties
 src/main/environment/admin_local.properties
+
+node_modules
