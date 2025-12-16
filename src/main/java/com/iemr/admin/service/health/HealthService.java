@@ -176,7 +176,7 @@ public class HealthService {
         } catch (Exception e) {
             long responseTime = System.currentTimeMillis() - startTime;
             redisStatus.put("status", "DOWN");
-            redisStatus.put("message", "Redis connection failed: " + e.getMessage());
+            redisStatus.put("message", "Redis connection failed");
             redisStatus.put("responseTime", responseTime + "ms");
             redisStatus.put("error", e.getClass().getSimpleName());
             

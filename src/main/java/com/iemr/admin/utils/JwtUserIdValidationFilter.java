@@ -61,7 +61,6 @@ public class JwtUserIdValidationFilter implements Filter {
 			response.setStatus(HttpServletResponse.SC_OK);
 			return;
 		}
-
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
 		// Log cookies for debugging

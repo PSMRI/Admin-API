@@ -21,16 +21,16 @@
 */
 package com.iemr.admin.controller.version;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.service.version.VersionService;
-import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -43,18 +43,11 @@ public class VersionController {
     private VersionService versionService;
 
     @Operation(summary = "Version information")
-    @RequestMapping(value = "/version", method = { RequestMethod.GET }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public String versionInformation() {
-        OutputResponse output = new OutputResponse();
-        try {
-            logger.info("version Controller Start");
-            output.setResponse(versionService.getVersionInformation());
-        } catch (Exception e) {
-            logger.error("Error in version controller", e);
-            output.setError(e);
-        }
-
+    @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, String> versionInformation() {
+        logger.info("version Controller Start");
+        Map<String, String> versionInfo = versionService.getVersionInfo();
         logger.info("version Controller End");
-        return output.toString();
+        return versionInfo;
     }
 }

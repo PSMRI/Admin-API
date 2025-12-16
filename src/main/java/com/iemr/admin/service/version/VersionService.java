@@ -47,6 +47,19 @@ public class VersionService {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Get version information as a Map for direct JSON serialization
+     * @return Map containing version information
+     */
+    public Map<String, String> getVersionInfo() {
+        return buildVersionInfo();
+    }
+
+    /**
+     * Get version information as JSON string (deprecated - use getVersionInfo() instead)
+     * @return JSON string containing version information
+     */
+    @Deprecated
     public String getVersionInformation() {
         try {
             Map<String, String> versionInfo = buildVersionInfo();
