@@ -45,6 +45,9 @@ public class VersionService {
     @Value("${app.version:unknown}")
     private String appVersion;
     
+    @Value("${maven.properties.path:META-INF/maven/com.iemr.admin/admin-api/pom.properties}")
+    private String mavenPropertiesPath;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -117,7 +120,7 @@ public class VersionService {
             versionInfo.put("build.time", time);
         } else {
             logger.info("build-info.properties not found, trying Maven properties");
-            Properties mavenProps = loadPropertiesFile("META-INF/maven/com.iemr.admin/admin-api/pom.properties");
+            Properties mavenProps = loadPropertiesFile(mavenPropertiesPath);
             if (mavenProps != null) {
                 String version = mavenProps.getProperty("version", appVersion);
                 versionInfo.put("build.version", version);
