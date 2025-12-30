@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.iemr.admin.utils.http.AuthorizationHeaderRequestWrapper;
 
 import jakarta.servlet.Filter;
@@ -36,6 +35,17 @@ public class JwtUserIdValidationFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals("/health") || path.equals("/version") || 
+		    path.equals(contextPath + "/health") || path.equals(contextPath + "/version")) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
+
 		String origin = request.getHeader("Origin");
 		if (origin != null && isOriginAllowed(origin)) {
 			response.setHeader("Access-Control-Allow-Origin", origin);
@@ -51,9 +61,6 @@ public class JwtUserIdValidationFilter implements Filter {
 			response.setStatus(HttpServletResponse.SC_OK);
 			return;
 		}
-
-		String path = request.getRequestURI();
-		String contextPath = request.getContextPath();
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
 		// Log cookies for debugging
@@ -122,12 +129,9 @@ public class JwtUserIdValidationFilter implements Filter {
 			logger.warn("No valid authentication token found");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
-			logger.warn("No valid authentication token found");
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
-
 		} catch (Exception e) {
 			logger.error("Authorization error: ", e);
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 		}
 	}
 
