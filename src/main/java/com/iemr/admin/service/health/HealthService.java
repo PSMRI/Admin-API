@@ -122,19 +122,23 @@ public class HealthService {
         details.put("database", extractDatabaseName(dbUrl));
 
         return performHealthCheck("MySQL", details, () -> {
-            try (Connection connection = dataSource.getConnection()) {
-                if (connection.isValid(2)) {
-                    try (PreparedStatement stmt = connection.prepareStatement(DB_HEALTH_CHECK_QUERY)) {
-                        stmt.setQueryTimeout(3);
-                        try (ResultSet rs = stmt.executeQuery()) {
-                            if (rs.next() && rs.getInt(1) == 1) {
-                                String version = getMySQLVersion(connection);
-                                return new HealthCheckResult(true, version, null);
+            try {
+                try (Connection connection = dataSource.getConnection()) {
+                    if (connection.isValid(2)) {
+                        try (PreparedStatement stmt = connection.prepareStatement(DB_HEALTH_CHECK_QUERY)) {
+                            stmt.setQueryTimeout(3);
+                            try (ResultSet rs = stmt.executeQuery()) {
+                                if (rs.next() && rs.getInt(1) == 1) {
+                                    String version = getMySQLVersion(connection);
+                                    return new HealthCheckResult(true, version, null);
+                                }
                             }
                         }
                     }
+                    return new HealthCheckResult(false, null, "Connection validation failed");
                 }
-                return new HealthCheckResult(false, null, "Connection validation failed");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
     }
