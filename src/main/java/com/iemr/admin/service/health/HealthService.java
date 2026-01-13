@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
@@ -83,7 +84,7 @@ public class HealthService {
         // Check MySQL connectivity
         Map<String, Object> mysqlStatus = checkMySQLHealth();
         components.put("mysql", mysqlStatus);
-        if (!"UP".equals(mysqlStatus.get("status"))) {
+        if (!isHealthy(mysqlStatus)) {
             overallHealth = false;
         }
 
@@ -91,7 +92,7 @@ public class HealthService {
         if (redisTemplate != null) {
             Map<String, Object> redisStatus = checkRedisHealth();
             components.put("redis", redisStatus);
-            if (!"UP".equals(redisStatus.get("status"))) {
+            if (!isHealthy(redisStatus)) {
                 overallHealth = false;
             }
         }
@@ -100,7 +101,7 @@ public class HealthService {
         if (mongoTemplate != null) {
             Map<String, Object> mongoStatus = checkMongoDBHealth();
             components.put("mongodb", mongoStatus);
-            if (!"UP".equals(mongoStatus.get("status"))) {
+            if (!isHealthy(mongoStatus)) {
                 overallHealth = false;
             }
         }
@@ -114,150 +115,104 @@ public class HealthService {
     }
 
     private Map<String, Object> checkMySQLHealth() {
-        Map<String, Object> status = new LinkedHashMap<>();
         Map<String, Object> details = new LinkedHashMap<>();
-        long startTime = System.currentTimeMillis();
-
-        // Add connection details
         details.put("type", "MySQL");
         details.put("host", extractHost(dbUrl));
         details.put("port", extractPort(dbUrl));
         details.put("database", extractDatabaseName(dbUrl));
 
-        try (Connection connection = dataSource.getConnection()) {
-            // 2 second timeout per best practices
-            boolean isConnectionValid = connection.isValid(2);
-
-            if (isConnectionValid) {
-                // 3 second query timeout
-                try (PreparedStatement stmt = connection.prepareStatement(DB_HEALTH_CHECK_QUERY)) {
-                    stmt.setQueryTimeout(3);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next() && rs.getInt(1) == 1) {
-                            long responseTime = System.currentTimeMillis() - startTime;
-                            logger.debug("MySQL health check: UP ({}ms)", responseTime);
-
-                            status.put("status", "UP");
-                            details.put("responseTimeMs", responseTime);
-
-                            // Get database version
-                            String version = getMySQLVersion(connection);
-                            if (version != null) {
-                                details.put("version", version);
+        return performHealthCheck("MySQL", details, () -> {
+            try (Connection connection = dataSource.getConnection()) {
+                if (connection.isValid(2)) {
+                    try (PreparedStatement stmt = connection.prepareStatement(DB_HEALTH_CHECK_QUERY)) {
+                        stmt.setQueryTimeout(3);
+                        try (ResultSet rs = stmt.executeQuery()) {
+                            if (rs.next() && rs.getInt(1) == 1) {
+                                String version = getMySQLVersion(connection);
+                                return new HealthCheckResult(true, version, null);
                             }
-
-                            status.put("details", details);
-                            return status;
                         }
                     }
                 }
+                return new HealthCheckResult(false, null, "Connection validation failed");
             }
-            logger.warn("MySQL health check: Connection not valid");
-            status.put("status", "DOWN");
-            details.put("error", "Connection validation failed");
-            status.put("details", details);
-            return status;
-        } catch (Exception e) {
-            logger.error("MySQL health check failed: {}", e.getMessage());
-            status.put("status", "DOWN");
-            details.put("error", e.getMessage());
-            details.put("errorType", e.getClass().getSimpleName());
-            status.put("details", details);
-            return status;
-        }
+        });
     }
 
     private Map<String, Object> checkRedisHealth() {
-        Map<String, Object> status = new LinkedHashMap<>();
         Map<String, Object> details = new LinkedHashMap<>();
-        long startTime = System.currentTimeMillis();
-
-        // Add connection details
         details.put("type", "Redis");
         details.put("host", redisHost);
         details.put("port", redisPort);
 
-        try {
-            // Use ping() from RedisConnection directly
+        return performHealthCheck("Redis", details, () -> {
             String pong = redisTemplate.execute((RedisCallback<String>) connection ->
                 connection.ping()
             );
-
             if ("PONG".equals(pong)) {
-                long responseTime = System.currentTimeMillis() - startTime;
-                logger.debug("Redis health check: UP ({}ms)", responseTime);
-
-                status.put("status", "UP");
-                details.put("responseTimeMs", responseTime);
-
-                // Get Redis version
                 String version = getRedisVersion();
-                if (version != null) {
-                    details.put("version", version);
-                }
-
-                status.put("details", details);
-                return status;
+                return new HealthCheckResult(true, version, null);
             }
-            logger.warn("Redis health check: Ping returned unexpected response");
-            status.put("status", "DOWN");
-            details.put("error", "Ping returned unexpected response");
-            status.put("details", details);
-            return status;
-        } catch (Exception e) {
-            logger.error("Redis health check failed: {}", e.getMessage());
-            status.put("status", "DOWN");
-            details.put("error", e.getMessage());
-            details.put("errorType", e.getClass().getSimpleName());
-            status.put("details", details);
-            return status;
-        }
+            return new HealthCheckResult(false, null, "Ping returned unexpected response");
+        });
     }
 
     private Map<String, Object> checkMongoDBHealth() {
-        Map<String, Object> status = new LinkedHashMap<>();
         Map<String, Object> details = new LinkedHashMap<>();
-        long startTime = System.currentTimeMillis();
-
-        // Add connection details
         details.put("type", "MongoDB");
         details.put("host", mongoHost);
         details.put("port", mongoPort);
         details.put("database", mongoDatabase);
 
-        try {
-            // Run ping command to check MongoDB connectivity
+        return performHealthCheck("MongoDB", details, () -> {
             Document pingResult = mongoTemplate.getDb().runCommand(new Document("ping", 1));
-
             if (pingResult != null && pingResult.getDouble("ok") == 1.0) {
-                long responseTime = System.currentTimeMillis() - startTime;
-                logger.debug("MongoDB health check: UP ({}ms)", responseTime);
+                String version = getMongoDBVersion();
+                return new HealthCheckResult(true, version, null);
+            }
+            return new HealthCheckResult(false, null, "Ping returned unexpected response");
+        });
+    }
 
+    /**
+     * Common health check execution pattern to reduce code duplication.
+     */
+    private Map<String, Object> performHealthCheck(String componentName, 
+                                                    Map<String, Object> details,
+                                                    Supplier<HealthCheckResult> checker) {
+        Map<String, Object> status = new LinkedHashMap<>();
+        long startTime = System.currentTimeMillis();
+
+        try {
+            HealthCheckResult result = checker.get();
+            long responseTime = System.currentTimeMillis() - startTime;
+
+            if (result.isHealthy) {
+                logger.debug("{} health check: UP ({}ms)", componentName, responseTime);
                 status.put("status", "UP");
                 details.put("responseTimeMs", responseTime);
-
-                // Get MongoDB version
-                String version = getMongoDBVersion();
-                if (version != null) {
-                    details.put("version", version);
+                if (result.version != null) {
+                    details.put("version", result.version);
                 }
-
-                status.put("details", details);
-                return status;
+            } else {
+                logger.warn("{} health check: {}", componentName, result.error);
+                status.put("status", "DOWN");
+                details.put("error", result.error);
             }
-            logger.warn("MongoDB health check: Ping returned unexpected response");
-            status.put("status", "DOWN");
-            details.put("error", "Ping returned unexpected response");
             status.put("details", details);
             return status;
         } catch (Exception e) {
-            logger.error("MongoDB health check failed: {}", e.getMessage());
+            logger.error("{} health check failed: {}", componentName, e.getMessage());
             status.put("status", "DOWN");
             details.put("error", e.getMessage());
             details.put("errorType", e.getClass().getSimpleName());
             status.put("details", details);
             return status;
         }
+    }
+
+    private boolean isHealthy(Map<String, Object> componentStatus) {
+        return "UP".equals(componentStatus.get("status"));
     }
 
     private String getMySQLVersion(Connection connection) {
@@ -298,23 +253,16 @@ public class HealthService {
         return null;
     }
 
-    /**
-     * Extracts host from JDBC URL.
-     * Example: jdbc:mysql://mysql-container:3306/db_iemr -> mysql-container
-     */
     private String extractHost(String jdbcUrl) {
         if (jdbcUrl == null || "unknown".equals(jdbcUrl)) {
             return "unknown";
         }
         try {
-            // Remove jdbc:mysql:// prefix
             String withoutPrefix = jdbcUrl.replaceFirst("jdbc:mysql://", "");
-            // Get host:port part (before the first /)
             int slashIndex = withoutPrefix.indexOf('/');
             String hostPort = slashIndex > 0 
                 ? withoutPrefix.substring(0, slashIndex) 
                 : withoutPrefix;
-            // Get host (before the colon)
             int colonIndex = hostPort.indexOf(':');
             return colonIndex > 0 ? hostPort.substring(0, colonIndex) : hostPort;
         } catch (Exception e) {
@@ -323,23 +271,16 @@ public class HealthService {
         return "unknown";
     }
 
-    /**
-     * Extracts port from JDBC URL.
-     * Example: jdbc:mysql://mysql-container:3306/db_iemr -> 3306
-     */
     private String extractPort(String jdbcUrl) {
         if (jdbcUrl == null || "unknown".equals(jdbcUrl)) {
             return "unknown";
         }
         try {
-            // Remove jdbc:mysql:// prefix
             String withoutPrefix = jdbcUrl.replaceFirst("jdbc:mysql://", "");
-            // Get host:port part (before the first /)
             int slashIndex = withoutPrefix.indexOf('/');
             String hostPort = slashIndex > 0 
                 ? withoutPrefix.substring(0, slashIndex) 
                 : withoutPrefix;
-            // Get port (after the colon)
             int colonIndex = hostPort.indexOf(':');
             return colonIndex > 0 ? hostPort.substring(colonIndex + 1) : "3306";
         } catch (Exception e) {
@@ -348,10 +289,6 @@ public class HealthService {
         return "3306";
     }
 
-    /**
-     * Extracts database name from JDBC URL.
-     * Example: jdbc:mysql://mysql-container:3306/db_iemr?params -> db_iemr
-     */
     private String extractDatabaseName(String jdbcUrl) {
         if (jdbcUrl == null || "unknown".equals(jdbcUrl)) {
             return "unknown";
@@ -370,5 +307,20 @@ public class HealthService {
             logger.debug("Could not extract database name: {}", e.getMessage());
         }
         return "unknown";
+    }
+
+    /**
+     * Internal class to hold health check results.
+     */
+    private static class HealthCheckResult {
+        final boolean isHealthy;
+        final String version;
+        final String error;
+
+        HealthCheckResult(boolean isHealthy, String version, String error) {
+            this.isHealthy = isHealthy;
+            this.version = version;
+            this.error = error;
+        }
     }
 }
