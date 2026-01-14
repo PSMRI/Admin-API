@@ -346,9 +346,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setEmployeeID(employee.getUserName());
                             mUser.setServiceProviderID(serviceProviderID);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
-                            logger.info("Register_user:" + mUser);
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
-                            logger.info("BulkUser:" + bulkUserID);
 //                            m_userServiceRoleMapping.setUserID(bulkUserID.getUserID());
 //                            m_userServiceRoleMapping.setServiceProviderID(bulkUserID.getServiceProviderID());
 //                            m_userServiceRoleMapping.setCreatedBy(createdBy);
