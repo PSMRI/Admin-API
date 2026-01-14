@@ -783,7 +783,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
         } catch (IOException e) {
             logger.error("IOException" + e.getMessage());
-            e.printStackTrace();
         }
 
         return baos.toByteArray();
