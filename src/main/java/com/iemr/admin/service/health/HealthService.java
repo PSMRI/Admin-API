@@ -32,12 +32,10 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -55,9 +53,6 @@ public class HealthService {
     @Autowired(required = false)
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Autowired(required = false)
-    private MongoTemplate mongoTemplate;
-
     @Value("${spring.datasource.url:unknown}")
     private String dbUrl;
 
@@ -66,15 +61,6 @@ public class HealthService {
 
     @Value("${spring.redis.port:6379}")
     private int redisPort;
-
-    @Value("${spring.data.mongodb.host:localhost}")
-    private String mongoHost;
-
-    @Value("${spring.data.mongodb.port:27017}")
-    private int mongoPort;
-
-    @Value("${spring.data.mongodb.database:amrit}")
-    private String mongoDatabase;
 
     public Map<String, Object> checkHealth() {
         Map<String, Object> healthStatus = new LinkedHashMap<>();
@@ -93,15 +79,6 @@ public class HealthService {
             Map<String, Object> redisStatus = checkRedisHealth();
             components.put("redis", redisStatus);
             if (!isHealthy(redisStatus)) {
-                overallHealth = false;
-            }
-        }
-
-        // Check MongoDB connectivity if configured
-        if (mongoTemplate != null) {
-            Map<String, Object> mongoStatus = checkMongoDBHealth();
-            components.put("mongodb", mongoStatus);
-            if (!isHealthy(mongoStatus)) {
                 overallHealth = false;
             }
         }
@@ -161,22 +138,7 @@ public class HealthService {
         });
     }
 
-    private Map<String, Object> checkMongoDBHealth() {
-        Map<String, Object> details = new LinkedHashMap<>();
-        details.put("type", "MongoDB");
-        details.put("host", mongoHost);
-        details.put("port", mongoPort);
-        details.put("database", mongoDatabase);
 
-        return performHealthCheck("MongoDB", details, () -> {
-            Document pingResult = mongoTemplate.getDb().runCommand(new Document("ping", 1));
-            if (pingResult != null && pingResult.getDouble("ok") == 1.0) {
-                String version = getMongoDBVersion();
-                return new HealthCheckResult(true, version, null);
-            }
-            return new HealthCheckResult(false, null, "Ping returned unexpected response");
-        });
-    }
 
     /**
      * Common health check execution pattern to reduce code duplication.
@@ -245,17 +207,7 @@ public class HealthService {
         return null;
     }
 
-    private String getMongoDBVersion() {
-        try {
-            Document buildInfo = mongoTemplate.getDb().runCommand(new Document("buildInfo", 1));
-            if (buildInfo != null && buildInfo.containsKey("version")) {
-                return buildInfo.getString("version");
-            }
-        } catch (Exception e) {
-            logger.debug("Could not retrieve MongoDB version: {}", e.getMessage());
-        }
-        return null;
-    }
+
 
     private String extractHost(String jdbcUrl) {
         if (jdbcUrl == null || "unknown".equals(jdbcUrl)) {
