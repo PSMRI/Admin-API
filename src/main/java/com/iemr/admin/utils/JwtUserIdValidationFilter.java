@@ -47,19 +47,32 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 
 		String origin = request.getHeader("Origin");
-		if (origin != null && isOriginAllowed(origin)) {
-			response.setHeader("Access-Control-Allow-Origin", origin);
-			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Jwttoken");
-			response.setHeader("Access-Control-Allow-Credentials", "true");
-		} else {
-			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
-		}
+		String method = request.getMethod();
+		String uri = request.getRequestURI();
 
-		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-			logger.info("OPTIONS request - skipping JWT validation");
-			response.setStatus(HttpServletResponse.SC_OK);
-			return;
+		logger.debug("Incoming Origin: {}", origin);
+		logger.debug("Request Method: {}", method);
+		logger.debug("Request URI: {}", uri);
+		logger.debug("Allowed Origins Configured: {}", allowedOrigins);
+
+		if ("OPTIONS".equalsIgnoreCase(method)) {
+			if (origin == null) {
+				logger.warn("BLOCKED - OPTIONS request without Origin header | Method: {} | URI: {}", method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "OPTIONS request requires Origin header");
+				return;
+			}
+			if (!isOriginAllowed(origin)) {
+				logger.warn("BLOCKED - Unauthorized Origin | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed");
+				return;
+			}
+		} else {
+			// For non-OPTIONS requests, validate origin if present
+			if (origin != null && !isOriginAllowed(origin)) {
+				logger.warn("BLOCKED - Unauthorized Origin | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed");
+				return;
+			}
 		}
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
@@ -77,7 +90,7 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 
 		// Log headers for debugging
-		logger.info("JWT token from header: ");
+		logger.debug("JWT token from header: {}", request.getHeader("Jwttoken") != null ? "present" : "not present");
 
 		// Skip login and public endpoints
 		if (path.equals(contextPath + "/user/userAuthenticate")
@@ -90,6 +103,7 @@ public class JwtUserIdValidationFilter implements Filter {
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
+
 
 		try {
 			String jwtFromCookie = getJwtTokenFromCookies(request);
@@ -135,6 +149,15 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 	}
 
+	private void addCorsHeaders(HttpServletResponse response, String origin) {
+		response.setHeader("Access-Control-Allow-Origin", origin); // Never use wildcard
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+		response.setHeader("Access-Control-Allow-Headers",
+				"Authorization, Content-Type, Accept, Jwttoken, serverAuthorization, ServerAuthorization, serverauthorization, Serverauthorization");
+		response.setHeader("Access-Control-Allow-Credentials", "true");
+		response.setHeader("Access-Control-Max-Age", "3600");
+	}
+
 	private boolean isOriginAllowed(String origin) {
 		if (origin == null || allowedOrigins == null || allowedOrigins.trim().isEmpty()) {
 			logger.warn("No allowed origins configured or origin is null");
@@ -147,14 +170,12 @@ public class JwtUserIdValidationFilter implements Filter {
 					String regex = pattern
 							.replace(".", "\\.")
 							.replace("*", ".*")
-							.replace("http://localhost:.*", "http://localhost:\\d+"); // special case for wildcard port
-
+						    .replace("http://localhost:.*", "http://localhost:\\d+");
+							
 					boolean matched = origin.matches(regex);
 					return matched;
 				});
-	}
-
-	private boolean isMobileClient(String userAgent) {
+	}	private boolean isMobileClient(String userAgent) {
 		if (userAgent == null)
 			return false;
 		userAgent = userAgent.toLowerCase();
