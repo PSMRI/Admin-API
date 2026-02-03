@@ -37,7 +37,7 @@ jobs:
       - name: Wait for API & fetch Swagger
         run: |
           for i in {1..30}; do
-            CODE=$(curl -s -o swagger_raw.json -w "%{http_code}" http://localhost:9090/v3/api-docs || true)
+            CODE=$(curl --connect-timeout 2 --max-time 5 -s -o swagger_raw.json -w "%{http_code}" http://localhost:9090/v3/api-docs || true)
             if [ "$CODE" = "200" ]; then
               jq . swagger_raw.json > admin-api.json
               echo "Swagger generated successfully"
