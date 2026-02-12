@@ -13,11 +13,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
 public class SwaggerConfig {
-    @Autowired
-    private Environment env;
 
     @Bean
-    public OpenAPI customOpenAPI() {
+    public OpenAPI customOpenAPI(Environment env) {
         String devUrl = env.getProperty("API_DEV_URL");
         String uatUrl = env.getProperty("API_UAT_URL");
         String demoUrl = env.getProperty("API_DEMO_URL");
