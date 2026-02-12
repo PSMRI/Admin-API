@@ -2,7 +2,6 @@ package com.iemr.admin.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 import io.swagger.v3.oas.models.Components;
@@ -16,9 +15,9 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI(Environment env) {
-        String devUrl = env.getProperty("API_DEV_URL", "http://localhost:9090");
-        String uatUrl = env.getProperty("API_UAT_URL", "http://localhost:9090");
-        String demoUrl = env.getProperty("API_DEMO_URL", "http://localhost:9090");
+        String devUrl = env.getProperty("api.dev.url", "http://localhost:9090");
+        String uatUrl = env.getProperty("api.uat.url", "http://localhost:9090");
+        String demoUrl = env.getProperty("api.demo.url", "http://localhost:9090");
         return new OpenAPI()
             .info(new Info().title("Admin API").version("version").description("Microservice for administration, configuration, user and role management, and service-level operations."))
             .addSecurityItem(new SecurityRequirement().addList("my security"))
