@@ -20,7 +20,7 @@ public class SwaggerConfig {
         String uatUrl = env.getProperty("API_UAT_URL", "http://localhost:9090");
         String demoUrl = env.getProperty("API_DEMO_URL", "http://localhost:9090");
         return new OpenAPI()
-            .info(new Info().title("Admin API").version("version").description("A microservice for the creation and management of beneficiaries."))
+            .info(new Info().title("Admin API").version("version").description("Microservice for administration, configuration, user and role management, and service-level operations."))
             .addSecurityItem(new SecurityRequirement().addList("my security"))
             .components(new Components().addSecuritySchemes("my security",
                 new SecurityScheme().name("my security").type(SecurityScheme.Type.HTTP).scheme("bearer")))
