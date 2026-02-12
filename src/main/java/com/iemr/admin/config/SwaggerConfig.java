@@ -16,9 +16,9 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI(Environment env) {
-        String devUrl = env.getProperty("API_DEV_URL");
-        String uatUrl = env.getProperty("API_UAT_URL");
-        String demoUrl = env.getProperty("API_DEMO_URL");
+        String devUrl = env.getProperty("API_DEV_URL", "http://localhost:9090");
+        String uatUrl = env.getProperty("API_UAT_URL", "http://localhost:9090");
+        String demoUrl = env.getProperty("API_DEMO_URL", "http://localhost:9090");
         return new OpenAPI()
             .info(new Info().title("Admin API").version("version").description("A microservice for the creation and management of beneficiaries."))
             .addSecurityItem(new SecurityRequirement().addList("my security"))
