@@ -28,10 +28,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
@@ -40,7 +41,6 @@ import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-
 
 @RestController
 public class FacilitytypeController {
@@ -186,4 +186,32 @@ public class FacilitytypeController {
 		return response.toString();
 
 	}
+
+	@Operation(summary = "Get facility types by rural/urban")
+	@RequestMapping(value = "/getFacilityTypesByRuralUrban", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getFacilityTypesByRuralUrban(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+
+		try {
+
+			M_facilitytype facilityDetails = InputMapper.gson().fromJson(request, M_facilitytype.class);
+
+			ArrayList<M_facilitytype> facilityData = m_facilitytypeInter
+					.getFacilityTypesByRuralUrban(facilityDetails.getProviderServiceMapID(),
+							facilityDetails.getRuralUrban());
+
+			response.setResponse(facilityData.toString());
+
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+
+		}
+
+		return response.toString();
+	}
+
 }

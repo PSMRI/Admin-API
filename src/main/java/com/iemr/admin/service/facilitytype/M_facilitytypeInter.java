@@ -38,4 +38,7 @@ public interface M_facilitytypeInter {
 
 	Boolean checkFacilityTypeCode(M_facilitytype manufacturer);
 
+	ArrayList<M_facilitytype> getFacilityTypesByRuralUrban(Integer providerServiceMapID, String ruralUrban);
+
+
 }

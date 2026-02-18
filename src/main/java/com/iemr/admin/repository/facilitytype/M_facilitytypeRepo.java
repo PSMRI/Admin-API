@@ -32,16 +32,18 @@ import org.springframework.stereotype.Repository;
 import com.iemr.admin.data.facilitytype.M_facilitytype;
 
 @Repository
-public interface M_facilitytypeRepo extends CrudRepository<M_facilitytype, Integer>{
+public interface M_facilitytypeRepo extends CrudRepository<M_facilitytype, Integer> {
 
-	
-	
 	@Query("SELECT u FROM M_facilitytype u WHERE u.providerServiceMapID=:providerServiceMapID order by u.facilityTypeName")
 	ArrayList<M_facilitytype> getAllFicilityData(@Param("providerServiceMapID") Integer providerServiceMapID);
 
 	List<M_facilitytype> findByFacilityTypeCodeAndProviderServiceMapID(String facilityTypeCode,
 			Integer providerServiceMapID);
-	
+
 	M_facilitytype findByFacilityTypeID(Integer facilityTypeID);
+
+	@Query("SELECT f FROM M_facilitytype f WHERE f.providerServiceMapID=:psm AND f.ruralUrban=:ruralUrban ORDER BY f.facilityTypeName")
+	List<M_facilitytype> findByProviderServiceMapIDAndRuralUrban(@Param("psm") Integer psm,
+			@Param("ruralUrban") String ruralUrban);
 
 }
