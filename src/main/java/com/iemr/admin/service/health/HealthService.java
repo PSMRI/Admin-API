@@ -85,8 +85,6 @@ public class HealthService {
     private volatile AdvancedCheckResult cachedAdvancedCheckResult = null;
     private final ReentrantReadWriteLock advancedCheckLock = new ReentrantReadWriteLock();
     
-    private volatile boolean deadlockCheckDisabled = false;
-    
     private static final boolean ADVANCED_HEALTH_CHECKS_ENABLED = true;
 
     public HealthService(DataSource dataSource,
@@ -179,7 +177,7 @@ public class HealthService {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    boolean isDegraded = performAdvancedMySQLChecksWithThrottle(connection);
+                    boolean isDegraded = performAdvancedMySQLChecksWithThrottle();
                     return new HealthCheckResult(true, null, isDegraded);
                 }
             }
@@ -304,7 +302,7 @@ public class HealthService {
         return STATUS_UP;
     }
 
-    private boolean performAdvancedMySQLChecksWithThrottle(Connection connection) {
+    private boolean performAdvancedMySQLChecksWithThrottle() {
         if (!ADVANCED_HEALTH_CHECKS_ENABLED) {
             return false;
         }
@@ -328,12 +326,17 @@ public class HealthService {
                 return cachedAdvancedCheckResult.isDegraded;
             }
             
-            AdvancedCheckResult result = performAdvancedMySQLChecks(connection);
-            
-            lastAdvancedCheckTime = currentTime;
-            cachedAdvancedCheckResult = result;
-            
-            return result.isDegraded;
+            // Acquire a fresh connection for advanced checks to avoid pool exhaustion
+            try (Connection connection = dataSource.getConnection()) {
+                AdvancedCheckResult result = performAdvancedMySQLChecks(connection);
+                lastAdvancedCheckTime = currentTime;
+                cachedAdvancedCheckResult = result;
+                return result.isDegraded;
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to get connection for advanced checks: {}", e.getMessage());
+            // Return cached result or false if no cache
+            return cachedAdvancedCheckResult != null ? cachedAdvancedCheckResult.isDegraded : false;
         } finally {
             advancedCheckLock.writeLock().unlock();
         }
@@ -348,10 +351,6 @@ public class HealthService {
                 hasIssues = true;
             }
             
-            if (hasDeadlocks(connection)) {
-                logger.warn(DIAGNOSTIC_LOG_TEMPLATE, DIAGNOSTIC_DEADLOCK);
-                hasIssues = true;
-            }
             
             if (hasSlowQueries(connection)) {
                 logger.warn(DIAGNOSTIC_LOG_TEMPLATE, DIAGNOSTIC_SLOW_QUERIES);
@@ -386,32 +385,6 @@ public class HealthService {
             }
         } catch (Exception e) {
             logger.debug("Could not check for lock waits");
-        }
-        return false;
-    }
-
-    private boolean hasDeadlocks(Connection connection) {
-        if (deadlockCheckDisabled) {
-            return false;
-        }
-        
-        try (PreparedStatement stmt = connection.prepareStatement("SHOW ENGINE INNODB STATUS")) {
-            stmt.setQueryTimeout(2);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String innodbStatus = rs.getString(3);
-                    return innodbStatus != null && innodbStatus.contains("LATEST DETECTED DEADLOCK");
-                }
-            }
-        } catch (java.sql.SQLException e) {
-            if (e.getErrorCode() == 1142 || e.getErrorCode() == 1227) {
-                deadlockCheckDisabled = true;
-                logger.warn("Deadlock check disabled: Insufficient privileges");
-            } else {
-                logger.debug("Could not check for deadlocks");
-            }
-        } catch (Exception e) {
-            logger.debug("Could not check for deadlocks");
         }
         return false;
     }
