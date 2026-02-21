@@ -336,7 +336,7 @@ public class HealthService {
         } catch (Exception e) {
             logger.debug("Failed to get connection for advanced checks: {}", e.getMessage());
             // Return cached result or false if no cache
-            return cachedAdvancedCheckResult != null ? cachedAdvancedCheckResult.isDegraded : false;
+            return cachedAdvancedCheckResult != null && cachedAdvancedCheckResult.isDegraded;
         } finally {
             advancedCheckLock.writeLock().unlock();
         }
