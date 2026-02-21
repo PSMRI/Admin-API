@@ -375,7 +375,7 @@ public class HealthService {
                 "WHERE (state = 'Waiting for table metadata lock' " +
                 "   OR state = 'Waiting for row lock' " +
                 "   OR state = 'Waiting for lock') " +
-                "AND user = USER()")) {
+                "AND user = SUBSTRING_INDEX(USER(), '@', 1)")) {
             stmt.setQueryTimeout(2);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
