@@ -156,6 +156,7 @@ public class HealthService {
             cancelFutures(mysqlFuture, redisFuture);
         } catch (Exception e) {
             logger.warn("Health check execution error: {}", e.getMessage());
+            cancelFutures(mysqlFuture, redisFuture);
         }
     }
 
