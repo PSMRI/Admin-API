@@ -19,35 +19,59 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+
 package com.iemr.admin.controller.version;
 
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.iemr.admin.service.version.VersionService;
-
 import io.swagger.v3.oas.annotations.Operation;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Properties;
+import org.springframework.http.MediaType;
 
 @RestController
 public class VersionController {
 
-    private static final Logger logger = LoggerFactory.getLogger(VersionController.class);
+	private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+	
+	private static final String UNKNOWN_VALUE = "unknown";
 
-    @Autowired
-    private VersionService versionService;
+	@Operation(summary = "Get version information")
+	@GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Map<String, String>> versionInformation() {
+		Map<String, String> response = new LinkedHashMap<>();
+		try {
+			logger.info("version Controller Start");
+			Properties gitProperties = loadGitProperties();
+			response.put("buildTimestamp", gitProperties.getProperty("git.build.time", UNKNOWN_VALUE));
+			response.put("version", gitProperties.getProperty("git.build.version", UNKNOWN_VALUE));
+			response.put("branch", gitProperties.getProperty("git.branch", UNKNOWN_VALUE));
+			response.put("commitHash", gitProperties.getProperty("git.commit.id.abbrev", UNKNOWN_VALUE));
+		} catch (Exception e) {
+			logger.error("Failed to load version information", e);
+			response.put("buildTimestamp", UNKNOWN_VALUE);
+			response.put("version", UNKNOWN_VALUE);
+			response.put("branch", UNKNOWN_VALUE);
+			response.put("commitHash", UNKNOWN_VALUE);
+		}
+		logger.info("version Controller End");
+		return ResponseEntity.ok(response);
+	}
 
-    @Operation(summary = "Version information")
-    @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, String> versionInformation() {
-        logger.info("version Controller Start");
-        Map<String, String> versionInfo = versionService.getVersionInfo();
-        logger.info("version Controller End");
-        return versionInfo;
-    }
+	private Properties loadGitProperties() throws IOException {
+		Properties properties = new Properties();
+		try (InputStream input = getClass().getClassLoader()
+				.getResourceAsStream("git.properties")) {
+			if (input != null) {
+				properties.load(input);
+			}
+		}
+		return properties;
+	}
 }

@@ -21,40 +21,66 @@
 */
 package com.iemr.admin.controller.health;
 
+import java.time.Instant;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.service.health.HealthService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@RequestMapping("/health")
+@Tag(name = "Health Check", description = "APIs for checking infrastructure health status")
 public class HealthController {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthController.class);
 
-    @Autowired
-    private HealthService healthService;
+    private final HealthService healthService;
+    
+    public HealthController(HealthService healthService) {
+        this.healthService = healthService;
+    }
 
-    @Operation(summary = "Health check endpoint")
-    @GetMapping("/health")
-    public ResponseEntity<Map<String, Object>> health() {
-        logger.info("Health check endpoint called");
+    @GetMapping
+    @Operation(summary = "Check infrastructure health", 
+               description = "Returns the health status of MySQL, Redis, and other configured services")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Services are UP or DEGRADED (operational with warnings)"),
+        @ApiResponse(responseCode = "503", description = "One or more critical services are DOWN")
+    })
+    public ResponseEntity<Map<String, Object>> checkHealth() {
+        logger.debug("Health check endpoint called");
         
-        Map<String, Object> healthStatus = healthService.checkHealth();
-        
-        // Return 503 if any service is down, 200 if all are up
-        String status = (String) healthStatus.get("status");
-        HttpStatus httpStatus = "UP".equals(status) ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
-        
-        logger.info("Health check completed with status: {}", status);
-        return ResponseEntity.status(httpStatus).body(healthStatus);
+        try {
+            Map<String, Object> healthStatus = healthService.checkHealth();
+            String overallStatus = (String) healthStatus.get("status");
+            
+            HttpStatus httpStatus = "DOWN".equals(overallStatus) ? HttpStatus.SERVICE_UNAVAILABLE : HttpStatus.OK;
+            
+            logger.debug("Health check completed with status: {}", overallStatus);
+            return new ResponseEntity<>(healthStatus, httpStatus);
+            
+        } catch (Exception e) {
+            logger.error("Unexpected error during health check", e);
+            
+            Map<String, Object> errorResponse = Map.of(
+                "status", "DOWN",
+                "timestamp", Instant.now().toString()
+            );
+            
+            return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+        }
     }
 }
+
