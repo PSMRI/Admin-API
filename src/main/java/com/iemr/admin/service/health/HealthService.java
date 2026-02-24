@@ -48,8 +48,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class HealthService {
@@ -87,13 +90,23 @@ public class HealthService {
     private final ReentrantReadWriteLock advancedCheckLock = new ReentrantReadWriteLock();
     private final AtomicBoolean advancedCheckInProgress = new AtomicBoolean(false);
     
-    private static final boolean ADVANCED_HEALTH_CHECKS_ENABLED = true;
+    @Value("${health.advanced.checks.enabled:true}")
+    private boolean advancedHealthChecksEnabled;
 
     public HealthService(DataSource dataSource,
                         @Autowired(required = false) RedisTemplate<String, Object> redisTemplate) {
         this.dataSource = dataSource;
         this.redisTemplate = redisTemplate;
-        this.executorService = Executors.newFixedThreadPool(6);
+        this.executorService = Executors.newFixedThreadPool(2, new java.util.concurrent.ThreadFactory() {
+            private final AtomicInteger threadCounter = new AtomicInteger(0);
+            
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "health-check-" + threadCounter.incrementAndGet());
+                t.setDaemon(true);
+                return t;
+            }
+        });
     }
 
     @PreDestroy
@@ -184,11 +197,10 @@ public class HealthService {
     }
 
     private void ensurePopulated(Map<String, Object> status, String componentName) {
-        if (!status.containsKey(STATUS_KEY)) {
-            status.put(STATUS_KEY, STATUS_DOWN);
-            status.put(SEVERITY_KEY, SEVERITY_CRITICAL);
-            status.put(ERROR_KEY, componentName + " health check did not complete in time");
-        }
+
+        status.putIfAbsent(STATUS_KEY, STATUS_DOWN);
+        status.putIfAbsent(SEVERITY_KEY, SEVERITY_CRITICAL);
+        status.putIfAbsent(ERROR_KEY, componentName + " health check did not complete in time");
     }
 
     private HealthCheckResult checkMySQLHealthSync() {
@@ -199,17 +211,19 @@ public class HealthService {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    boolean isDegraded = performAdvancedMySQLChecksWithThrottle();
-                    return new HealthCheckResult(true, null, isDegraded);
+                    // Connection is auto-closed by try-with-resources here
+                    // Advanced checks will open a separate connection if needed
                 }
             }
-            
-            return new HealthCheckResult(false, "No result from health check query", false);
             
         } catch (Exception e) {
             logger.warn("MySQL health check failed: {}", e.getMessage(), e);
             return new HealthCheckResult(false, "MySQL connection failed", false);
         }
+        
+
+        boolean isDegraded = performAdvancedMySQLChecksWithThrottle();
+        return new HealthCheckResult(true, null, isDegraded);
     }
 
     private HealthCheckResult checkRedisHealthSync() {
@@ -325,7 +339,7 @@ public class HealthService {
     }
 
     private boolean performAdvancedMySQLChecksWithThrottle() {
-        if (!ADVANCED_HEALTH_CHECKS_ENABLED) {
+        if (!advancedHealthChecksEnabled) {
             return false;
         }
         
