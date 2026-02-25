@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
+import com.iemr.admin.data.store.M_FacilityLevel;
+import com.iemr.admin.repository.facilitytype.M_FacilityLevelRepo;
 import com.iemr.admin.repository.facilitytype.M_facilitytypeRepo;
 
 @Service
@@ -35,6 +37,9 @@ public class M_facilitytypeServiceImpl implements M_facilitytypeInter {
 
 	@Autowired
 	private M_facilitytypeRepo m_facilitytypeRepo;
+
+	@Autowired
+	private M_FacilityLevelRepo m_facilityLevelRepo;
 
 	@Override
 	public ArrayList<M_facilitytype> getAllFicilityData(Integer providerServiceMapID) {
@@ -73,6 +78,26 @@ public class M_facilitytypeServiceImpl implements M_facilitytypeInter {
 		if (manuList.size() > 0)
 			return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<M_FacilityLevel> getFacilityLevels() {
+		return m_facilityLevelRepo.findByDeletedFalseOrderByLevelName();
+	}
+
+	@Override
+	public ArrayList<M_facilitytype> getFacilityTypesByBlock(Integer blockID) {
+		return new ArrayList<>(m_facilitytypeRepo.findFacilityTypesByBlock(blockID));
+	}
+
+	@Override
+	public ArrayList<M_facilitytype> getFacilityTypesByState(Integer stateID) {
+		return new ArrayList<>(m_facilitytypeRepo.findByStateID(stateID));
+	}
+
+	@Override
+	public boolean checkFacilityTypeNameExists(String facilityTypeName, Integer stateID) {
+		return m_facilitytypeRepo.existsByFacilityTypeNameAndStateIDAndDeletedFalse(facilityTypeName, stateID);
 	}
 
 }

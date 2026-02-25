@@ -26,14 +26,17 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
 import com.iemr.admin.data.parkingPlace.M_Parkingplace;
+import com.iemr.admin.data.store.FacilityVillageMapping;
 import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_facilityMap;
 import com.iemr.admin.data.store.V_FetchFacility;
 import com.iemr.admin.data.vanMaster.M_Van;
 import com.iemr.admin.repository.parkingPlace.ParkingPlaceRepository;
+import com.iemr.admin.repository.store.FacilityVillageMappingRepo;
 import com.iemr.admin.repository.store.MainStoreRepo;
 import com.iemr.admin.repository.store.V_FetchFacilityRepo;
 import com.iemr.admin.repository.vanMaster.VanMasterRepository;
@@ -53,6 +56,9 @@ public class StoreServiceImpl implements StoreService {
 	
 	@Autowired
 	private V_FetchFacilityRepo fetchFacilityRepo;
+
+	@Autowired
+	private FacilityVillageMappingRepo facilityVillageMappingRepo;
 
 	// @Autowired
 	// private SubStoreRepo subStoreRepo;
@@ -231,6 +237,109 @@ public class StoreServiceImpl implements StoreService {
 		if(manuList.size()>0)
 			return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID) {
+		return mainStoreRepo.findByBlockIDOrderByFacilityName(blockID);
+	}
+
+	@Override
+	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID) {
+		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, facilityLevelID);
+	}
+
+	@Transactional
+	@Override
+	public M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
+			List<Integer> childFacilityIDs) {
+		M_Facility savedFacility = mainStoreRepo.save(facility);
+
+		if (villageIDs != null && !villageIDs.isEmpty()) {
+			for (Integer villageID : villageIDs) {
+				FacilityVillageMapping mapping = new FacilityVillageMapping();
+				mapping.setFacilityID(savedFacility.getFacilityID());
+				mapping.setDistrictBranchID(villageID);
+				mapping.setCreatedBy(facility.getCreatedBy());
+				mapping.setDeleted(false);
+				facilityVillageMappingRepo.save(mapping);
+			}
+		}
+
+		if (childFacilityIDs != null && !childFacilityIDs.isEmpty()) {
+			for (Integer childID : childFacilityIDs) {
+				M_Facility child = mainStoreRepo.findByFacilityID(childID);
+				if (child != null) {
+					child.setParentFacilityID(savedFacility.getFacilityID());
+					child.setModifiedBy(facility.getCreatedBy());
+					mainStoreRepo.save(child);
+				}
+			}
+		}
+
+		return savedFacility;
+	}
+
+	@Override
+	public List<Integer> getMappedVillageIDs(Integer blockID) {
+		return facilityVillageMappingRepo.findMappedVillageIDsByBlockID(blockID);
+	}
+
+	@Override
+	public ArrayList<FacilityVillageMapping> getVillageMappingsByFacility(Integer facilityID) {
+		return facilityVillageMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+	}
+
+	@Override
+	public ArrayList<M_Facility> getChildFacilitiesByParent(Integer parentFacilityID) {
+		return mainStoreRepo.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(parentFacilityID);
+	}
+
+	@Transactional
+	@Override
+	public M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
+			List<Integer> childFacilityIDs) {
+		M_Facility existing = mainStoreRepo.findByFacilityID(facility.getFacilityID());
+		if (existing == null) {
+			throw new RuntimeException("Facility not found");
+		}
+
+		existing.setFacilityName(facility.getFacilityName());
+		existing.setFacilityDesc(facility.getFacilityDesc());
+		existing.setModifiedBy(facility.getModifiedBy());
+		M_Facility savedFacility = mainStoreRepo.save(existing);
+
+		if (villageIDs != null) {
+			List<FacilityVillageMapping> oldMappings = facilityVillageMappingRepo
+					.findByFacilityIDAndDeletedFalse(facility.getFacilityID());
+			for (FacilityVillageMapping old : oldMappings) {
+				old.setDeleted(true);
+				old.setModifiedBy(facility.getModifiedBy());
+				facilityVillageMappingRepo.save(old);
+			}
+			for (Integer villageID : villageIDs) {
+				FacilityVillageMapping mapping = new FacilityVillageMapping();
+				mapping.setFacilityID(savedFacility.getFacilityID());
+				mapping.setDistrictBranchID(villageID);
+				mapping.setCreatedBy(facility.getModifiedBy());
+				mapping.setDeleted(false);
+				facilityVillageMappingRepo.save(mapping);
+			}
+		}
+
+		if (childFacilityIDs != null) {
+			mainStoreRepo.clearParentFacilityID(facility.getFacilityID(), facility.getModifiedBy());
+			for (Integer childID : childFacilityIDs) {
+				M_Facility child = mainStoreRepo.findByFacilityID(childID);
+				if (child != null) {
+					child.setParentFacilityID(savedFacility.getFacilityID());
+					child.setModifiedBy(facility.getModifiedBy());
+					mainStoreRepo.save(child);
+				}
+			}
+		}
+
+		return savedFacility;
 	}
 
 }

@@ -40,5 +40,12 @@ public interface M_facilitytypeInter {
 
 	ArrayList<M_facilitytype> getFacilityTypesByRuralUrban(Integer providerServiceMapID, String ruralUrban);
 
+	ArrayList<com.iemr.admin.data.store.M_FacilityLevel> getFacilityLevels();
+
+	ArrayList<M_facilitytype> getFacilityTypesByBlock(Integer blockID);
+
+	ArrayList<M_facilitytype> getFacilityTypesByState(Integer stateID);
+
+	boolean checkFacilityTypeNameExists(String facilityTypeName, Integer stateID);
 
 }

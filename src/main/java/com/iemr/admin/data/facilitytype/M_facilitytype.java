@@ -88,6 +88,18 @@ public class M_facilitytype {
 	@Column(name = "RuralUrban")
 	private String ruralUrban;
 
+	@Expose
+	@Column(name = "FacilityLevelID")
+	private Integer facilityLevelID;
+
+	@Expose
+	@Column(name = "StateID")
+	private Integer stateID;
+
+	@Transient
+	@Expose
+	private Integer blockID;
+
 	public M_facilitytype() {
 		// TODO Auto-generated constructor stub
 	}
@@ -194,6 +206,30 @@ public class M_facilitytype {
 
 	public void setRuralUrban(String ruralUrban) {
 		this.ruralUrban = ruralUrban;
+	}
+
+	public Integer getFacilityLevelID() {
+		return facilityLevelID;
+	}
+
+	public void setFacilityLevelID(Integer facilityLevelID) {
+		this.facilityLevelID = facilityLevelID;
+	}
+
+	public Integer getStateID() {
+		return stateID;
+	}
+
+	public void setStateID(Integer stateID) {
+		this.stateID = stateID;
+	}
+
+	public Integer getBlockID() {
+		return blockID;
+	}
+
+	public void setBlockID(Integer blockID) {
+		this.blockID = blockID;
 	}
 
 }

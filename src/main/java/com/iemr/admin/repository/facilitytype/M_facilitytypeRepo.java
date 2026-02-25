@@ -46,4 +46,15 @@ public interface M_facilitytypeRepo extends CrudRepository<M_facilitytype, Integ
 	List<M_facilitytype> findByProviderServiceMapIDAndRuralUrban(@Param("psm") Integer psm,
 			@Param("ruralUrban") String ruralUrban);
 
+	@Query("SELECT DISTINCT ft FROM M_facilitytype ft WHERE ft.facilityTypeID IN " +
+			"(SELECT DISTINCT f.facilityTypeID FROM com.iemr.admin.data.store.M_Facility f " +
+			"WHERE f.blockID = :blockID AND f.deleted = false) " +
+			"AND ft.deleted = false ORDER BY ft.facilityTypeName")
+	List<M_facilitytype> findFacilityTypesByBlock(@Param("blockID") Integer blockID);
+
+	@Query("SELECT f FROM M_facilitytype f WHERE f.stateID = :stateID ORDER BY f.facilityTypeName")
+	List<M_facilitytype> findByStateID(@Param("stateID") Integer stateID);
+
+	boolean existsByFacilityTypeNameAndStateIDAndDeletedFalse(String facilityTypeName, Integer stateID);
+
 }

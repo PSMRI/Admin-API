@@ -24,6 +24,7 @@ package com.iemr.admin.service.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.iemr.admin.data.store.FacilityVillageMapping;
 import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_facilityMap;
 import com.iemr.admin.data.store.V_FetchFacility;
@@ -54,9 +55,19 @@ public interface StoreService {
 	List<V_FetchFacility> getMapStore(V_FetchFacility facilitymap);
 
 	Boolean checkStoreCode(M_Facility manufacturer);
-	
-	
-	
 
-	
+	ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID);
+
+	ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID);
+
+	M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, List<Integer> childFacilityIDs);
+
+	List<Integer> getMappedVillageIDs(Integer blockID);
+
+	ArrayList<FacilityVillageMapping> getVillageMappingsByFacility(Integer facilityID);
+
+	ArrayList<M_Facility> getChildFacilitiesByParent(Integer parentFacilityID);
+
+	M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, List<Integer> childFacilityIDs);
+
 }
