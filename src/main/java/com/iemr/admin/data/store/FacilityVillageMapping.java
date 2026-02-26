@@ -39,10 +39,6 @@ public class FacilityVillageMapping {
     private String villageName;
 
     @Expose
-    @Column(name = "ProviderServiceMapID")
-    private Integer providerServiceMapID = 0;
-
-    @Expose
     @Column(name = "Deleted", insertable = true, updatable = true)
     private Boolean deleted = false;
 
