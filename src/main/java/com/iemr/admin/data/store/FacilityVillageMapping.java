@@ -43,8 +43,8 @@ public class FacilityVillageMapping {
     private Integer providerServiceMapID = 0;
 
     @Expose
-    @Column(name = "Deleted", insertable = false, updatable = true)
-    private Boolean deleted;
+    @Column(name = "Deleted", insertable = true, updatable = true)
+    private Boolean deleted = false;
 
     @Expose
     @Column(name = "CreatedBy")

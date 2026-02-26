@@ -241,7 +241,7 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	public ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID) {
-		return mainStoreRepo.findByBlockIDOrderByFacilityName(blockID);
+		return mainStoreRepo.findByBlockIDAndDeletedFalseOrderByFacilityName(blockID);
 	}
 
 	@Override
