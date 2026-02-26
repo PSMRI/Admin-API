@@ -35,7 +35,7 @@ public class FacilityVillageMapping {
     private Integer districtBranchID;
 
     @Expose
-    @Formula("(SELECT dbm.VillageName FROM m_DistrictBranchMapping dbm WHERE dbm.DistrictBranchID = districtBranchID)")
+    @Formula("(SELECT dbm.VillageName FROM m_DistrictBranchMapping dbm WHERE dbm.DistrictBranchID = {alias}.DistrictBranchID)")
     private String villageName;
 
     @Expose
