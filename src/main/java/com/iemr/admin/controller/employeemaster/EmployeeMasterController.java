@@ -1856,6 +1856,7 @@ public class EmployeeMasterController {
 			usrRole.setBlockName(pre.getBlockName());
 			usrRole.setVillageID(pre.getVillageID());
 			usrRole.setVillageName(pre.getVillageName());
+			usrRole.setFacilityID(pre.getFacilityID());
 
 			if (pre.getTeleConsultation() != null) {
 				usrRole.setTeleConsultation(pre.getTeleConsultation());
