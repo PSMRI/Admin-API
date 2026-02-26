@@ -31,7 +31,8 @@ public class Previleges1097_3 {
 	private String blockName;
 	private String[] villageID;
 	private String[] villageName;
-	
+	private Integer facilityID;
+
 	public Integer getProviderServiceMapID() {
 		return providerServiceMapID;
 	}
@@ -74,8 +75,10 @@ public class Previleges1097_3 {
 	public void setVillageName(String[] villageName) {
 		this.villageName = villageName;
 	}
-	
-	
-	
-	
+	public Integer getFacilityID() {
+		return facilityID;
+	}
+	public void setFacilityID(Integer facilityID) {
+		this.facilityID = facilityID;
+	}
 }

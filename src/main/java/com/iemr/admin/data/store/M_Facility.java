@@ -90,6 +90,10 @@ public class M_Facility {
 	@Expose
 	@Column(name="ParentFacilityID")
 	private Integer parentFacilityID;
+
+	@Expose
+	@Column(name="RuralUrban")
+	private String ruralUrban;
  
 	@Expose
 	@Column(name="Deleted",insertable = false, updatable = true)
@@ -246,6 +250,14 @@ public class M_Facility {
 
 	public void setParentFacilityID(Integer parentFacilityID) {
 		this.parentFacilityID = parentFacilityID;
+	}
+
+	public String getRuralUrban() {
+		return ruralUrban;
+	}
+
+	public void setRuralUrban(String ruralUrban) {
+		this.ruralUrban = ruralUrban;
 	}
 
 	public Boolean getDeleted() {

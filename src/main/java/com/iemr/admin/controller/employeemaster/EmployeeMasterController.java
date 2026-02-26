@@ -1810,6 +1810,7 @@ public class EmployeeMasterController {
 					resDataMap1.setBlockName(previl.getBlockName());
 					resDataMap1.setVillageID(previl.getVillageID());
 					resDataMap1.setVillageName(previl.getVillageName());
+					resDataMap1.setFacilityID(previl.getFacilityID());
 					resList1.add(resDataMap1);
 
 				}

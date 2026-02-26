@@ -98,6 +98,9 @@ public class M_UserServiceRoleMapping2 {
 	@Expose
 	@Column(name = "VillageName")
 	private String villageNameDb;
+	@Expose
+	@Column(name = "FacilityID")
+	private Integer facilityID;
 	@Transient
 	private String[] villageID;
 	@Transient

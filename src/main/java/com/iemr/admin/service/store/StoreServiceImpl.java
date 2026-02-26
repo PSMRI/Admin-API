@@ -245,8 +245,8 @@ public class StoreServiceImpl implements StoreService {
 	}
 
 	@Override
-	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID) {
-		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, facilityLevelID);
+	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID, String ruralUrban) {
+		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, facilityLevelID, ruralUrban);
 	}
 
 	@Transactional

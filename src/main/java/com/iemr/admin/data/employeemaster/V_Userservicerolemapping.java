@@ -385,5 +385,5 @@ public class V_Userservicerolemapping {
 	public String toString() {
 		return outputMapper.gson().toJson(this);
 	}
-	
+
 }

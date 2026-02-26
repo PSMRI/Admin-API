@@ -341,7 +341,7 @@ public class StoreController {
 			com.iemr.admin.data.facilitytype.M_facilitytype reqObj = InputMapper.gson().fromJson(request,
 					com.iemr.admin.data.facilitytype.M_facilitytype.class);
 			ArrayList<M_Facility> data = storeService.getFacilitiesByBlockAndLevel(reqObj.getBlockID(),
-					reqObj.getFacilityLevelID());
+					reqObj.getFacilityLevelID(), reqObj.getRuralUrban());
 			response.setResponse(data.toString());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);

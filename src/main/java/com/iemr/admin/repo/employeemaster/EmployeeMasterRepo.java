@@ -126,4 +126,7 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 	@Query("SELECT u FROM M_UserServiceRoleMapping2 u WHERE u.uSRMappingID=:uSRMappingID")
 	M_UserServiceRoleMapping2 findByUSRMappingID(@Param("uSRMappingID") Integer uSRMappingID);
 
+	@Query("SELECT u FROM M_UserServiceRoleMapping2 u JOIN u.mRole rm WHERE u.facilityID IN :facilityIDs AND LOWER(rm.roleName) = 'asha' AND u.deleted = false")
+	ArrayList<M_UserServiceRoleMapping2> findAshaUsersByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
+
 }
