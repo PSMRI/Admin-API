@@ -28,19 +28,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
+import com.iemr.admin.data.store.M_FacilityLevel;
 import com.iemr.admin.service.facilitytype.M_facilitytypeInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
-
 
 @RestController
 public class FacilitytypeController {
@@ -186,4 +186,100 @@ public class FacilitytypeController {
 		return response.toString();
 
 	}
+
+	@Operation(summary = "Get facility types by rural/urban")
+	@RequestMapping(value = "/getFacilityTypesByRuralUrban", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getFacilityTypesByRuralUrban(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+
+		try {
+
+			M_facilitytype facilityDetails = InputMapper.gson().fromJson(request, M_facilitytype.class);
+
+			ArrayList<M_facilitytype> facilityData = m_facilitytypeInter
+					.getFacilityTypesByRuralUrban(facilityDetails.getProviderServiceMapID(),
+							facilityDetails.getRuralUrban());
+
+			response.setResponse(facilityData.toString());
+
+		} catch (Exception e) {
+
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+
+		}
+
+		return response.toString();
+	}
+
+	@Operation(summary = "Get all facility levels")
+	@RequestMapping(value = "/getFacilityLevels", headers = "Authorization", method = {
+			RequestMethod.GET }, produces = { "application/json" })
+	public String getFacilityLevels() {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			ArrayList<M_FacilityLevel> data = m_facilitytypeInter.getFacilityLevels();
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get facility types by block")
+	@RequestMapping(value = "/getFacilityTypesByBlock", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getFacilityTypesByBlock(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_facilitytype facilityDetails = InputMapper.gson().fromJson(request, M_facilitytype.class);
+			ArrayList<M_facilitytype> data = m_facilitytypeInter.getFacilityTypesByBlock(facilityDetails.getBlockID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get facility types by state")
+	@RequestMapping(value = "/getFacilityTypesByState", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getFacilityTypesByState(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_facilitytype facilityDetails = InputMapper.gson().fromJson(request, M_facilitytype.class);
+			ArrayList<M_facilitytype> data = m_facilitytypeInter.getFacilityTypesByState(facilityDetails.getStateID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Check if facility type name exists in state")
+	@RequestMapping(value = "/checkFacilityTypeName", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String checkFacilityTypeName(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_facilitytype facilityDetails = InputMapper.gson().fromJson(request, M_facilitytype.class);
+			boolean exists = m_facilitytypeInter.checkFacilityTypeNameExists(
+					facilityDetails.getFacilityTypeName(), facilityDetails.getStateID());
+			response.setResponse(String.valueOf(exists));
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 }

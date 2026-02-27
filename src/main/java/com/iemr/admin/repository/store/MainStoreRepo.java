@@ -24,6 +24,7 @@ package com.iemr.admin.repository.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -55,6 +56,19 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer>{
 	List<M_Facility> findByFacilityCodeAndProviderServiceMapID(String facilityCode, Integer providerServiceMapID);
 	
 	M_Facility findByFacilityID(Integer facilityID);
-	
+
+	ArrayList<M_Facility> findByBlockIDAndDeletedFalseOrderByFacilityName(Integer blockID);
+
+	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.facilityTypeID IN " +
+			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.facilityLevelID = :facilityLevelID " +
+			"AND ft.deleted = false) AND f.deleted = false AND f.parentFacilityID IS NULL ORDER BY f.facilityName")
+	ArrayList<M_Facility> findByBlockIDAndFacilityLevel(@Param("blockID") Integer blockID,
+			@Param("facilityLevelID") Integer facilityLevelID);
+
+	ArrayList<M_Facility> findByParentFacilityIDAndDeletedFalseOrderByFacilityName(Integer parentFacilityID);
+
+	@Modifying
+	@Query("UPDATE M_Facility f SET f.parentFacilityID = NULL, f.modifiedBy = :modifiedBy WHERE f.parentFacilityID = :parentFacilityID")
+	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID, @Param("modifiedBy") String modifiedBy);
 
 }

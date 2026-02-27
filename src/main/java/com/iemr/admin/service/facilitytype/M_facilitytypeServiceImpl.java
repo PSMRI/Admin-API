@@ -28,46 +28,76 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
-import com.iemr.admin.data.manufacturer.M_Manufacturer;
+import com.iemr.admin.data.store.M_FacilityLevel;
+import com.iemr.admin.repository.facilitytype.M_FacilityLevelRepo;
 import com.iemr.admin.repository.facilitytype.M_facilitytypeRepo;
 
 @Service
-public class M_facilitytypeServiceImpl implements M_facilitytypeInter{
+public class M_facilitytypeServiceImpl implements M_facilitytypeInter {
 
 	@Autowired
 	private M_facilitytypeRepo m_facilitytypeRepo;
 
+	@Autowired
+	private M_FacilityLevelRepo m_facilityLevelRepo;
+
 	@Override
 	public ArrayList<M_facilitytype> getAllFicilityData(Integer providerServiceMapID) {
-		ArrayList<M_facilitytype> data=m_facilitytypeRepo.getAllFicilityData(providerServiceMapID);
+		ArrayList<M_facilitytype> data = m_facilitytypeRepo.getAllFicilityData(providerServiceMapID);
 		return data;
 	}
 
 	@Override
+	public ArrayList<M_facilitytype> getFacilityTypesByRuralUrban(Integer providerServiceMapID, String ruralUrban) {
+		return new ArrayList<>(m_facilitytypeRepo.findByProviderServiceMapIDAndRuralUrban(providerServiceMapID, ruralUrban));
+	}
+
+	@Override
 	public ArrayList<M_facilitytype> addAllFicilityData(List<M_facilitytype> addfacilityDetails) {
-		ArrayList<M_facilitytype> data=(ArrayList<M_facilitytype>) m_facilitytypeRepo.saveAll(addfacilityDetails);
+		ArrayList<M_facilitytype> data = (ArrayList<M_facilitytype>) m_facilitytypeRepo.saveAll(addfacilityDetails);
 		return data;
 	}
 
 	@Override
 	public M_facilitytype editAllFicilityData(Integer facilityTypeID) {
-		M_facilitytype data=m_facilitytypeRepo.findByFacilityTypeID(facilityTypeID); 
+		M_facilitytype data = m_facilitytypeRepo.findByFacilityTypeID(facilityTypeID);
 		return data;
 	}
 
 	@Override
 	public M_facilitytype updateFacilityData(M_facilitytype allFacilityData) {
-		M_facilitytype data=m_facilitytypeRepo.save(allFacilityData);
+		M_facilitytype data = m_facilitytypeRepo.save(allFacilityData);
 		return data;
 	}
 
 	@Override
 	public Boolean checkFacilityTypeCode(M_facilitytype manufacturer) {
 		// TODO Auto-generated method stub
-		List<M_facilitytype> manuList=m_facilitytypeRepo.findByFacilityTypeCodeAndProviderServiceMapID(manufacturer.getFacilityTypeCode() ,manufacturer.getProviderServiceMapID());
-		if(manuList.size()>0)
+		List<M_facilitytype> manuList = m_facilitytypeRepo.findByFacilityTypeCodeAndProviderServiceMapID(
+				manufacturer.getFacilityTypeCode(), manufacturer.getProviderServiceMapID());
+		if (manuList.size() > 0)
 			return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<M_FacilityLevel> getFacilityLevels() {
+		return m_facilityLevelRepo.findByDeletedFalseOrderByLevelName();
+	}
+
+	@Override
+	public ArrayList<M_facilitytype> getFacilityTypesByBlock(Integer blockID) {
+		return new ArrayList<>(m_facilitytypeRepo.findFacilityTypesByBlock(blockID));
+	}
+
+	@Override
+	public ArrayList<M_facilitytype> getFacilityTypesByState(Integer stateID) {
+		return new ArrayList<>(m_facilitytypeRepo.findByStateID(stateID));
+	}
+
+	@Override
+	public boolean checkFacilityTypeNameExists(String facilityTypeName, Integer stateID) {
+		return m_facilitytypeRepo.existsByFacilityTypeNameAndStateIDAndDeletedFalse(facilityTypeName, stateID);
 	}
 
 }
