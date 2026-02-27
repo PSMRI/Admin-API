@@ -75,4 +75,15 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 			}
 		}
 	}
+
+	@Override
+	public void deleteBySupervisorAndFacilities(Integer supervisorUserID, List<Integer> facilityIDs, String modifiedBy) {
+		ArrayList<AshaSupervisorMapping> mappings = ashaSupervisorMappingRepo
+				.findBySupervisorUserIDAndFacilityIDInAndDeletedFalse(supervisorUserID, facilityIDs);
+		for (AshaSupervisorMapping mapping : mappings) {
+			mapping.setDeleted(true);
+			mapping.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(mapping);
+		}
+	}
 }

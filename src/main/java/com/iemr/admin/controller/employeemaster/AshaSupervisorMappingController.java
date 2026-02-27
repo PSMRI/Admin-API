@@ -116,6 +116,28 @@ public class AshaSupervisorMappingController {
 		return response.toString();
 	}
 
+	@Operation(summary = "Delete ASHA supervisor mappings by supervisor and facility IDs")
+	@RequestMapping(value = "/userFacilityMapping/ashaSupervisorMapping/delete", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String deleteAshaSupervisorMapping(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			AshaSupervisorMapping reqObj = InputMapper.gson().fromJson(request, AshaSupervisorMapping.class);
+			Integer supervisorUserID = reqObj.getSupervisorUserID();
+			List<Integer> facilityIDs = reqObj.getFacilityIDs();
+			if (supervisorUserID != null && facilityIDs != null && !facilityIDs.isEmpty()) {
+				ashaSupervisorMappingService.deleteBySupervisorAndFacilities(supervisorUserID, facilityIDs, "Admin");
+				response.setResponse("Deleted successfully");
+			} else {
+				response.setError(5000, "supervisorUserID and facilityIDs are required");
+			}
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Get facility details by USR mapping ID")
 	@RequestMapping(value = "/userFacilityMapping/getFacilityByMappingID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

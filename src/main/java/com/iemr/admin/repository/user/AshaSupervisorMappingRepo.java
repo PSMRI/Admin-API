@@ -22,6 +22,7 @@
 package com.iemr.admin.repository.user;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -36,4 +37,6 @@ public interface AshaSupervisorMappingRepo extends CrudRepository<AshaSupervisor
 	ArrayList<AshaSupervisorMapping> findByFacilityIDAndDeletedFalse(Integer facilityID);
 
 	ArrayList<AshaSupervisorMapping> findBySupervisorUserIDAndFacilityIDAndDeletedFalse(Integer supervisorUserID, Integer facilityID);
+
+	ArrayList<AshaSupervisorMapping> findBySupervisorUserIDAndFacilityIDInAndDeletedFalse(Integer supervisorUserID, List<Integer> facilityIDs);
 }

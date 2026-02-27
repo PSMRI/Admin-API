@@ -116,7 +116,18 @@ public class FacilitytypeController {
 			M_facilitytype allFacilityData = m_facilitytypeInter
 					.editAllFicilityData(facilityDetails.getFacilityTypeID());
 
-			allFacilityData.setFacilityTypeDesc(facilityDetails.getFacilityTypeDesc());
+			if (facilityDetails.getFacilityTypeName() != null) {
+				allFacilityData.setFacilityTypeName(facilityDetails.getFacilityTypeName());
+			}
+			if (facilityDetails.getRuralUrban() != null) {
+				allFacilityData.setRuralUrban(facilityDetails.getRuralUrban());
+			}
+			if (facilityDetails.getFacilityLevelID() != null) {
+				allFacilityData.setFacilityLevelID(facilityDetails.getFacilityLevelID());
+			}
+			if (facilityDetails.getFacilityTypeDesc() != null) {
+				allFacilityData.setFacilityTypeDesc(facilityDetails.getFacilityTypeDesc());
+			}
 			allFacilityData.setModifiedBy(facilityDetails.getModifiedBy());
 
 			M_facilitytype saveFacilityData = m_facilitytypeInter.updateFacilityData(allFacilityData);

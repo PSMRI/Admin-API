@@ -36,4 +36,6 @@ public interface AshaSupervisorMappingService {
 	ArrayList<M_UserServiceRoleMapping2> getAshasByFacility(List<Integer> facilityIDs);
 
 	void deleteMappings(List<Long> ids, String modifiedBy);
+
+	void deleteBySupervisorAndFacilities(Integer supervisorUserID, List<Integer> facilityIDs, String modifiedBy);
 }
