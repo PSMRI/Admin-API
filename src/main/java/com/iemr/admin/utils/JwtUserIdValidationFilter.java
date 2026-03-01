@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.iemr.admin.utils.http.AuthorizationHeaderRequestWrapper;
 
 import jakarta.servlet.Filter;
@@ -36,6 +35,17 @@ public class JwtUserIdValidationFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals("/health") || path.equals("/version") || 
+		    path.equals(contextPath + "/health") || path.equals(contextPath + "/version")) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
+
 		String origin = request.getHeader("Origin");
 		String method = request.getMethod();
 		String uri = request.getRequestURI();
@@ -64,30 +74,6 @@ public class JwtUserIdValidationFilter implements Filter {
 				return;
 			}
 		}
-
-		// Determine request path/context for later checks
-		String path = request.getRequestURI();
-		String contextPath = request.getContextPath();
-
-		// Set CORS headers and handle OPTIONS request only if origin is valid and allowed
-		if (origin != null && isOriginAllowed(origin)) {
-			addCorsHeaders(response, origin);
-			logger.info("Origin Validated | Origin: {} | Method: {} | URI: {}", origin, method, uri);
-			
-			if ("OPTIONS".equalsIgnoreCase(method)) {
-				// OPTIONS (preflight) - respond with full allowed methods
-				response.setStatus(HttpServletResponse.SC_OK);
-				return;
-			}
-		} else {
-			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
-			
-			if ("OPTIONS".equalsIgnoreCase(method)) {
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed for OPTIONS request");
-				return;
-			}
-		}
-
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
 		// Log cookies for debugging
@@ -157,12 +143,9 @@ public class JwtUserIdValidationFilter implements Filter {
 			logger.warn("No valid authentication token found");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
-			logger.warn("No valid authentication token found");
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
-
 		} catch (Exception e) {
 			logger.error("Authorization error: ", e);
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 		}
 	}
 

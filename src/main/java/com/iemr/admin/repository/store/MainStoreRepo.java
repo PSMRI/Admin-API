@@ -58,7 +58,7 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 
 	M_Facility findByFacilityID(Integer facilityID);
 
-	ArrayList<M_Facility> findByBlockIDOrderByFacilityName(Integer blockID);
+	ArrayList<M_Facility> findByBlockIDAndDeletedFalseOrderByFacilityName(Integer blockID);
 
 	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.ruralUrban = :ruralUrban AND f.facilityTypeID IN " +
 			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.facilityLevelID = :facilityLevelID " +

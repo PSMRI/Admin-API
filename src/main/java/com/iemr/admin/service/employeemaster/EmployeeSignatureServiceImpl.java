@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.repo.employeemaster.EmployeeSignatureRepo;
+import org.json.JSONObject;
 
 @Service
 public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
@@ -71,6 +72,8 @@ public class EmployeeSignatureServiceImpl implements EmployeeSignatureService {
 	public Boolean isSignatureActive(Long userID) {
 		return employeeSignatureRepo.countByUserIDAndSignatureNotNullAndDeletedFalse(userID) > 0;
 	}
+
+
 
 	@Override
 	public EmployeeSignature updateUserSignatureStatus(String activateUser) {
