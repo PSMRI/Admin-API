@@ -78,6 +78,18 @@ public class M_Facility {
 	@Expose
 	@Column(name="ProviderServiceMapID")
 	private Integer providerServiceMapID;
+	@Expose
+	@Column(name="StateID")
+	private Integer stateID;
+	@Expose
+	@Column(name="DistrictID")
+	private Integer districtID;
+	@Expose
+	@Column(name="BlockID")
+	private Integer blockID;
+	@Expose
+	@Column(name="ParentFacilityID")
+	private Integer parentFacilityID;
  
 	@Expose
 	@Column(name="Deleted",insertable = false, updatable = true)
@@ -202,6 +214,38 @@ public class M_Facility {
 
 	public void setProviderServiceMapID(Integer providerServiceMapID) {
 		this.providerServiceMapID = providerServiceMapID;
+	}
+
+	public Integer getStateID() {
+		return stateID;
+	}
+
+	public void setStateID(Integer stateID) {
+		this.stateID = stateID;
+	}
+
+	public Integer getDistrictID() {
+		return districtID;
+	}
+
+	public void setDistrictID(Integer districtID) {
+		this.districtID = districtID;
+	}
+
+	public Integer getBlockID() {
+		return blockID;
+	}
+
+	public void setBlockID(Integer blockID) {
+		this.blockID = blockID;
+	}
+
+	public Integer getParentFacilityID() {
+		return parentFacilityID;
+	}
+
+	public void setParentFacilityID(Integer parentFacilityID) {
+		this.parentFacilityID = parentFacilityID;
 	}
 
 	public Boolean getDeleted() {

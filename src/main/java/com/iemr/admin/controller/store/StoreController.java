@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iemr.admin.data.store.FacilityHierarchyRequest;
+import com.iemr.admin.data.store.FacilityVillageMapping;
 import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_facilityMap;
 import com.iemr.admin.data.store.V_FetchFacility;
@@ -286,6 +288,23 @@ public class StoreController {
 
 	}
 
+	@Operation(summary = "Get facilities by block/taluk")
+	@RequestMapping(value = "/getFacilitiesByBlock", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String getFacilitiesByBlock(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility facility = InputMapper.gson().fromJson(request, M_Facility.class);
+			ArrayList<M_Facility> data = storeService.getFacilitiesByBlock(facility.getBlockID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Check store code")
 	@RequestMapping(value = "/checkStoreCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -310,5 +329,111 @@ public class StoreController {
 
 		return response.toString();
 
+	}
+
+	@Operation(summary = "Get facilities by block and facility level")
+	@RequestMapping(value = "/getFacilitiesByBlockAndLevel", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getFacilitiesByBlockAndLevel(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			com.iemr.admin.data.facilitytype.M_facilitytype reqObj = InputMapper.gson().fromJson(request,
+					com.iemr.admin.data.facilitytype.M_facilitytype.class);
+			ArrayList<M_Facility> data = storeService.getFacilitiesByBlockAndLevel(reqObj.getBlockID(),
+					reqObj.getFacilityLevelID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Create facility with hierarchy mapping")
+	@RequestMapping(value = "/createFacilityWithHierarchy", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String createFacilityWithHierarchy(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			FacilityHierarchyRequest reqObj = InputMapper.gson().fromJson(request, FacilityHierarchyRequest.class);
+			M_Facility savedFacility = storeService.createFacilityWithHierarchy(reqObj.getFacility(),
+					reqObj.getVillageIDs(), reqObj.getChildFacilityIDs());
+			response.setResponse(savedFacility.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get village IDs already mapped to facilities in a block")
+	@RequestMapping(value = "/getMappedVillageIDs", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getMappedVillageIDs(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility facility = InputMapper.gson().fromJson(request, M_Facility.class);
+			List<Integer> mappedIDs = storeService.getMappedVillageIDs(facility.getBlockID());
+			response.setResponse(mappedIDs.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get village mappings for a facility")
+	@RequestMapping(value = "/getVillageMappingsByFacility", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getVillageMappingsByFacility(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility facility = InputMapper.gson().fromJson(request, M_Facility.class);
+			ArrayList<FacilityVillageMapping> mappings = storeService.getVillageMappingsByFacility(facility.getFacilityID());
+			response.setResponse(mappings.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get child facilities by parent facility ID")
+	@RequestMapping(value = "/getChildFacilitiesByParent", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getChildFacilitiesByParent(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility facility = InputMapper.gson().fromJson(request, M_Facility.class);
+			ArrayList<M_Facility> children = storeService.getChildFacilitiesByParent(facility.getFacilityID());
+			response.setResponse(children.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Update facility with hierarchy mapping")
+	@RequestMapping(value = "/updateFacilityWithHierarchy", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String updateFacilityWithHierarchy(@RequestBody String request) {
+
+		OutputResponse response = new OutputResponse();
+		try {
+			FacilityHierarchyRequest reqObj = InputMapper.gson().fromJson(request, FacilityHierarchyRequest.class);
+			M_Facility updatedFacility = storeService.updateFacilityWithHierarchy(reqObj.getFacility(),
+					reqObj.getVillageIDs(), reqObj.getChildFacilityIDs());
+			response.setResponse(updatedFacility.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
 	}
 }

@@ -35,7 +35,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 @Entity
-@Table(name="m_facilitytype")
+@Table(name = "m_facilitytype")
 public class M_facilitytype {
 
 	@Id
@@ -43,59 +43,67 @@ public class M_facilitytype {
 	@Column(name = "FacilityTypeID")
 	@Expose
 	private Integer facilityTypeID;
-	
+
 	@Column(name = "FacilityTypeName")
 	@Expose
 	private String facilityTypeName;
-	
+
 	@Column(name = "FacilityTypeDesc")
 	@Expose
 	private String facilityTypeDesc;
-	
+
 	@Column(name = "FacilityTypeCode")
 	@Expose
 	private String facilityTypeCode;
-	
+
 	@Column(name = "Status")
 	@Expose
 	private String status;
-	
+
 	@Column(name = "ProviderServiceMapID")
 	@Expose
 	private Integer providerServiceMapID;
-	
+
 	@Column(name = "Deleted", insertable = false, updatable = true)
 	@Expose
 	private Boolean deleted;
-	
+
 	@Column(name = "CreatedBy")
 	@Expose
 	private String createdBy;
-	
+
 	@Column(name = "CreatedDate", insertable = false, updatable = false)
 	@Expose
 	private Timestamp createdDate;
-	
+
 	@Column(name = "ModifiedBy")
 	@Expose
 	private String modifiedBy;
-	
+
 	@Column(name = "LastModDate", insertable = false, updatable = false)
 	@Expose
 	private Timestamp lastModDate;
-	
-	
-	
+
+	@Expose
+	@Column(name = "RuralUrban")
+	private String ruralUrban;
+
+	@Expose
+	@Column(name = "FacilityLevelID")
+	private Integer facilityLevelID;
+
+	@Expose
+	@Column(name = "StateID")
+	private Integer stateID;
+
+	@Transient
+	@Expose
+	private Integer blockID;
+
 	public M_facilitytype() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	public Integer getFacilityTypeID() {
 		return facilityTypeID;
 	}
@@ -160,8 +168,6 @@ public class M_facilitytype {
 		this.createdBy = createdBy;
 	}
 
-	
-
 	public String getModifiedBy() {
 		return modifiedBy;
 	}
@@ -170,43 +176,21 @@ public class M_facilitytype {
 		this.modifiedBy = modifiedBy;
 	}
 
-	
-
 	public Timestamp getCreatedDate() {
 		return createdDate;
 	}
-
-
-
-
-
-
 
 	public void setCreatedDate(Timestamp createdDate) {
 		this.createdDate = createdDate;
 	}
 
-
-
-
-
-
-
 	public Timestamp getLastModDate() {
 		return lastModDate;
 	}
 
-
-
-
-
-
-
 	public void setLastModDate(Timestamp lastModDate) {
 		this.lastModDate = lastModDate;
 	}
-
-
 
 	@Transient
 	private OutputMapper outputMapper = new OutputMapper();
@@ -214,6 +198,38 @@ public class M_facilitytype {
 	@Override
 	public String toString() {
 		return outputMapper.gson().toJson(this);
+	}
+
+	public String getRuralUrban() {
+		return ruralUrban;
+	}
+
+	public void setRuralUrban(String ruralUrban) {
+		this.ruralUrban = ruralUrban;
+	}
+
+	public Integer getFacilityLevelID() {
+		return facilityLevelID;
+	}
+
+	public void setFacilityLevelID(Integer facilityLevelID) {
+		this.facilityLevelID = facilityLevelID;
+	}
+
+	public Integer getStateID() {
+		return stateID;
+	}
+
+	public void setStateID(Integer stateID) {
+		this.stateID = stateID;
+	}
+
+	public Integer getBlockID() {
+		return blockID;
+	}
+
+	public void setBlockID(Integer blockID) {
+		this.blockID = blockID;
 	}
 
 }
