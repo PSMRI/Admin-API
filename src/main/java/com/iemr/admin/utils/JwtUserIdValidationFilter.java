@@ -19,6 +19,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtUserIdValidationFilter implements Filter {
 
+	private static final String HEALTH_ENDPOINT = "/health";
+	private static final String VERSION_ENDPOINT = "/version";
+
 	private final JwtAuthenticationUtil jwtAuthenticationUtil;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 	private final String allowedOrigins;
@@ -39,8 +42,8 @@ public class JwtUserIdValidationFilter implements Filter {
 		String contextPath = request.getContextPath();
 		
 		// FIRST: Check for health and version endpoints - skip ALL processing
-		if (path.equals("/health") || path.equals("/version") || 
-		    path.equals(contextPath + "/health") || path.equals(contextPath + "/version")) {
+		if (path.equals(HEALTH_ENDPOINT) || path.equals(VERSION_ENDPOINT) || 
+		    path.equals(contextPath + HEALTH_ENDPOINT) || path.equals(contextPath + VERSION_ENDPOINT)) {
 			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
@@ -85,7 +88,9 @@ public class JwtUserIdValidationFilter implements Filter {
 				|| path.startsWith(contextPath + "/swagger-ui")
 				|| path.startsWith(contextPath + "/v3/api-docs")
 				|| path.startsWith(contextPath + "/user/refreshToken")
-				|| path.startsWith(contextPath + "/public")) {
+				|| path.startsWith(contextPath + "/public")
+			|| path.equals(contextPath + HEALTH_ENDPOINT)
+			|| path.equals(contextPath + VERSION_ENDPOINT)) {
 			logger.info("Skipping filter for path: " + path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
