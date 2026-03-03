@@ -87,6 +87,12 @@ public class M_UserServiceRoleMapping2 {
 	@Column(name = "WorkingLocationID")
 	private Integer workingLocationID;
 	@Expose
+	@Column(name = "StateID")
+	private Integer stateID;
+	@Expose
+	@Column(name = "DistrictID")
+	private Integer districtID;
+	@Expose
 	@Column(name = "Blockid")
 	private Integer blockID;
 	@Expose

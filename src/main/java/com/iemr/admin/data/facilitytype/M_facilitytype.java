@@ -109,7 +109,7 @@ public class M_facilitytype {
 	}
 
 	public void setFacilityTypeID(Integer facilityTypeID) {
-		facilityTypeID = facilityTypeID;
+		this.facilityTypeID = facilityTypeID;
 	}
 
 	public String getFacilityTypeName() {

@@ -24,7 +24,9 @@ package com.iemr.admin.repository.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.employeemaster.AshaSupervisorMapping;
@@ -39,4 +41,21 @@ public interface AshaSupervisorMappingRepo extends CrudRepository<AshaSupervisor
 	ArrayList<AshaSupervisorMapping> findBySupervisorUserIDAndFacilityIDAndDeletedFalse(Integer supervisorUserID, Integer facilityID);
 
 	ArrayList<AshaSupervisorMapping> findBySupervisorUserIDAndFacilityIDInAndDeletedFalse(Integer supervisorUserID, List<Integer> facilityIDs);
+
+	AshaSupervisorMapping findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedTrue(Integer supervisorUserID, Integer ashaUserID, Integer facilityID);
+
+	/**
+	 * Get active supervisor mappings at a facility, excluding mappings where
+	 * the supervisor user has been soft-deleted in m_User.
+	 * Prevents deleted supervisors from blocking ASHA reassignment.
+	 */
+	@Query(value = "SELECT asm.*, "
+			+ "(SELECT u.FirstName FROM m_User u WHERE u.UserID = asm.ashaUserID) AS ashaFirstName, "
+			+ "(SELECT u.LastName FROM m_User u WHERE u.UserID = asm.ashaUserID) AS ashaLastName "
+			+ "FROM asha_supervisor_mapping asm "
+			+ "JOIN m_User su ON su.UserID = asm.supervisorUserID "
+			+ "WHERE asm.facilityID = :facilityID "
+			+ "AND asm.deleted = false "
+			+ "AND su.Deleted = false", nativeQuery = true)
+	ArrayList<AshaSupervisorMapping> findActiveMappingsByFacilityID(@Param("facilityID") Integer facilityID);
 }

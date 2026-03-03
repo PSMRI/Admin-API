@@ -138,6 +138,27 @@ public class AshaSupervisorMappingController {
 		return response.toString();
 	}
 
+	@Operation(summary = "Restore soft-deleted ASHA supervisor mappings by IDs")
+	@RequestMapping(value = "/userFacilityMapping/ashaSupervisorMapping/restore", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String restoreAshaSupervisorMapping(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			AshaSupervisorMapping reqObj = InputMapper.gson().fromJson(request, AshaSupervisorMapping.class);
+			List<Long> ids = reqObj.getIds();
+			if (ids != null && !ids.isEmpty()) {
+				ashaSupervisorMappingService.restoreMappings(ids, "Admin");
+				response.setResponse("Restored successfully");
+			} else {
+				response.setError(5000, "ids are required");
+			}
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Get facility details by USR mapping ID")
 	@RequestMapping(value = "/userFacilityMapping/getFacilityByMappingID", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
@@ -148,14 +169,22 @@ public class AshaSupervisorMappingController {
 			Integer mappingID = reqObj.getuSRMappingID();
 			if (mappingID != null) {
 				M_UserServiceRoleMapping2 mapping = employeeMasterRepo.findById(mappingID).orElse(null);
+				// Skip if mapping is soft-deleted or has no facility
+				if (mapping != null && Boolean.TRUE.equals(mapping.getDeleted())) {
+					mapping = null;
+				}
 				if (mapping != null && mapping.getFacilityID() != null) {
-					M_Facility facility = mainStoreRepo.findById(mapping.getFacilityID()).orElse(null);
+					// Use deleted filter to exclude soft-deleted facilities
+					M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(mapping.getFacilityID(), false);
 					StringBuilder json = new StringBuilder("{");
 					json.append("\"facilityID\": ").append(mapping.getFacilityID());
 					if (facility != null) {
 						json.append(", \"facilityName\": \"").append(facility.getFacilityName() != null ? facility.getFacilityName() : "").append("\"");
 						json.append(", \"facilityTypeID\": ").append(facility.getFacilityTypeID());
 						json.append(", \"ruralUrban\": \"").append(facility.getRuralUrban() != null ? facility.getRuralUrban() : "").append("\"");
+					} else {
+						// Facility was deleted — return null so frontend knows
+						json = new StringBuilder("{\"facilityID\": null, \"facilityDeleted\": true");
 					}
 					json.append("}");
 					response.setResponse(json.toString());

@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.iemr.admin.data.employeemaster.AshaSupervisorMapping;
 import com.iemr.admin.data.employeemaster.M_UserServiceRoleMapping2;
@@ -45,18 +46,30 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 	@Autowired
 	private EmployeeMasterRepo employeeMasterRepo;
 
+	@Transactional
 	@Override
 	public ArrayList<AshaSupervisorMapping> saveAshaSupervisorMappings(List<AshaSupervisorMapping> mappings) {
 		ArrayList<AshaSupervisorMapping> savedMappings = new ArrayList<>();
 		for (AshaSupervisorMapping mapping : mappings) {
-			savedMappings.add(ashaSupervisorMappingRepo.save(mapping));
+			// Check for existing soft-deleted row and reuse it
+			AshaSupervisorMapping softDeleted = ashaSupervisorMappingRepo
+					.findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedTrue(
+							mapping.getSupervisorUserID(), mapping.getAshaUserID(), mapping.getFacilityID());
+			if (softDeleted != null) {
+				softDeleted.setDeleted(false);
+				softDeleted.setModifiedBy(mapping.getCreatedBy());
+				savedMappings.add(ashaSupervisorMappingRepo.save(softDeleted));
+			} else {
+				savedMappings.add(ashaSupervisorMappingRepo.save(mapping));
+			}
 		}
 		return savedMappings;
 	}
 
 	@Override
 	public ArrayList<AshaSupervisorMapping> getSupervisorMappingByFacility(Integer facilityID) {
-		return ashaSupervisorMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+		// Use native query that also filters out mappings where supervisor user is deleted
+		return ashaSupervisorMappingRepo.findActiveMappingsByFacilityID(facilityID);
 	}
 
 	@Override
@@ -64,6 +77,7 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 		return employeeMasterRepo.findAshaUsersByFacilityIDs(facilityIDs);
 	}
 
+	@Transactional
 	@Override
 	public void deleteMappings(List<Long> ids, String modifiedBy) {
 		for (Long id : ids) {
@@ -76,6 +90,7 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 		}
 	}
 
+	@Transactional
 	@Override
 	public void deleteBySupervisorAndFacilities(Integer supervisorUserID, List<Integer> facilityIDs, String modifiedBy) {
 		ArrayList<AshaSupervisorMapping> mappings = ashaSupervisorMappingRepo
@@ -84,6 +99,19 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 			mapping.setDeleted(true);
 			mapping.setModifiedBy(modifiedBy);
 			ashaSupervisorMappingRepo.save(mapping);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void restoreMappings(List<Long> ids, String modifiedBy) {
+		for (Long id : ids) {
+			AshaSupervisorMapping mapping = ashaSupervisorMappingRepo.findById(id).orElse(null);
+			if (mapping != null) {
+				mapping.setDeleted(false);
+				mapping.setModifiedBy(modifiedBy);
+				ashaSupervisorMappingRepo.save(mapping);
+			}
 		}
 	}
 }

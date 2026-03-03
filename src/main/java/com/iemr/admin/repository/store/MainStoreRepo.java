@@ -69,6 +69,13 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 
 	ArrayList<M_Facility> findByParentFacilityIDAndDeletedFalseOrderByFacilityName(Integer parentFacilityID);
 
+	List<M_Facility> findByFacilityTypeIDAndDeletedFalse(Integer facilityTypeID);
+
+	boolean existsByFacilityNameAndBlockIDAndDeletedFalse(String facilityName, Integer blockID);
+
+	@Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM M_Facility f WHERE f.facilityName = :facilityName AND f.blockID = :blockID AND f.facilityID != :facilityID AND f.deleted = false")
+	boolean existsByFacilityNameAndBlockIDAndNotFacilityID(@Param("facilityName") String facilityName, @Param("blockID") Integer blockID, @Param("facilityID") Integer facilityID);
+
 	@Modifying
 	@Query("UPDATE M_Facility f SET f.parentFacilityID = NULL, f.modifiedBy = :modifiedBy WHERE f.parentFacilityID = :parentFacilityID")
 	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID,

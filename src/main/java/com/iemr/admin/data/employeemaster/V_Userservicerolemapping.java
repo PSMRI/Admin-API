@@ -145,8 +145,20 @@ public class V_Userservicerolemapping {
 	@Transient
 	private String[] villageID;
 	@Transient
-	private String[] villageName;   
-	
+	private String[] villageName;
+	@Transient
+	@Expose
+	private Integer facilityID;
+	@Transient
+	@Expose
+	private String facilityName;
+	@Transient
+	@Expose
+	private Integer facilityTypeID;
+	@Transient
+	@Expose
+	private String ruralUrban;
+
     @Expose
 	@Column(name="teleConsultation")
 	private String teleConsultation;

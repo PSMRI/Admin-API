@@ -129,4 +129,19 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 	@Query("SELECT u FROM M_UserServiceRoleMapping2 u JOIN u.mRole rm WHERE u.facilityID IN :facilityIDs AND LOWER(rm.roleName) = 'asha' AND u.deleted = false")
 	ArrayList<M_UserServiceRoleMapping2> findAshaUsersByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
 
+	@Query(value = "SELECT usrm.USRMappingID, usrm.StateID, s.StateName, usrm.DistrictID, d.DistrictName, "
+			+ "usrm.Blockid, usrm.BlockName "
+			+ "FROM m_userservicerolemapping usrm "
+			+ "LEFT JOIN m_state s ON usrm.StateID = s.StateID "
+			+ "LEFT JOIN m_district d ON usrm.DistrictID = d.DistrictID "
+			+ "WHERE usrm.USRMappingID IN :mappingIDs", nativeQuery = true)
+	List<Object[]> getDirectStateDistrictByMappingIDs(@Param("mappingIDs") List<Integer> mappingIDs);
+
+	@Query(value = "SELECT usrm.USRMappingID, usrm.FacilityID, f.FacilityName, f.FacilityTypeID, ft.RuralUrban "
+			+ "FROM m_userservicerolemapping usrm "
+			+ "LEFT JOIN m_facility f ON usrm.FacilityID = f.FacilityID AND f.Deleted = false "
+			+ "LEFT JOIN m_facilitytype ft ON f.FacilityTypeID = ft.FacilityTypeID "
+			+ "WHERE usrm.USRMappingID IN :mappingIDs AND usrm.FacilityID IS NOT NULL", nativeQuery = true)
+	List<Object[]> getFacilityInfoByMappingIDs(@Param("mappingIDs") List<Integer> mappingIDs);
+
 }

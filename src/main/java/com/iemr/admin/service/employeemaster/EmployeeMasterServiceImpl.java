@@ -1003,7 +1003,61 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		ArrayList<V_Userservicerolemapping> mappedRoles = new ArrayList<>();
 
 		if (getData != null) {
+			// Collect mapping IDs where stateID OR workingDistrictID is null
+			// (view derives these from WorkingLocationID JOIN — null when workLocationID was nullified for HWC/FLW)
+			List<Integer> patchMappingIDs = new ArrayList<>();
 			for (V_Userservicerolemapping mapping : getData) {
+				if (mapping.getuSRMappingID() != null
+						&& (mapping.getStateID() == null || mapping.getWorkingDistrictID() == null)) {
+					patchMappingIDs.add(mapping.getuSRMappingID());
+				}
+			}
+
+			// Batch lookup: get stateID/districtID directly from m_userservicerolemapping table
+			Map<Integer, Object[]> stateDistrictMap = new HashMap<>();
+			if (!patchMappingIDs.isEmpty()) {
+				List<Object[]> results = employeeMasterRepo.getDirectStateDistrictByMappingIDs(patchMappingIDs);
+				for (Object[] row : results) {
+					stateDistrictMap.put((Integer) row[0], row);
+				}
+			}
+
+				// Batch lookup: get facilityID/Name/TypeID/ruralUrban from m_userservicerolemapping + m_facility
+			List<Integer> allMappingIDs = new ArrayList<>();
+			for (V_Userservicerolemapping mapping : getData) {
+				if (mapping.getuSRMappingID() != null) {
+					allMappingIDs.add(mapping.getuSRMappingID());
+				}
+			}
+			Map<Integer, Object[]> facilityMap = new HashMap<>();
+			if (!allMappingIDs.isEmpty()) {
+				List<Object[]> facilityResults = employeeMasterRepo.getFacilityInfoByMappingIDs(allMappingIDs);
+				for (Object[] row : facilityResults) {
+					facilityMap.put((Integer) row[0], row);
+				}
+			}
+
+			for (V_Userservicerolemapping mapping : getData) {
+				// Patch null stateID/districtID/blockID from direct columns in m_userservicerolemapping
+				if (stateDistrictMap.containsKey(mapping.getuSRMappingID())) {
+					Object[] row = stateDistrictMap.get(mapping.getuSRMappingID());
+					if (mapping.getStateID() == null && row[1] != null) mapping.setStateID((Integer) row[1]);
+					if (mapping.getStateName() == null && row[2] != null) mapping.setStateName((String) row[2]);
+					if (mapping.getWorkingDistrictID() == null && row[3] != null) mapping.setWorkingDistrictID(String.valueOf(row[3]));
+					if (mapping.getWorkingDistrictName() == null && row[4] != null) mapping.setWorkingDistrictName((String) row[4]);
+					if (mapping.getBlockID() == null && row[5] != null) mapping.setBlockID((Integer) row[5]);
+					if (mapping.getBlockName() == null && row[6] != null) mapping.setBlockName((String) row[6]);
+				}
+
+				// Set facility info from batch lookup
+				if (facilityMap.containsKey(mapping.getuSRMappingID())) {
+					Object[] fRow = facilityMap.get(mapping.getuSRMappingID());
+					if (fRow[1] != null) mapping.setFacilityID((Integer) fRow[1]);
+					if (fRow[2] != null) mapping.setFacilityName((String) fRow[2]);
+					if (fRow[3] != null) mapping.setFacilityTypeID((Integer) fRow[3]);
+					if (fRow[4] != null) mapping.setRuralUrban((String) fRow[4]);
+				}
+
 				if (mapping.getVillageidDb() != null) {
 					mapping.setVillageID(mapping.getVillageidDb().split(","));
 				} else {

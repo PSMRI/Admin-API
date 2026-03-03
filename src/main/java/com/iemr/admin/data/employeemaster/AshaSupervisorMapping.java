@@ -94,6 +94,10 @@ public class AshaSupervisorMapping {
 	private List<Integer> facilityIDs;
 
 	@Transient
+	@Expose
+	private List<Long> ids;
+
+	@Transient
 	private OutputMapper outputMapper = new OutputMapper();
 
 	@Override

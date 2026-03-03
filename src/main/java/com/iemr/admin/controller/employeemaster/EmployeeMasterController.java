@@ -1804,6 +1804,8 @@ public class EmployeeMasterController {
 					resDataMap1.setUserID(employeeMaster.get(x).getUserID());
 					resDataMap1.setProviderServiceMapID(previl.getProviderServiceMapID());
 					resDataMap1.setWorkingLocationID(previl.getWorkingLocationID());
+					resDataMap1.setStateID(previl.getStateID());
+					resDataMap1.setDistrictID(previl.getDistrictID());
 					resDataMap1.setCreatedBy(employeeMaster.get(x).getCreatedBy());
 					resDataMap1.setServiceProviderID(employeeMaster.get(x).getServiceProviderID());
 					resDataMap1.setBlockID(previl.getBlockID());
@@ -1851,6 +1853,8 @@ public class EmployeeMasterController {
 			usrRole.setAgentPassword(pre.getAgentPassword());
 			usrRole.setProviderServiceMapID(pre.getProviderServiceMapID());
 			usrRole.setWorkingLocationID(pre.getWorkingLocationID());
+			usrRole.setStateID(pre.getStateID());
+			usrRole.setDistrictID(pre.getDistrictID());
 			usrRole.setModifiedBy(pre.getModifiedBy());
 			usrRole.setBlockID(pre.getBlockID());
 			usrRole.setBlockName(pre.getBlockName());

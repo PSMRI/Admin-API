@@ -253,16 +253,27 @@ public class StoreServiceImpl implements StoreService {
 	@Override
 	public M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
 			List<Integer> childFacilityIDs) {
+		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndDeletedFalse(facility.getFacilityName(), facility.getBlockID())) {
+			throw new RuntimeException("Facility with this name already exists in this block");
+		}
 		M_Facility savedFacility = mainStoreRepo.save(facility);
 
 		if (villageIDs != null && !villageIDs.isEmpty()) {
 			for (Integer villageID : villageIDs) {
-				FacilityVillageMapping mapping = new FacilityVillageMapping();
-				mapping.setFacilityID(savedFacility.getFacilityID());
-				mapping.setDistrictBranchID(villageID);
-				mapping.setCreatedBy(facility.getCreatedBy());
-				mapping.setDeleted(false);
-				facilityVillageMappingRepo.save(mapping);
+				FacilityVillageMapping existing = facilityVillageMappingRepo
+						.findByFacilityIDAndDistrictBranchIDAndDeletedTrue(savedFacility.getFacilityID(), villageID);
+				if (existing != null) {
+					existing.setDeleted(false);
+					existing.setModifiedBy(facility.getCreatedBy());
+					facilityVillageMappingRepo.save(existing);
+				} else {
+					FacilityVillageMapping mapping = new FacilityVillageMapping();
+					mapping.setFacilityID(savedFacility.getFacilityID());
+					mapping.setDistrictBranchID(villageID);
+					mapping.setCreatedBy(facility.getCreatedBy());
+					mapping.setDeleted(false);
+					facilityVillageMappingRepo.save(mapping);
+				}
 			}
 		}
 
@@ -287,6 +298,11 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	public ArrayList<FacilityVillageMapping> getVillageMappingsByFacility(Integer facilityID) {
+		// Return empty if facility itself is deleted
+		M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(facilityID, false);
+		if (facility == null) {
+			return new ArrayList<>();
+		}
 		return facilityVillageMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
 	}
 
@@ -304,26 +320,54 @@ public class StoreServiceImpl implements StoreService {
 			throw new RuntimeException("Facility not found");
 		}
 
+		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndNotFacilityID(facility.getFacilityName(), existing.getBlockID(), facility.getFacilityID())) {
+			throw new RuntimeException("Facility with this name already exists in this block");
+		}
+
 		existing.setFacilityName(facility.getFacilityName());
 		existing.setFacilityDesc(facility.getFacilityDesc());
+		existing.setFacilityCode(facility.getFacilityCode());
 		existing.setModifiedBy(facility.getModifiedBy());
 		M_Facility savedFacility = mainStoreRepo.save(existing);
 
 		if (villageIDs != null) {
 			List<FacilityVillageMapping> oldMappings = facilityVillageMappingRepo
 					.findByFacilityIDAndDeletedFalse(facility.getFacilityID());
+			// Build set of new village IDs for quick lookup
+			java.util.Set<Integer> newVillageSet = new java.util.HashSet<>(villageIDs);
+			// Soft-delete old mappings that are NOT in the new list
 			for (FacilityVillageMapping old : oldMappings) {
-				old.setDeleted(true);
-				old.setModifiedBy(facility.getModifiedBy());
-				facilityVillageMappingRepo.save(old);
+				if (!newVillageSet.contains(old.getDistrictBranchID())) {
+					old.setDeleted(true);
+					old.setModifiedBy(facility.getModifiedBy());
+					facilityVillageMappingRepo.save(old);
+				}
 			}
+			// Build set of currently active village IDs
+			java.util.Set<Integer> activeVillageSet = new java.util.HashSet<>();
+			for (FacilityVillageMapping old : oldMappings) {
+				if (!Boolean.TRUE.equals(old.getDeleted())) {
+					activeVillageSet.add(old.getDistrictBranchID());
+				}
+			}
+			// Add only truly new villages (not already active)
 			for (Integer villageID : villageIDs) {
-				FacilityVillageMapping mapping = new FacilityVillageMapping();
-				mapping.setFacilityID(savedFacility.getFacilityID());
-				mapping.setDistrictBranchID(villageID);
-				mapping.setCreatedBy(facility.getModifiedBy());
-				mapping.setDeleted(false);
-				facilityVillageMappingRepo.save(mapping);
+				if (!activeVillageSet.contains(villageID)) {
+					FacilityVillageMapping softDeleted = facilityVillageMappingRepo
+							.findByFacilityIDAndDistrictBranchIDAndDeletedTrue(savedFacility.getFacilityID(), villageID);
+					if (softDeleted != null) {
+						softDeleted.setDeleted(false);
+						softDeleted.setModifiedBy(facility.getModifiedBy());
+						facilityVillageMappingRepo.save(softDeleted);
+					} else {
+						FacilityVillageMapping mapping = new FacilityVillageMapping();
+						mapping.setFacilityID(savedFacility.getFacilityID());
+						mapping.setDistrictBranchID(villageID);
+						mapping.setCreatedBy(facility.getModifiedBy());
+						mapping.setDeleted(false);
+						facilityVillageMappingRepo.save(mapping);
+					}
+				}
 			}
 		}
 

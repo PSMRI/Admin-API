@@ -38,4 +38,6 @@ public interface AshaSupervisorMappingService {
 	void deleteMappings(List<Long> ids, String modifiedBy);
 
 	void deleteBySupervisorAndFacilities(Integer supervisorUserID, List<Integer> facilityIDs, String modifiedBy);
+
+	void restoreMappings(List<Long> ids, String modifiedBy);
 }

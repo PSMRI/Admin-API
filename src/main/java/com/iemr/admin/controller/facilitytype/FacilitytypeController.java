@@ -35,7 +35,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
+import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_FacilityLevel;
+import com.iemr.admin.repository.store.MainStoreRepo;
 import com.iemr.admin.service.facilitytype.M_facilitytypeInter;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
@@ -48,6 +50,9 @@ public class FacilitytypeController {
 
 	@Autowired
 	private M_facilitytypeInter m_facilitytypeInter;
+
+	@Autowired
+	private MainStoreRepo mainStoreRepo;
 
 	@Operation(summary = "Get facility")
 	@RequestMapping(value = "/getFacility", headers = "Authorization", method = { RequestMethod.POST }, produces = {
@@ -156,6 +161,16 @@ public class FacilitytypeController {
 
 			M_facilitytype allFacilityData = m_facilitytypeInter
 					.editAllFicilityData(facilityDetails.getFacilityTypeID());
+
+			// Block deactivation if facility type is in use by active facilities
+			if (Boolean.TRUE.equals(facilityDetails.getDeleted())) {
+				List<M_Facility> activeFacilities = mainStoreRepo
+						.findByFacilityTypeIDAndDeletedFalse(facilityDetails.getFacilityTypeID());
+				if (activeFacilities != null && !activeFacilities.isEmpty()) {
+					throw new Exception("Cannot deactivate: facility type is in use by " + activeFacilities.size() + " active facilities");
+				}
+			}
+
 			allFacilityData.setDeleted(facilityDetails.getDeleted());
 
 			M_facilitytype saveFacilityData = m_facilitytypeInter.updateFacilityData(allFacilityData);
