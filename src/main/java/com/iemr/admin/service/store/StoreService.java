@@ -58,9 +58,9 @@ public interface StoreService {
 
 	ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID);
 
-	ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID, String ruralUrban);
+	ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer levelValue, String ruralUrban);
 
-	M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, List<Integer> childFacilityIDs);
+	M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, Integer mainVillageID, List<Integer> childFacilityIDs);
 
 	List<Integer> getMappedVillageIDs(Integer blockID);
 
@@ -68,6 +68,6 @@ public interface StoreService {
 
 	ArrayList<M_Facility> getChildFacilitiesByParent(Integer parentFacilityID);
 
-	M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, List<Integer> childFacilityIDs);
+	M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, Integer mainVillageID, List<Integer> childFacilityIDs);
 
 }

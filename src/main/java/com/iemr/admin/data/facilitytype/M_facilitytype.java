@@ -93,6 +93,10 @@ public class M_facilitytype {
 	private Integer facilityLevelID;
 
 	@Expose
+	@Column(name = "LevelValue")
+	private Integer levelValue;
+
+	@Expose
 	@Column(name = "StateID")
 	private Integer stateID;
 
@@ -222,6 +226,14 @@ public class M_facilitytype {
 
 	public void setStateID(Integer stateID) {
 		this.stateID = stateID;
+	}
+
+	public Integer getLevelValue() {
+		return levelValue;
+	}
+
+	public void setLevelValue(Integer levelValue) {
+		this.levelValue = levelValue;
 	}
 
 	public Integer getBlockID() {

@@ -18,4 +18,7 @@ public class FacilityHierarchyRequest {
 	@Expose
 	private List<Integer> childFacilityIDs;
 
+	@Expose
+	private Integer mainVillageID;
+
 }

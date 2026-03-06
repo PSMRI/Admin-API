@@ -245,17 +245,18 @@ public class StoreServiceImpl implements StoreService {
 	}
 
 	@Override
-	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer facilityLevelID, String ruralUrban) {
-		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, facilityLevelID, ruralUrban);
+	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer levelValue, String ruralUrban) {
+		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, levelValue, ruralUrban);
 	}
 
 	@Transactional
 	@Override
 	public M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
-			List<Integer> childFacilityIDs) {
+			Integer mainVillageID, List<Integer> childFacilityIDs) {
 		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndDeletedFalse(facility.getFacilityName(), facility.getBlockID())) {
 			throw new RuntimeException("Facility with this name already exists in this block");
 		}
+		facility.setMainVillageID(mainVillageID);
 		M_Facility savedFacility = mainStoreRepo.save(facility);
 
 		if (villageIDs != null && !villageIDs.isEmpty()) {
@@ -314,7 +315,7 @@ public class StoreServiceImpl implements StoreService {
 	@Transactional
 	@Override
 	public M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
-			List<Integer> childFacilityIDs) {
+			Integer mainVillageID, List<Integer> childFacilityIDs) {
 		M_Facility existing = mainStoreRepo.findByFacilityID(facility.getFacilityID());
 		if (existing == null) {
 			throw new RuntimeException("Facility not found");
@@ -327,6 +328,7 @@ public class StoreServiceImpl implements StoreService {
 		existing.setFacilityName(facility.getFacilityName());
 		existing.setFacilityDesc(facility.getFacilityDesc());
 		existing.setFacilityCode(facility.getFacilityCode());
+		existing.setMainVillageID(mainVillageID);
 		existing.setModifiedBy(facility.getModifiedBy());
 		M_Facility savedFacility = mainStoreRepo.save(existing);
 

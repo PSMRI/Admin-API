@@ -341,7 +341,7 @@ public class StoreController {
 			com.iemr.admin.data.facilitytype.M_facilitytype reqObj = InputMapper.gson().fromJson(request,
 					com.iemr.admin.data.facilitytype.M_facilitytype.class);
 			ArrayList<M_Facility> data = storeService.getFacilitiesByBlockAndLevel(reqObj.getBlockID(),
-					reqObj.getFacilityLevelID(), reqObj.getRuralUrban());
+					reqObj.getLevelValue(), reqObj.getRuralUrban());
 			response.setResponse(data.toString());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
@@ -359,7 +359,7 @@ public class StoreController {
 		try {
 			FacilityHierarchyRequest reqObj = InputMapper.gson().fromJson(request, FacilityHierarchyRequest.class);
 			M_Facility savedFacility = storeService.createFacilityWithHierarchy(reqObj.getFacility(),
-					reqObj.getVillageIDs(), reqObj.getChildFacilityIDs());
+					reqObj.getVillageIDs(), reqObj.getMainVillageID(), reqObj.getChildFacilityIDs());
 			response.setResponse(savedFacility.toString());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
@@ -428,7 +428,7 @@ public class StoreController {
 		try {
 			FacilityHierarchyRequest reqObj = InputMapper.gson().fromJson(request, FacilityHierarchyRequest.class);
 			M_Facility updatedFacility = storeService.updateFacilityWithHierarchy(reqObj.getFacility(),
-					reqObj.getVillageIDs(), reqObj.getChildFacilityIDs());
+					reqObj.getVillageIDs(), reqObj.getMainVillageID(), reqObj.getChildFacilityIDs());
 			response.setResponse(updatedFacility.toString());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);

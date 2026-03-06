@@ -92,6 +92,10 @@ public class M_Facility {
 	private Integer parentFacilityID;
 
 	@Expose
+	@Column(name="MainVillageID")
+	private Integer mainVillageID;
+
+	@Expose
 	@Column(name="RuralUrban")
 	private String ruralUrban;
  
@@ -250,6 +254,14 @@ public class M_Facility {
 
 	public void setParentFacilityID(Integer parentFacilityID) {
 		this.parentFacilityID = parentFacilityID;
+	}
+
+	public Integer getMainVillageID() {
+		return mainVillageID;
+	}
+
+	public void setMainVillageID(Integer mainVillageID) {
+		this.mainVillageID = mainVillageID;
 	}
 
 	public String getRuralUrban() {
