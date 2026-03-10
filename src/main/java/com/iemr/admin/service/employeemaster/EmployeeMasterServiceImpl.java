@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -1062,8 +1063,36 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public ArrayList<V_Showuser> getEmployeeDetails4(Integer serviceProviderID) {
+		ArrayList<V_Showuser> users = v_ShowuserRepo.EmployeeDetails4(serviceProviderID);
+		if (users.isEmpty()) {
+			return users;
+		}
 
-		return v_ShowuserRepo.EmployeeDetails4(serviceProviderID);
+		ArrayList<Integer> userIDs = new ArrayList<Integer>(users.size());
+		for (V_Showuser user : users) {
+			userIDs.add(user.getUserID());
+		}
+
+		Map<Integer, M_User1> userRecords = new HashMap<Integer, M_User1>();
+		for (M_User1 userRecord : employeeMasterRepoo.findByUserIDIn(userIDs)) {
+			userRecords.put(userRecord.getUserID(), userRecord);
+		}
+
+		for (V_Showuser user : users) {
+			enrichAccountLockState(user, userRecords.get(user.getUserID()));
+		}
+		return users;
+	}
+
+	private void enrichAccountLockState(V_Showuser user, M_User1 userRecord) {
+		if (userRecord == null) {
+			return;
+		}
+
+		Timestamp lockTimestamp = userRecord.getLockTimestamp();
+		user.setFailedAttempt(userRecord.getFailedAttempt() != null ? userRecord.getFailedAttempt() : 0);
+		user.setLockTimestamp(lockTimestamp);
+		user.setLockedDueToFailedAttempts(Boolean.TRUE.equals(userRecord.getDeleted()) && lockTimestamp != null);
 	}
 
 	@Override
