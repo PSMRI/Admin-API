@@ -19,6 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
+
 package com.iemr.admin.controller.version;
 
 import java.util.Map;
@@ -33,6 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iemr.admin.service.version.VersionService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedHashMap;
+import java.util.Properties;
+import org.springframework.http.MediaType;
 
 @RestController
 public class VersionController {
