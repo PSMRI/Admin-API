@@ -100,7 +100,7 @@ public class StoreServiceImpl implements StoreService {
 	@Override
 	public List<M_Facility> getAllMainStore(Integer providerServiceMapID) {
 		// TODO Auto-generated method stub
-		return (List<M_Facility>) mainStoreRepo.findByProviderServiceMapIDOrderByFacilityName(providerServiceMapID);
+		return (List<M_Facility>) mainStoreRepo.findByProviderServiceMapIDOrNullOrderByFacilityName(providerServiceMapID);
 	}
 
 	// @Override
@@ -386,14 +386,43 @@ public class StoreServiceImpl implements StoreService {
 			throw new RuntimeException("Facility not found");
 		}
 
-		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndNotFacilityID(facility.getFacilityName(), existing.getBlockID(), facility.getFacilityID())) {
-			throw new RuntimeException("Facility with this name already exists in this block");
+		if (existing.getBlockID() != null && facility.getFacilityName() != null) {
+			if (mainStoreRepo.existsByFacilityNameAndBlockIDAndNotFacilityID(facility.getFacilityName(), existing.getBlockID(), facility.getFacilityID())) {
+				throw new RuntimeException("Facility with this name already exists in this block");
+			}
 		}
 
-		existing.setFacilityName(facility.getFacilityName());
-		existing.setFacilityDesc(facility.getFacilityDesc());
-		existing.setFacilityCode(facility.getFacilityCode());
-		// Rural/Urban and FacilityType are read-only on edit — admin must delete and recreate to change
+		if (facility.getFacilityName() != null) {
+			existing.setFacilityName(facility.getFacilityName());
+		}
+		if (facility.getFacilityDesc() != null) {
+			existing.setFacilityDesc(facility.getFacilityDesc());
+		}
+		if (facility.getFacilityCode() != null) {
+			existing.setFacilityCode(facility.getFacilityCode());
+		}
+		// Set hierarchy fields: facilityType, ruralUrban, and location
+		if (facility.getFacilityTypeID() != null) {
+			existing.setFacilityTypeID(facility.getFacilityTypeID());
+		}
+		if (facility.getRuralUrban() != null) {
+			existing.setRuralUrban(facility.getRuralUrban());
+		}
+		if (facility.getStateID() != null) {
+			existing.setStateID(facility.getStateID());
+		}
+		if (facility.getDistrictID() != null) {
+			existing.setDistrictID(facility.getDistrictID());
+		}
+		if (facility.getBlockID() != null) {
+			existing.setBlockID(facility.getBlockID());
+		}
+		// Convert Sub Store to independent facility for hierarchy
+		if (!Boolean.TRUE.equals(existing.getIsMainFacility())) {
+			existing.setIsMainFacility(true);
+			existing.setMainFacilityID(null);
+			existing.setStoreType("MAIN");
+		}
 		existing.setMainVillageID(mainVillageID);
 		existing.setModifiedBy(facility.getModifiedBy());
 		M_Facility savedFacility = mainStoreRepo.save(existing);
