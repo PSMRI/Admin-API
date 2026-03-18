@@ -1804,12 +1804,15 @@ public class EmployeeMasterController {
 					resDataMap1.setUserID(employeeMaster.get(x).getUserID());
 					resDataMap1.setProviderServiceMapID(previl.getProviderServiceMapID());
 					resDataMap1.setWorkingLocationID(previl.getWorkingLocationID());
+					resDataMap1.setStateID(previl.getStateID());
+					resDataMap1.setDistrictID(previl.getDistrictID());
 					resDataMap1.setCreatedBy(employeeMaster.get(x).getCreatedBy());
 					resDataMap1.setServiceProviderID(employeeMaster.get(x).getServiceProviderID());
 					resDataMap1.setBlockID(previl.getBlockID());
 					resDataMap1.setBlockName(previl.getBlockName());
 					resDataMap1.setVillageID(previl.getVillageID());
 					resDataMap1.setVillageName(previl.getVillageName());
+					resDataMap1.setFacilityID(previl.getFacilityID());
 					resList1.add(resDataMap1);
 
 				}
@@ -1845,16 +1848,32 @@ public class EmployeeMasterController {
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
 
+			// Fix 1/3: cascade asha_supervisor_mapping BEFORE modifying entity to avoid JPA L1 cache issue
+			if (usrRole != null && usrRole.getUserID() != null) {
+				boolean roleChanged = pre.getRoleID() != null && usrRole.getRoleID() != null
+						&& !usrRole.getRoleID().equals(pre.getRoleID());
+				boolean facilityChanged = usrRole.getFacilityID() != null && pre.getFacilityID() != null
+						&& !usrRole.getFacilityID().equals(pre.getFacilityID());
+				if (roleChanged || facilityChanged) {
+					logger.info("Fix1/3: cascading asha_supervisor_mapping for userID={}, roleChanged={}, facilityChanged={}",
+							usrRole.getUserID(), roleChanged, facilityChanged);
+					employeeMasterInter.cascadeDeleteAshaMappingsForUser(usrRole.getUserID());
+				}
+			}
+
 			usrRole.setUserID(pre.getUserID());
 			usrRole.setRoleID(pre.getRoleID());
 			usrRole.setAgentPassword(pre.getAgentPassword());
 			usrRole.setProviderServiceMapID(pre.getProviderServiceMapID());
 			usrRole.setWorkingLocationID(pre.getWorkingLocationID());
+			usrRole.setStateID(pre.getStateID());
+			usrRole.setDistrictID(pre.getDistrictID());
 			usrRole.setModifiedBy(pre.getModifiedBy());
 			usrRole.setBlockID(pre.getBlockID());
 			usrRole.setBlockName(pre.getBlockName());
 			usrRole.setVillageID(pre.getVillageID());
 			usrRole.setVillageName(pre.getVillageName());
+			usrRole.setFacilityID(pre.getFacilityID());
 
 			if (pre.getTeleConsultation() != null) {
 				usrRole.setTeleConsultation(pre.getTeleConsultation());
@@ -1896,6 +1915,17 @@ public class EmployeeMasterController {
 					M_UserServiceRoleMapping2.class);
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
+
+			// Fix 2: cascade asha_supervisor_mapping BEFORE setDeleted() to avoid JPA L1 cache issue.
+			// After setDeleted(true), findById() in saveRoleMappingeditedData hits the L1 cache
+			// returning the already-modified entity, so the "old vs new deleted" check always fails.
+			// For ASHA Supervisor with multiple facilities: only delete mappings for this facilityID
+			if (Boolean.TRUE.equals(pre.getDeleted()) && !Boolean.TRUE.equals(usrRole.getDeleted())
+					&& usrRole.getUserID() != null) {
+				logger.info("Fix2: cascading asha_supervisor_mapping soft-delete for userID={}, uSRMappingID={}",
+						usrRole.getUserID(), pre.getuSRMappingID());
+				employeeMasterInter.cascadeDeleteAshaMappingsForDeactivation(usrRole);
+			}
 
 			usrRole.setDeleted(pre.getDeleted());
 

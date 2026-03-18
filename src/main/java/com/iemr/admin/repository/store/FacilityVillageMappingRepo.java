@@ -15,6 +15,8 @@ public interface FacilityVillageMappingRepo extends CrudRepository<FacilityVilla
 
 	ArrayList<FacilityVillageMapping> findByFacilityIDAndDeletedFalse(Integer facilityID);
 
+	FacilityVillageMapping findByFacilityIDAndDistrictBranchIDAndDeletedTrue(Integer facilityID, Integer districtBranchID);
+
 	@Query("SELECT DISTINCT fvm.districtBranchID FROM FacilityVillageMapping fvm WHERE fvm.facilityID IN " +
 			"(SELECT f.facilityID FROM M_Facility f WHERE f.blockID = :blockID AND f.deleted = false) " +
 			"AND fvm.deleted = false")

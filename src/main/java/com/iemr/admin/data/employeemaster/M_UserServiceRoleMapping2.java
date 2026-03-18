@@ -87,6 +87,12 @@ public class M_UserServiceRoleMapping2 {
 	@Column(name = "WorkingLocationID")
 	private Integer workingLocationID;
 	@Expose
+	@Column(name = "StateID")
+	private Integer stateID;
+	@Expose
+	@Column(name = "DistrictID")
+	private Integer districtID;
+	@Expose
 	@Column(name = "Blockid")
 	private Integer blockID;
 	@Expose
@@ -98,6 +104,9 @@ public class M_UserServiceRoleMapping2 {
 	@Expose
 	@Column(name = "VillageName")
 	private String villageNameDb;
+	@Expose
+	@Column(name = "FacilityID")
+	private Integer facilityID;
 	@Transient
 	private String[] villageID;
 	@Transient

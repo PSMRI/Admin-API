@@ -163,6 +163,12 @@ public interface EmployeeMasterInter {
 //	M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String string);
 	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException;
 
+	// Fix 2: cascade soft-delete asha_supervisor_mapping rows when a user is deactivated
+	void cascadeDeleteAshaMappingsForUser(Integer userID);
+
+	// Fix 2: smart cascade — for supervisor with multiple facilities, only delete mappings for this facility
+	void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole);
+
 	// ArrayList<M_UserLangMapping> getMappedLanguge();
 
 	ArrayList<V_Userservicerolemapping> getMappedRole(Integer serviceProviderID);

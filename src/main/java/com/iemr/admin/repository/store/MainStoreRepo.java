@@ -33,42 +33,61 @@ import org.springframework.stereotype.Repository;
 import com.iemr.admin.data.store.M_Facility;
 
 @Repository
-public interface MainStoreRepo extends CrudRepository<M_Facility, Integer>{
-	
+public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
+
 	List<M_Facility> findByProviderServiceMapIDOrderByFacilityName(Integer providerServiceMapID);
-    
+
 	@Query("SELECT u FROM M_Facility u WHERE u.providerServiceMapID=:providerServiceMapID AND u.isMainFacility=:isMainFacility AND deleted=false order by u.facilityName")
-	ArrayList<M_Facility> getAllMainFacility(@Param("providerServiceMapID")Integer providerServiceMapID,@Param("isMainFacility") Boolean isMainFacility);
-	
-	
+	ArrayList<M_Facility> getAllMainFacility(@Param("providerServiceMapID") Integer providerServiceMapID,
+			@Param("isMainFacility") Boolean isMainFacility);
+
 	@Query("SELECT u FROM M_Facility u WHERE u.providerServiceMapID=:providerServiceMapID AND u.isMainFacility=:isMainFacility AND u.mainFacilityID=:mainFacilityID AND deleted=false order by u.facilityName")
-	ArrayList<M_Facility> getAllMainFacility(@Param("providerServiceMapID")Integer providerServiceMapID,@Param("isMainFacility") Boolean isMainFacility,
+	ArrayList<M_Facility> getAllMainFacility(@Param("providerServiceMapID") Integer providerServiceMapID,
+			@Param("isMainFacility") Boolean isMainFacility,
 			@Param("mainFacilityID") Integer mainFacilityID);
 
 	@Query("SELECT u FROM M_Facility u WHERE u.providerServiceMapID=:providerServiceMapID AND u.mainFacilityID=:mainFacilityID AND deleted=false order by u.facilityName")
-	ArrayList<M_Facility> getChildFacility(@Param("providerServiceMapID")Integer providerServiceMapID,@Param("mainFacilityID") Integer mainFacilityID);
-	
-	
-	ArrayList<M_Facility> findByMainFacilityIDAndDeletedOrderByFacilityName(Integer mainfacID,Boolean deleted);
-	
-	M_Facility findByFacilityIDAndDeleted(Integer mainfacID,Boolean deleted);
+	ArrayList<M_Facility> getChildFacility(@Param("providerServiceMapID") Integer providerServiceMapID,
+			@Param("mainFacilityID") Integer mainFacilityID);
+
+	ArrayList<M_Facility> findByMainFacilityIDAndDeletedOrderByFacilityName(Integer mainfacID, Boolean deleted);
+
+	M_Facility findByFacilityIDAndDeleted(Integer mainfacID, Boolean deleted);
 
 	List<M_Facility> findByFacilityCodeAndProviderServiceMapID(String facilityCode, Integer providerServiceMapID);
-	
+
 	M_Facility findByFacilityID(Integer facilityID);
 
 	ArrayList<M_Facility> findByBlockIDAndDeletedFalseOrderByFacilityName(Integer blockID);
 
-	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.facilityTypeID IN " +
-			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.facilityLevelID = :facilityLevelID " +
-			"AND ft.deleted = false) AND f.deleted = false AND f.parentFacilityID IS NULL ORDER BY f.facilityName")
+	ArrayList<M_Facility> findByBlockIDOrderByFacilityName(Integer blockID);
+
+	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.ruralUrban = :ruralUrban AND f.facilityTypeID IN " +
+			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.levelValue = :levelValue " +
+			"AND ft.deleted = false) AND f.deleted = false ORDER BY f.facilityName")
 	ArrayList<M_Facility> findByBlockIDAndFacilityLevel(@Param("blockID") Integer blockID,
-			@Param("facilityLevelID") Integer facilityLevelID);
+			@Param("levelValue") Integer levelValue,
+			@Param("ruralUrban") String ruralUrban);
+
+	// All SCs in block regardless of rural/urban (for main village selection)
+	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.facilityTypeID IN " +
+			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.levelValue = :levelValue " +
+			"AND ft.deleted = false) AND f.deleted = false ORDER BY f.facilityName")
+	ArrayList<M_Facility> findByBlockIDAndLevelValue(@Param("blockID") Integer blockID,
+			@Param("levelValue") Integer levelValue);
 
 	ArrayList<M_Facility> findByParentFacilityIDAndDeletedFalseOrderByFacilityName(Integer parentFacilityID);
 
+	List<M_Facility> findByFacilityTypeIDAndDeletedFalse(Integer facilityTypeID);
+
+	boolean existsByFacilityNameAndBlockIDAndDeletedFalse(String facilityName, Integer blockID);
+
+	@Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM M_Facility f WHERE f.facilityName = :facilityName AND f.blockID = :blockID AND f.facilityID != :facilityID AND f.deleted = false")
+	boolean existsByFacilityNameAndBlockIDAndNotFacilityID(@Param("facilityName") String facilityName, @Param("blockID") Integer blockID, @Param("facilityID") Integer facilityID);
+
 	@Modifying
 	@Query("UPDATE M_Facility f SET f.parentFacilityID = NULL, f.modifiedBy = :modifiedBy WHERE f.parentFacilityID = :parentFacilityID")
-	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID, @Param("modifiedBy") String modifiedBy);
+	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID,
+			@Param("modifiedBy") String modifiedBy);
 
 }

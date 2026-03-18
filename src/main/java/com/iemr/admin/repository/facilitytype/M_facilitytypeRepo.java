@@ -57,4 +57,8 @@ public interface M_facilitytypeRepo extends CrudRepository<M_facilitytype, Integ
 
 	boolean existsByFacilityTypeNameAndStateIDAndDeletedFalse(String facilityTypeName, Integer stateID);
 
+	// Fix 17: get the highest levelValue (= SC level) for a given service line
+	@Query("SELECT MAX(f.levelValue) FROM M_facilitytype f WHERE f.providerServiceMapID = :psm AND f.deleted = false")
+	Integer findMaxLevelValueByProviderServiceMapID(@Param("psm") Integer psm);
+
 }

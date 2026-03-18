@@ -54,6 +54,12 @@ public class M_facilitytypeServiceImpl implements M_facilitytypeInter {
 
 	@Override
 	public ArrayList<M_facilitytype> addAllFicilityData(List<M_facilitytype> addfacilityDetails) {
+		for (M_facilitytype ft : addfacilityDetails) {
+			if (m_facilitytypeRepo.existsByFacilityTypeNameAndStateIDAndDeletedFalse(
+					ft.getFacilityTypeName(), ft.getStateID())) {
+				throw new RuntimeException("Facility type '" + ft.getFacilityTypeName() + "' already exists");
+			}
+		}
 		ArrayList<M_facilitytype> data = (ArrayList<M_facilitytype>) m_facilitytypeRepo.saveAll(addfacilityDetails);
 		return data;
 	}
