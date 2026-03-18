@@ -305,6 +305,22 @@ public class StoreController {
 		return response.toString();
 	}
 
+	@Operation(summary = "Get all facilities by block (including deleted)")
+	@RequestMapping(value = "/getAllFacilitiesByBlock", headers = "Authorization", method = { RequestMethod.POST }, produces = {
+			"application/json" })
+	public String getAllFacilitiesByBlock(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility facility = InputMapper.gson().fromJson(request, M_Facility.class);
+			ArrayList<M_Facility> data = storeService.getAllFacilitiesByBlock(facility.getBlockID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Check store code")
 	@RequestMapping(value = "/checkStoreCode", headers = "Authorization", method = { RequestMethod.POST }, produces = {
 			"application/json" })
@@ -430,6 +446,23 @@ public class StoreController {
 			M_Facility updatedFacility = storeService.updateFacilityWithHierarchy(reqObj.getFacility(),
 					reqObj.getVillageIDs(), reqObj.getMainVillageID(), reqObj.getChildFacilityIDs());
 			response.setResponse(updatedFacility.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Deactivate facility with hierarchy cascade (Fix 8 + Fix 19)")
+	@RequestMapping(value = "/deleteFacilityWithHierarchy", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String deleteFacilityWithHierarchy(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			M_Facility reqObj = InputMapper.gson().fromJson(request, M_Facility.class);
+			M_Facility result = storeService.deleteFacilityWithHierarchy(
+					reqObj.getFacilityID(), reqObj.getModifiedBy());
+			response.setResponse(result.toString());
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
 			response.setError(e);

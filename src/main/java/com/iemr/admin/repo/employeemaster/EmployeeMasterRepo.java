@@ -144,4 +144,15 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 			+ "WHERE usrm.USRMappingID IN :mappingIDs AND usrm.FacilityID IS NOT NULL", nativeQuery = true)
 	List<Object[]> getFacilityInfoByMappingIDs(@Param("mappingIDs") List<Integer> mappingIDs);
 
+	// Fix 18: detect duplicate USR row before create
+	boolean existsByUserIDAndRoleIDAndProviderServiceMapIDAndDeletedFalse(
+			Integer userID, Integer roleID, Integer providerServiceMapID);
+
+	// Fix 18: ASHA Supervisor duplicate check includes facilityID
+	boolean existsByUserIDAndRoleIDAndProviderServiceMapIDAndFacilityIDAndDeletedFalse(
+			Integer userID, Integer roleID, Integer providerServiceMapID, Integer facilityID);
+
+	// Fix 2: count active USR rows for supervisor (check if other facilities remain)
+	long countByUserIDAndRoleIDAndDeletedFalse(Integer userID, Integer roleID);
+
 }

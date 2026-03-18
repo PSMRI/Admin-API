@@ -32,7 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.iemr.admin.data.employeemaster.AshaSupervisorMapping;
 import com.iemr.admin.data.employeemaster.M_UserServiceRoleMapping2;
+import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.repo.employeemaster.EmployeeMasterRepo;
+import com.iemr.admin.repository.store.MainStoreRepo;
 import com.iemr.admin.repository.user.AshaSupervisorMappingRepo;
 
 @Service
@@ -46,22 +48,39 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 	@Autowired
 	private EmployeeMasterRepo employeeMasterRepo;
 
+	@Autowired
+	private MainStoreRepo mainStoreRepo;
+
 	@Transactional
 	@Override
 	public ArrayList<AshaSupervisorMapping> saveAshaSupervisorMappings(List<AshaSupervisorMapping> mappings) {
 		ArrayList<AshaSupervisorMapping> savedMappings = new ArrayList<>();
 		for (AshaSupervisorMapping mapping : mappings) {
-			// Check for existing soft-deleted row and reuse it
-			AshaSupervisorMapping softDeleted = ashaSupervisorMappingRepo
-					.findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedTrue(
-							mapping.getSupervisorUserID(), mapping.getAshaUserID(), mapping.getFacilityID());
-			if (softDeleted != null) {
-				softDeleted.setDeleted(false);
-				softDeleted.setModifiedBy(mapping.getCreatedBy());
-				savedMappings.add(ashaSupervisorMappingRepo.save(softDeleted));
-			} else {
-				savedMappings.add(ashaSupervisorMappingRepo.save(mapping));
+			// Fix 12: reject if facilityID points to a soft-deleted or missing facility
+			M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(mapping.getFacilityID(), false);
+			if (facility == null) {
+				throw new RuntimeException("Facility ID " + mapping.getFacilityID()
+						+ " is no longer active. Cannot save ASHA supervisor mapping.");
 			}
+			// Fix 6: skip if identical active row already exists (network retry / duplicate save)
+			AshaSupervisorMapping existingActive = ashaSupervisorMappingRepo
+					.findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedFalse(
+							mapping.getSupervisorUserID(), mapping.getAshaUserID(), mapping.getFacilityID());
+			if (existingActive != null) {
+				savedMappings.add(existingActive);
+				continue;
+			}
+			// Fix 5: if ASHA already has an active row under a DIFFERENT supervisor → soft-delete it
+			ArrayList<AshaSupervisorMapping> otherSupervisorMappings = ashaSupervisorMappingRepo
+					.findByAshaUserIDAndFacilityIDAndDeletedFalseAndSupervisorUserIDNot(
+							mapping.getAshaUserID(), mapping.getFacilityID(), mapping.getSupervisorUserID());
+			for (AshaSupervisorMapping old : otherSupervisorMappings) {
+				old.setDeleted(true);
+				old.setModifiedBy(mapping.getCreatedBy());
+				ashaSupervisorMappingRepo.save(old);
+			}
+			// Always create new row for clean audit trail (old soft-deleted rows stay as history)
+			savedMappings.add(ashaSupervisorMappingRepo.save(mapping));
 		}
 		return savedMappings;
 	}
@@ -113,5 +132,75 @@ public class AshaSupervisorMappingServiceImpl implements AshaSupervisorMappingSe
 				ashaSupervisorMappingRepo.save(mapping);
 			}
 		}
+	}
+
+	@Transactional
+	@Override
+	public void cascadeDeleteByUserID(Integer userID, String modifiedBy) {
+		// Soft-delete all rows where this user is supervisor
+		ArrayList<AshaSupervisorMapping> asSupervisor = ashaSupervisorMappingRepo
+				.findBySupervisorUserIDAndDeletedFalse(userID);
+		logger.info("cascadeDeleteByUserID: userID={}, found {} supervisor rows to soft-delete", userID, asSupervisor.size());
+		for (AshaSupervisorMapping m : asSupervisor) {
+			m.setDeleted(true);
+			m.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(m);
+		}
+		// Soft-delete all rows where this user is ASHA
+		ArrayList<AshaSupervisorMapping> asAsha = ashaSupervisorMappingRepo
+				.findByAshaUserIDAndDeletedFalse(userID);
+		logger.info("cascadeDeleteByUserID: userID={}, found {} ASHA rows to soft-delete", userID, asAsha.size());
+		for (AshaSupervisorMapping m : asAsha) {
+			m.setDeleted(true);
+			m.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(m);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void cascadeDeleteByFacilityID(Integer facilityID, String modifiedBy) {
+		// Fix 8: soft-delete all asha_supervisor_mapping rows for a deleted facility
+		ArrayList<AshaSupervisorMapping> mappings = ashaSupervisorMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+		for (AshaSupervisorMapping m : mappings) {
+			m.setDeleted(true);
+			m.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(m);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void cascadeDeleteByUserIDAndFacilityID(Integer userID, Integer facilityID, String modifiedBy) {
+		// Soft-delete rows where this user is supervisor at this facility
+		ArrayList<AshaSupervisorMapping> asSupervisor = ashaSupervisorMappingRepo
+				.findBySupervisorUserIDAndFacilityIDAndDeletedFalse(userID, facilityID);
+		for (AshaSupervisorMapping m : asSupervisor) {
+			m.setDeleted(true);
+			m.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(m);
+		}
+		// Soft-delete rows where this user is ASHA at this facility
+		ArrayList<AshaSupervisorMapping> asAsha = ashaSupervisorMappingRepo
+				.findByAshaUserIDAndFacilityIDAndDeletedFalse(userID, facilityID);
+		for (AshaSupervisorMapping m : asAsha) {
+			m.setDeleted(true);
+			m.setModifiedBy(modifiedBy);
+			ashaSupervisorMappingRepo.save(m);
+		}
+	}
+
+	@Transactional
+	@Override
+	public ArrayList<AshaSupervisorMapping> updateAshaMappingsAtomically(
+			Integer supervisorUserID, List<Integer> facilityIDs,
+			List<AshaSupervisorMapping> newMappings, String modifiedBy) {
+		// Fix 7: delete old + save new in a SINGLE transaction
+		// If anything fails, the entire operation rolls back — no partial wipe
+		deleteBySupervisorAndFacilities(supervisorUserID, facilityIDs, modifiedBy);
+		if (newMappings != null && !newMappings.isEmpty()) {
+			return saveAshaSupervisorMappings(newMappings);
+		}
+		return new ArrayList<>();
 	}
 }

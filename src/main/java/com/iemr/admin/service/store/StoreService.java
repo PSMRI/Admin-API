@@ -58,6 +58,8 @@ public interface StoreService {
 
 	ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID);
 
+	ArrayList<M_Facility> getAllFacilitiesByBlock(Integer blockID);
+
 	ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer levelValue, String ruralUrban);
 
 	M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, Integer mainVillageID, List<Integer> childFacilityIDs);
@@ -69,5 +71,7 @@ public interface StoreService {
 	ArrayList<M_Facility> getChildFacilitiesByParent(Integer parentFacilityID);
 
 	M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs, Integer mainVillageID, List<Integer> childFacilityIDs);
+
+	M_Facility deleteFacilityWithHierarchy(Integer facilityID, String modifiedBy) throws Exception;
 
 }

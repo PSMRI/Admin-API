@@ -1848,6 +1848,19 @@ public class EmployeeMasterController {
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
 
+			// Fix 1/3: cascade asha_supervisor_mapping BEFORE modifying entity to avoid JPA L1 cache issue
+			if (usrRole != null && usrRole.getUserID() != null) {
+				boolean roleChanged = pre.getRoleID() != null && usrRole.getRoleID() != null
+						&& !usrRole.getRoleID().equals(pre.getRoleID());
+				boolean facilityChanged = usrRole.getFacilityID() != null && pre.getFacilityID() != null
+						&& !usrRole.getFacilityID().equals(pre.getFacilityID());
+				if (roleChanged || facilityChanged) {
+					logger.info("Fix1/3: cascading asha_supervisor_mapping for userID={}, roleChanged={}, facilityChanged={}",
+							usrRole.getUserID(), roleChanged, facilityChanged);
+					employeeMasterInter.cascadeDeleteAshaMappingsForUser(usrRole.getUserID());
+				}
+			}
+
 			usrRole.setUserID(pre.getUserID());
 			usrRole.setRoleID(pre.getRoleID());
 			usrRole.setAgentPassword(pre.getAgentPassword());
@@ -1902,6 +1915,17 @@ public class EmployeeMasterController {
 					M_UserServiceRoleMapping2.class);
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
+
+			// Fix 2: cascade asha_supervisor_mapping BEFORE setDeleted() to avoid JPA L1 cache issue.
+			// After setDeleted(true), findById() in saveRoleMappingeditedData hits the L1 cache
+			// returning the already-modified entity, so the "old vs new deleted" check always fails.
+			// For ASHA Supervisor with multiple facilities: only delete mappings for this facilityID
+			if (Boolean.TRUE.equals(pre.getDeleted()) && !Boolean.TRUE.equals(usrRole.getDeleted())
+					&& usrRole.getUserID() != null) {
+				logger.info("Fix2: cascading asha_supervisor_mapping soft-delete for userID={}, uSRMappingID={}",
+						usrRole.getUserID(), pre.getuSRMappingID());
+				employeeMasterInter.cascadeDeleteAshaMappingsForDeactivation(usrRole);
+			}
 
 			usrRole.setDeleted(pre.getDeleted());
 

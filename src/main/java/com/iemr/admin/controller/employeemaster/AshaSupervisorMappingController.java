@@ -138,6 +138,37 @@ public class AshaSupervisorMappingController {
 		return response.toString();
 	}
 
+	@Operation(summary = "Atomically delete old and save new ASHA supervisor mappings (Fix 7)")
+	@RequestMapping(value = "/userFacilityMapping/ashaSupervisorMapping/updateAtomically", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String updateAshaSupervisorMappingAtomically(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			com.google.gson.JsonObject reqObj = InputMapper.gson().fromJson(request, com.google.gson.JsonObject.class);
+			Integer supervisorUserID = reqObj.get("supervisorUserID").getAsInt();
+			String modifiedBy = reqObj.has("modifiedBy") ? reqObj.get("modifiedBy").getAsString() : "Admin";
+			List<Integer> facilityIDs = new ArrayList<>();
+			if (reqObj.has("facilityIDs")) {
+				for (com.google.gson.JsonElement el : reqObj.getAsJsonArray("facilityIDs")) {
+					facilityIDs.add(el.getAsInt());
+				}
+			}
+			List<AshaSupervisorMapping> newMappings = new ArrayList<>();
+			if (reqObj.has("newMappings")) {
+				AshaSupervisorMapping[] arr = InputMapper.gson().fromJson(
+						reqObj.getAsJsonArray("newMappings").toString(), AshaSupervisorMapping[].class);
+				newMappings = Arrays.asList(arr);
+			}
+			ArrayList<AshaSupervisorMapping> saved = ashaSupervisorMappingService
+					.updateAshaMappingsAtomically(supervisorUserID, facilityIDs, newMappings, modifiedBy);
+			response.setResponse(saved.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Restore soft-deleted ASHA supervisor mappings by IDs")
 	@RequestMapping(value = "/userFacilityMapping/ashaSupervisorMapping/restore", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })

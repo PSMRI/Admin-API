@@ -40,4 +40,18 @@ public interface AshaSupervisorMappingService {
 	void deleteBySupervisorAndFacilities(Integer supervisorUserID, List<Integer> facilityIDs, String modifiedBy);
 
 	void restoreMappings(List<Long> ids, String modifiedBy);
+
+	// Cascade: soft-delete all asha_supervisor_mapping rows for a user (as supervisor or ASHA)
+	void cascadeDeleteByUserID(Integer userID, String modifiedBy);
+
+	// Cascade: soft-delete rows for a user at a specific old facility (role or facility change)
+	void cascadeDeleteByUserIDAndFacilityID(Integer userID, Integer facilityID, String modifiedBy);
+
+	// Cascade: soft-delete all asha_supervisor_mapping rows for a facility (facility soft-deleted)
+	void cascadeDeleteByFacilityID(Integer facilityID, String modifiedBy);
+
+	// Fix 7: atomic delete-old + save-new in one transaction
+	ArrayList<AshaSupervisorMapping> updateAshaMappingsAtomically(
+			Integer supervisorUserID, List<Integer> facilityIDs,
+			List<AshaSupervisorMapping> newMappings, String modifiedBy);
 }

@@ -60,12 +60,21 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 
 	ArrayList<M_Facility> findByBlockIDAndDeletedFalseOrderByFacilityName(Integer blockID);
 
+	ArrayList<M_Facility> findByBlockIDOrderByFacilityName(Integer blockID);
+
 	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.ruralUrban = :ruralUrban AND f.facilityTypeID IN " +
 			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.levelValue = :levelValue " +
 			"AND ft.deleted = false) AND f.deleted = false ORDER BY f.facilityName")
 	ArrayList<M_Facility> findByBlockIDAndFacilityLevel(@Param("blockID") Integer blockID,
 			@Param("levelValue") Integer levelValue,
 			@Param("ruralUrban") String ruralUrban);
+
+	// All SCs in block regardless of rural/urban (for main village selection)
+	@Query("SELECT f FROM M_Facility f WHERE f.blockID = :blockID AND f.facilityTypeID IN " +
+			"(SELECT ft.facilityTypeID FROM M_facilitytype ft WHERE ft.levelValue = :levelValue " +
+			"AND ft.deleted = false) AND f.deleted = false ORDER BY f.facilityName")
+	ArrayList<M_Facility> findByBlockIDAndLevelValue(@Param("blockID") Integer blockID,
+			@Param("levelValue") Integer levelValue);
 
 	ArrayList<M_Facility> findByParentFacilityIDAndDeletedFalseOrderByFacilityName(Integer parentFacilityID);
 

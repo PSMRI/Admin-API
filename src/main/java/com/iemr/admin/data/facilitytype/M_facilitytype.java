@@ -89,10 +89,6 @@ public class M_facilitytype {
 	private String ruralUrban;
 
 	@Expose
-	@Column(name = "FacilityLevelID")
-	private Integer facilityLevelID;
-
-	@Expose
 	@Column(name = "LevelValue")
 	private Integer levelValue;
 
@@ -210,14 +206,6 @@ public class M_facilitytype {
 
 	public void setRuralUrban(String ruralUrban) {
 		this.ruralUrban = ruralUrban;
-	}
-
-	public Integer getFacilityLevelID() {
-		return facilityLevelID;
-	}
-
-	public void setFacilityLevelID(Integer facilityLevelID) {
-		this.facilityLevelID = facilityLevelID;
 	}
 
 	public Integer getStateID() {

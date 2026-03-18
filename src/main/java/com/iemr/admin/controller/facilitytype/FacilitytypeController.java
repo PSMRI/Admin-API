@@ -126,9 +126,6 @@ public class FacilitytypeController {
 			if (facilityDetails.getRuralUrban() != null) {
 				allFacilityData.setRuralUrban(facilityDetails.getRuralUrban());
 			}
-			if (facilityDetails.getFacilityLevelID() != null) {
-				allFacilityData.setFacilityLevelID(facilityDetails.getFacilityLevelID());
-			}
 			if (facilityDetails.getFacilityTypeDesc() != null) {
 				allFacilityData.setFacilityTypeDesc(facilityDetails.getFacilityTypeDesc());
 			}

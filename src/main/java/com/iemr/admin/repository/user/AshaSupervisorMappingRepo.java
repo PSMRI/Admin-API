@@ -44,6 +44,18 @@ public interface AshaSupervisorMappingRepo extends CrudRepository<AshaSupervisor
 
 	AshaSupervisorMapping findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedTrue(Integer supervisorUserID, Integer ashaUserID, Integer facilityID);
 
+	ArrayList<AshaSupervisorMapping> findByAshaUserIDAndDeletedFalse(Integer ashaUserID);
+
+	ArrayList<AshaSupervisorMapping> findByAshaUserIDAndFacilityIDAndDeletedFalse(Integer ashaUserID, Integer facilityID);
+
+	// Fix 5: find active row for this ASHA at this facility under a DIFFERENT supervisor
+	ArrayList<AshaSupervisorMapping> findByAshaUserIDAndFacilityIDAndDeletedFalseAndSupervisorUserIDNot(
+			Integer ashaUserID, Integer facilityID, Integer supervisorUserID);
+
+	// Fix 6: find existing active row for exact (supervisor, ASHA, facility) — for idempotent save
+	AshaSupervisorMapping findBySupervisorUserIDAndAshaUserIDAndFacilityIDAndDeletedFalse(
+			Integer supervisorUserID, Integer ashaUserID, Integer facilityID);
+
 	/**
 	 * Get active supervisor mappings at a facility, excluding mappings where
 	 * the supervisor user has been soft-deleted in m_User.

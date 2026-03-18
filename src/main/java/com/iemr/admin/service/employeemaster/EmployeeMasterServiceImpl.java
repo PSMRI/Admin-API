@@ -95,8 +95,13 @@ import com.iemr.admin.repo.employeemaster.Showofficedetails1Repo1;
 import com.iemr.admin.repo.employeemaster.ShowuserdetailsfromuserservicerolemappingRepo;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
 import com.iemr.admin.repo.employeemaster.V_UserservicerolemappingRepo;
+import com.iemr.admin.data.facilitytype.M_facilitytype;
+import com.iemr.admin.data.store.M_Facility;
+import com.iemr.admin.repository.facilitytype.M_facilitytypeRepo;
 import com.iemr.admin.repository.provideronboard.M_ServiceMasterRepo;
 import com.iemr.admin.repository.rolemaster.M_UserservicerolemappingForRoleProviderAdminRepo;
+import com.iemr.admin.repository.store.MainStoreRepo;
+import com.iemr.admin.service.employeemaster.AshaSupervisorMappingService;
 import com.iemr.admin.service.user.EncryptUserPassword;
 import com.iemr.admin.utils.CookieUtil;
 import com.iemr.admin.utils.RestTemplateUtil;
@@ -137,6 +142,9 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Autowired
 	private MProviderservicemappingBlockingRepo mProviderservicemappingBlockingRepo;
+
+	@Autowired
+	private AshaSupervisorMappingService ashaSupervisorMappingService;
 
 	@Autowired
 	private EncryptUserPassword encryptUserPassword;
@@ -191,6 +199,12 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Autowired
 	M_ServiceMasterRepo serviceMasterRepo;
+
+	@Autowired
+	private MainStoreRepo mainStoreRepo;
+
+	@Autowired
+	private M_facilitytypeRepo facilityTypeRepo;
 	
 	@Autowired
 	private EmployeeSignatureRepo employeeSignatureRepo;
@@ -327,6 +341,61 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) throws JsonMappingException, JsonProcessingException {
+		// Fix 4 + Fix 16 + Fix 17: validate each mapping before any save
+		for (M_UserServiceRoleMapping2 mapping : resList1) {
+			M_Role role = null;
+			if (mapping.getRoleID() != null) {
+				role = roleRepo.findByRoleID(mapping.getRoleID());
+				// Fix 4: ASHA must have a facilityID
+				if (role != null && "asha".equalsIgnoreCase(role.getRoleName())
+						&& mapping.getFacilityID() == null) {
+					throw new RuntimeException(
+							"Facility (SC) is mandatory for ASHA role. Please select a facility before saving.");
+				}
+			}
+			if (mapping.getFacilityID() != null) {
+				M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(mapping.getFacilityID(), false);
+				// Fix 16: facility must not be soft-deleted
+				if (facility == null) {
+					throw new RuntimeException("Facility ID " + mapping.getFacilityID()
+							+ " is no longer active. Please select a valid facility.");
+				}
+				// Fix 17: ASHA must be at SC level (max levelValue for this service line)
+				if (role != null && "asha".equalsIgnoreCase(role.getRoleName())
+						&& facility.getFacilityTypeID() != null
+						&& mapping.getProviderServiceMapID() != null) {
+					M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(facility.getFacilityTypeID());
+					Integer maxLevel = facilityTypeRepo
+							.findMaxLevelValueByProviderServiceMapID(mapping.getProviderServiceMapID());
+					if (ft != null && maxLevel != null && ft.getLevelValue() != null
+							&& !ft.getLevelValue().equals(maxLevel)) {
+						throw new RuntimeException(
+								"ASHA role must be mapped to a Sub-Centre (SC) level facility. Please select a facility at the lowest hierarchy level.");
+					}
+				}
+			}
+			// Fix 18: prevent duplicate active USR row (same user + role + service line)
+			// ASHA Supervisor can have multiple USR rows (one per facility) — check user+role+PSMID+facilityID
+			boolean isAshaSupervisor = role != null && "asha supervisor".equalsIgnoreCase(role.getRoleName());
+			if (mapping.getUserID() != null && mapping.getRoleID() != null
+					&& mapping.getProviderServiceMapID() != null) {
+				if (isAshaSupervisor) {
+					if (mapping.getFacilityID() != null && employeeMasterRepo
+							.existsByUserIDAndRoleIDAndProviderServiceMapIDAndFacilityIDAndDeletedFalse(
+									mapping.getUserID(), mapping.getRoleID(),
+									mapping.getProviderServiceMapID(), mapping.getFacilityID())) {
+						throw new RuntimeException(
+								"User already has an active work location mapping for this facility. Duplicate mapping is not allowed.");
+					}
+				} else {
+					if (employeeMasterRepo.existsByUserIDAndRoleIDAndProviderServiceMapIDAndDeletedFalse(
+							mapping.getUserID(), mapping.getRoleID(), mapping.getProviderServiceMapID())) {
+						throw new RuntimeException(
+								"User already has an active work location mapping with this role and service line. Duplicate mapping is not allowed.");
+					}
+				}
+			}
+		}
 		ArrayList<M_UserServiceRoleMapping2> reslist = (ArrayList<M_UserServiceRoleMapping2>) employeeMasterRepo
 				.saveAll(resList1);
 		if (ENABLE_CTI_USER_CREATION) {
@@ -943,7 +1012,106 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
+	public void cascadeDeleteAshaMappingsForUser(Integer userID) {
+		// Fix 2: called from controller BEFORE setDeleted() to avoid JPA L1 cache issue
+		ashaSupervisorMappingService.cascadeDeleteByUserID(userID, "Admin");
+	}
+
+	@Override
+	public void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole) {
+		Integer userID = usrRole.getUserID();
+		M_Role role = usrRole.getRoleID() != null ? roleRepo.findByRoleID(usrRole.getRoleID()) : null;
+		boolean isSupervisor = role != null && "asha supervisor".equalsIgnoreCase(role.getRoleName());
+		if (isSupervisor && usrRole.getFacilityID() != null) {
+			// Count active USR rows for this user+role (exclude current row being deleted)
+			long activeCount = employeeMasterRepo.countByUserIDAndRoleIDAndDeletedFalse(userID, usrRole.getRoleID()) - 1;
+			if (activeCount > 0) {
+				// Other facilities still active — only delete this supervisor's mappings at this facility
+				ashaSupervisorMappingService.cascadeDeleteByUserIDAndFacilityID(userID, usrRole.getFacilityID(), "Admin");
+				return;
+			}
+		}
+		// Last facility or non-supervisor — delete all
+		ashaSupervisorMappingService.cascadeDeleteByUserID(userID, "Admin");
+	}
+
+	@Override
 	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException {
+
+		// Fix 4 + Fix 16 + Fix 17 + Fix 14: validate only on create/update, skip for deactivation
+		M_Role role = null;
+		if (!Boolean.TRUE.equals(usrRole.getDeleted())) {
+			if (usrRole.getRoleID() != null) {
+				role = roleRepo.findByRoleID(usrRole.getRoleID());
+				// Fix 4: ASHA must have a facilityID
+				if (role != null && "asha".equalsIgnoreCase(role.getRoleName())
+						&& usrRole.getFacilityID() == null) {
+					throw new RuntimeException(
+							"Facility (SC) is mandatory for ASHA role. Please select a facility before saving.");
+				}
+			}
+			if (usrRole.getFacilityID() != null) {
+				M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(usrRole.getFacilityID(), false);
+				// Fix 16: facility must not be soft-deleted
+				if (facility == null) {
+					throw new RuntimeException("Facility ID " + usrRole.getFacilityID()
+							+ " is no longer active. Please select a valid facility.");
+				}
+				if (facility.getFacilityTypeID() != null && usrRole.getProviderServiceMapID() != null) {
+					M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(facility.getFacilityTypeID());
+					Integer maxLevel = facilityTypeRepo
+							.findMaxLevelValueByProviderServiceMapID(usrRole.getProviderServiceMapID());
+					// Fix 17: ASHA must be at SC level
+					if (role != null && "asha".equalsIgnoreCase(role.getRoleName())
+							&& ft != null && maxLevel != null && ft.getLevelValue() != null
+							&& !ft.getLevelValue().equals(maxLevel)) {
+						throw new RuntimeException(
+								"ASHA role must be mapped to a Sub-Centre (SC) level facility. Please select a facility at the lowest hierarchy level.");
+					}
+					// Fix 14: non-SC facility → clear saved village mappings
+					if (ft != null && maxLevel != null && ft.getLevelValue() != null
+							&& !ft.getLevelValue().equals(maxLevel)) {
+						usrRole.setVillageidDb(null);
+						usrRole.setVillageNameDb(null);
+					}
+				}
+			}
+		}
+
+		// CASCADE: fetch old USR row and soft-delete stale asha_supervisor_mapping rows
+		if (usrRole.getuSRMappingID() != null) {
+			M_UserServiceRoleMapping2 oldUSR = employeeMasterRepo.findById(usrRole.getuSRMappingID()).orElse(null);
+			if (oldUSR != null) {
+				Integer userID = oldUSR.getUserID();
+				// Fix 1 & 11: Role changed → cascade soft-delete all mappings for this user
+				if (oldUSR.getRoleID() != null && !oldUSR.getRoleID().equals(usrRole.getRoleID())) {
+					ashaSupervisorMappingService.cascadeDeleteByUserID(userID, "Admin");
+				}
+				// Fix 2: User deleted/deactivated → cascade soft-delete mappings
+				// For ASHA Supervisor with multiple facilities: only delete mappings for this facilityID
+				// For other roles or single facility: delete all mappings for this user
+				if (Boolean.TRUE.equals(usrRole.getDeleted()) && !Boolean.TRUE.equals(oldUSR.getDeleted())) {
+					M_Role oldRole = oldUSR.getRoleID() != null ? roleRepo.findByRoleID(oldUSR.getRoleID()) : null;
+					boolean isSupervisor = oldRole != null && "asha supervisor".equalsIgnoreCase(oldRole.getRoleName());
+					// Check if supervisor still has other active USR rows
+					// Count excludes current row being deleted (subtract 1 since it's still active in DB)
+					long activeCount = isSupervisor ? employeeMasterRepo.countByUserIDAndRoleIDAndDeletedFalse(userID, oldUSR.getRoleID()) - 1 : 0;
+					if (isSupervisor && activeCount > 0 && oldUSR.getFacilityID() != null) {
+						// Other facilities still active — only delete mappings for this facility
+						ashaSupervisorMappingService.cascadeDeleteByFacilityID(oldUSR.getFacilityID(), "Admin");
+					} else {
+						// Last facility or non-supervisor — delete all
+						ashaSupervisorMappingService.cascadeDeleteByUserID(userID, "Admin");
+					}
+				}
+				// Fix 3, 9, 10: Facility changed → cascade delete ALL asha_supervisor_mapping rows for this user
+				// Supervisor may have multiple facilityIDs in asha_supervisor_mapping (SC1, SC2, SC3)
+				// but USR stores only one facilityID — so delete all, not just the old facilityID
+				if (oldUSR.getFacilityID() != null && !oldUSR.getFacilityID().equals(usrRole.getFacilityID())) {
+					ashaSupervisorMappingService.cascadeDeleteByUserID(userID, "Admin");
+				}
+			}
+		}
 
 		M_UserServiceRoleMapping2 data = employeeMasterRepo.save(usrRole);
 		if (ENABLE_CTI_USER_CREATION) {

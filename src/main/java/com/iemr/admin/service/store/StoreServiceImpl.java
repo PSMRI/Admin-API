@@ -35,11 +35,13 @@ import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_facilityMap;
 import com.iemr.admin.data.store.V_FetchFacility;
 import com.iemr.admin.data.vanMaster.M_Van;
+import com.iemr.admin.repository.facilitytype.M_facilitytypeRepo;
 import com.iemr.admin.repository.parkingPlace.ParkingPlaceRepository;
 import com.iemr.admin.repository.store.FacilityVillageMappingRepo;
 import com.iemr.admin.repository.store.MainStoreRepo;
 import com.iemr.admin.repository.store.V_FetchFacilityRepo;
 import com.iemr.admin.repository.vanMaster.VanMasterRepository;
+import com.iemr.admin.service.employeemaster.AshaSupervisorMappingService;
 import com.iemr.admin.utils.exception.IEMRException;
 
 @Service
@@ -59,6 +61,12 @@ public class StoreServiceImpl implements StoreService {
 
 	@Autowired
 	private FacilityVillageMappingRepo facilityVillageMappingRepo;
+
+	@Autowired
+	private AshaSupervisorMappingService ashaSupervisorMappingService;
+
+	@Autowired
+	private M_facilitytypeRepo facilityTypeRepo;
 
 	// @Autowired
 	// private SubStoreRepo subStoreRepo;
@@ -245,7 +253,15 @@ public class StoreServiceImpl implements StoreService {
 	}
 
 	@Override
+	public ArrayList<M_Facility> getAllFacilitiesByBlock(Integer blockID) {
+		return mainStoreRepo.findByBlockIDOrderByFacilityName(blockID);
+	}
+
+	@Override
 	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer levelValue, String ruralUrban) {
+		if (ruralUrban == null || ruralUrban.isEmpty()) {
+			return mainStoreRepo.findByBlockIDAndLevelValue(blockID, levelValue);
+		}
 		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, levelValue, ruralUrban);
 	}
 
@@ -255,6 +271,26 @@ public class StoreServiceImpl implements StoreService {
 			Integer mainVillageID, List<Integer> childFacilityIDs) {
 		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndDeletedFalse(facility.getFacilityName(), facility.getBlockID())) {
 			throw new RuntimeException("Facility with this name already exists in this block");
+		}
+		// Fix 20: validate that child facilities selected are exactly one level below this facility
+		// (parentFacilityID is not sent from frontend on create; the hierarchy is built via childFacilityIDs)
+		if (childFacilityIDs != null && !childFacilityIDs.isEmpty()
+				&& facility.getFacilityTypeID() != null) {
+			M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(facility.getFacilityTypeID());
+			if (ft != null && ft.getLevelValue() != null) {
+				for (Integer childID : childFacilityIDs) {
+					M_Facility child = mainStoreRepo.findByFacilityIDAndDeleted(childID, false);
+					if (child != null && child.getFacilityTypeID() != null) {
+						M_facilitytype childFt = facilityTypeRepo.findByFacilityTypeID(child.getFacilityTypeID());
+						if (childFt != null && childFt.getLevelValue() != null
+								&& !childFt.getLevelValue().equals(ft.getLevelValue() + 1)) {
+							throw new RuntimeException(
+									"Hierarchy level mismatch: selected child facility is not at the expected level. "
+									+ "Children must be exactly one level below this facility.");
+						}
+					}
+				}
+			}
 		}
 		facility.setMainVillageID(mainVillageID);
 		M_Facility savedFacility = mainStoreRepo.save(facility);
@@ -314,6 +350,35 @@ public class StoreServiceImpl implements StoreService {
 
 	@Transactional
 	@Override
+	public M_Facility deleteFacilityWithHierarchy(Integer facilityID, String modifiedBy) throws Exception {
+		M_Facility facility = mainStoreRepo.findByFacilityID(facilityID);
+		if (facility == null) {
+			throw new Exception("Facility not found");
+		}
+		// Fix 19: clear parentFacilityID on children (unlink from hierarchy, don't block)
+		ArrayList<M_Facility> children = mainStoreRepo.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(facilityID);
+		for (M_Facility child : children) {
+			child.setParentFacilityID(null);
+			child.setModifiedBy(modifiedBy);
+			mainStoreRepo.save(child);
+		}
+		facility.setDeleted(true);
+		facility.setModifiedBy(modifiedBy);
+		M_Facility saved = mainStoreRepo.save(facility);
+		// Fix 8: cascade soft-delete all asha_supervisor_mapping rows for this facility
+		ashaSupervisorMappingService.cascadeDeleteByFacilityID(facilityID, modifiedBy);
+		// Cascade soft-delete facility_village_mapping rows
+		ArrayList<FacilityVillageMapping> villageMappings = facilityVillageMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+		for (FacilityVillageMapping vm : villageMappings) {
+			vm.setDeleted(true);
+			vm.setModifiedBy(modifiedBy);
+			facilityVillageMappingRepo.save(vm);
+		}
+		return saved;
+	}
+
+	@Transactional
+	@Override
 	public M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
 			Integer mainVillageID, List<Integer> childFacilityIDs) {
 		M_Facility existing = mainStoreRepo.findByFacilityID(facility.getFacilityID());
@@ -328,6 +393,7 @@ public class StoreServiceImpl implements StoreService {
 		existing.setFacilityName(facility.getFacilityName());
 		existing.setFacilityDesc(facility.getFacilityDesc());
 		existing.setFacilityCode(facility.getFacilityCode());
+		// Rural/Urban and FacilityType are read-only on edit — admin must delete and recreate to change
 		existing.setMainVillageID(mainVillageID);
 		existing.setModifiedBy(facility.getModifiedBy());
 		M_Facility savedFacility = mainStoreRepo.save(existing);
@@ -374,6 +440,24 @@ public class StoreServiceImpl implements StoreService {
 		}
 
 		if (childFacilityIDs != null) {
+			// Fix 20: validate child levels before updating
+			if (!childFacilityIDs.isEmpty() && existing.getFacilityTypeID() != null) {
+				M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(existing.getFacilityTypeID());
+				if (ft != null && ft.getLevelValue() != null) {
+					for (Integer childID : childFacilityIDs) {
+						M_Facility child = mainStoreRepo.findByFacilityIDAndDeleted(childID, false);
+						if (child != null && child.getFacilityTypeID() != null) {
+							M_facilitytype childFt = facilityTypeRepo.findByFacilityTypeID(child.getFacilityTypeID());
+							if (childFt != null && childFt.getLevelValue() != null
+									&& !childFt.getLevelValue().equals(ft.getLevelValue() + 1)) {
+								throw new RuntimeException(
+										"Hierarchy level mismatch: selected child facility is not at the expected level. "
+										+ "Children must be exactly one level below this facility.");
+							}
+						}
+					}
+				}
+			}
 			mainStoreRepo.clearParentFacilityID(facility.getFacilityID(), facility.getModifiedBy());
 			for (Integer childID : childFacilityIDs) {
 				M_Facility child = mainStoreRepo.findByFacilityID(childID);
