@@ -202,10 +202,32 @@ public class M_User1{
 	   @Expose
 	    private M_Maritalstatus m_Maritalstatus;
 	   
+	   @Expose
+	   @Transient
+	   private String signatureStatus;
+	   
 	   /*@OneToOne(mappedBy="m_user")
 		private M_UserLangMapping m_UserLangMapping1;*/
 	
-	// new field for rate-limit, failed authentication
+	public String getSignatureStatus() {
+		return signatureStatus;
+	}
+
+	   public void setSignatureStatus(String signatureStatus) {
+		   this.signatureStatus = signatureStatus;
+	   }
+
+
+
+
+
+
+
+
+
+
+
+			// new field for rate-limit, failed authentication
 			@Expose
 			@Column(name = "failed_attempt", insertable = false)
 			private Integer failedAttempt;

@@ -40,8 +40,15 @@ public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 	@Query("SELECT u FROM M_User1 u WHERE u.userID=:userID  AND deleted=false")
 	M_User1 editEmployee(@Param("userID") Integer userID);
 
+	@Query("SELECT u FROM M_User1 u WHERE u.aadhaarNo=:aadhaar AND deleted=false ")
+	M_User1 findEmployeeAadhaarNo(@Param("aadhaar") String userName);
+
 	@Query("SELECT u FROM M_User1 u WHERE u.userName=:userName AND deleted=false ")
 	M_User1 findEmployeeByName(@Param("userName") String userName);
+
+
+	@Query("SELECT u FROM M_User1 u WHERE u.contactNo=:contactNo AND deleted=false ")
+	M_User1 findEmployeeByContact(@Param("contactNo") String userName);
 
 	@Query("SELECT u FROM M_User1 u WHERE u.userName=:userName OR u.aadhaarNo=:aadhaarNo OR u.pAN=:getpAN OR u.employeeID=:employeeID OR u.healthProfessionalID=:healthProfessionalID AND deleted=false ")
 	M_User1 checkingEmpDetails(@Param("userName") String userName, @Param("aadhaarNo") String aadhaarNo,

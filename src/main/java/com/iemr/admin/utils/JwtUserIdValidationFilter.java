@@ -22,6 +22,9 @@ public class JwtUserIdValidationFilter implements Filter {
 	private static final String HEALTH_ENDPOINT = "/health";
 	private static final String VERSION_ENDPOINT = "/version";
 
+	private static final String HEALTH_ENDPOINT = "/health";
+	private static final String VERSION_ENDPOINT = "/version";
+
 	private final JwtAuthenticationUtil jwtAuthenticationUtil;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 	private final String allowedOrigins;
@@ -49,21 +52,69 @@ public class JwtUserIdValidationFilter implements Filter {
 			return;
 		}
 
-		String origin = request.getHeader("Origin");
-		if (origin != null && isOriginAllowed(origin)) {
-			response.setHeader("Access-Control-Allow-Origin", origin);
-			response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, Jwttoken");
-			response.setHeader("Access-Control-Allow-Credentials", "true");
-		} else {
-			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
-		}
-
-		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-			logger.info("OPTIONS request - skipping JWT validation");
-			response.setStatus(HttpServletResponse.SC_OK);
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals(HEALTH_ENDPOINT) || path.equals(VERSION_ENDPOINT) || 
+		    path.equals(contextPath + HEALTH_ENDPOINT) || path.equals(contextPath + VERSION_ENDPOINT)) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
+			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
+
+		String origin = request.getHeader("Origin");
+		String method = request.getMethod();
+		String uri = request.getRequestURI();
+
+		logger.debug("Incoming Origin: {}", origin);
+		logger.debug("Request Method: {}", method);
+		logger.debug("Request URI: {}", uri);
+		logger.debug("Allowed Origins Configured: {}", allowedOrigins);
+
+		if ("OPTIONS".equalsIgnoreCase(method)) {
+			if (origin == null) {
+				logger.warn("BLOCKED - OPTIONS request without Origin header | Method: {} | URI: {}", method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "OPTIONS request requires Origin header");
+				return;
+			}
+			if (!isOriginAllowed(origin)) {
+				logger.warn("BLOCKED - Unauthorized Origin | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed");
+				return;
+			}
+		} else {
+			// For non-OPTIONS requests, validate origin if present
+			if (origin != null && !isOriginAllowed(origin)) {
+				logger.warn("BLOCKED - Unauthorized Origin | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed");
+				return;
+			}
+		}
+
+		// Determine request path/context for later checks
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+
+		// Set CORS headers and handle OPTIONS request only if origin is valid and allowed
+		if (origin != null && isOriginAllowed(origin)) {
+			addCorsHeaders(response, origin);
+			logger.info("Origin Validated | Origin: {} | Method: {} | URI: {}", origin, method, uri);
+			
+			if ("OPTIONS".equalsIgnoreCase(method)) {
+				// OPTIONS (preflight) - respond with full allowed methods
+				response.setStatus(HttpServletResponse.SC_OK);
+				return;
+			}
+		} else {
+			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
+			
+			if ("OPTIONS".equalsIgnoreCase(method)) {
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed for OPTIONS request");
+				return;
+			}
+		}
+
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
 		// Log cookies for debugging
@@ -80,7 +131,7 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 
 		// Log headers for debugging
-		logger.info("JWT token from header: ");
+		logger.debug("JWT token from header: {}", request.getHeader("Jwttoken") != null ? "present" : "not present");
 
 		// Skip login and public endpoints
 		if (path.equals(contextPath + "/user/userAuthenticate")
@@ -91,10 +142,14 @@ public class JwtUserIdValidationFilter implements Filter {
 				|| path.startsWith(contextPath + "/public")
 			|| path.equals(contextPath + HEALTH_ENDPOINT)
 			|| path.equals(contextPath + VERSION_ENDPOINT)) {
+				|| path.startsWith(contextPath + "/public")
+			|| path.equals(contextPath + HEALTH_ENDPOINT)
+			|| path.equals(contextPath + VERSION_ENDPOINT)) {
 			logger.info("Skipping filter for path: " + path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
+
 
 		try {
 			String jwtFromCookie = getJwtTokenFromCookies(request);
@@ -136,8 +191,17 @@ public class JwtUserIdValidationFilter implements Filter {
 
 		} catch (Exception e) {
 			logger.error("Authorization error: ", e);
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
 		}
+	}
+
+	private void addCorsHeaders(HttpServletResponse response, String origin) {
+		response.setHeader("Access-Control-Allow-Origin", origin); // Never use wildcard
+		response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+		response.setHeader("Access-Control-Allow-Headers",
+				"Authorization, Content-Type, Accept, Jwttoken, serverAuthorization, ServerAuthorization, serverauthorization, Serverauthorization");
+		response.setHeader("Access-Control-Allow-Credentials", "true");
+		response.setHeader("Access-Control-Max-Age", "3600");
 	}
 
 	private boolean isOriginAllowed(String origin) {
@@ -152,14 +216,12 @@ public class JwtUserIdValidationFilter implements Filter {
 					String regex = pattern
 							.replace(".", "\\.")
 							.replace("*", ".*")
-							.replace("http://localhost:.*", "http://localhost:\\d+"); // special case for wildcard port
-
+						    .replace("http://localhost:.*", "http://localhost:\\d+");
+							
 					boolean matched = origin.matches(regex);
 					return matched;
 				});
-	}
-
-	private boolean isMobileClient(String userAgent) {
+	}	private boolean isMobileClient(String userAgent) {
 		if (userAgent == null)
 			return false;
 		userAgent = userAgent.toLowerCase();
