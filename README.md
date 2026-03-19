@@ -1,5 +1,6 @@
 # AMRIT - Admin Service
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)  ![branch parameter](https://github.com/PSMRI/Admin-API/actions/workflows/sast-and-package.yml/badge.svg)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)       [![DeepWiki](https://img.shields.io/badge/DeepWiki-PSMRI%2FAdmin--API-blue)](https://deepwiki.com/PSMRI/Admin-API)
+
 
 The Admin Module is a collection of tools and scripts that allow users to manage the project. It includes tools for managing users, permissions, and settings.It is the master of all branches.
 Admin module provides a user-friendly interface for managing your application. It includes features such as:

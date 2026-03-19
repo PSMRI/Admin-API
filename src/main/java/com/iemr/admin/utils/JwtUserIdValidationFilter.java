@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.iemr.admin.utils.http.AuthorizationHeaderRequestWrapper;
 
 import jakarta.servlet.Filter;
@@ -19,6 +18,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtUserIdValidationFilter implements Filter {
+
+	private static final String HEALTH_ENDPOINT = "/health";
+	private static final String VERSION_ENDPOINT = "/version";
 
 	private static final String HEALTH_ENDPOINT = "/health";
 	private static final String VERSION_ENDPOINT = "/version";
@@ -38,6 +40,17 @@ public class JwtUserIdValidationFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
+
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals(HEALTH_ENDPOINT) || path.equals(VERSION_ENDPOINT) || 
+		    path.equals(contextPath + HEALTH_ENDPOINT) || path.equals(contextPath + VERSION_ENDPOINT)) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
 
 		String origin = request.getHeader("Origin");
 		String method = request.getMethod();
@@ -118,6 +131,9 @@ public class JwtUserIdValidationFilter implements Filter {
 				|| path.startsWith(contextPath + "/public")
 			|| path.equals(contextPath + HEALTH_ENDPOINT)
 			|| path.equals(contextPath + VERSION_ENDPOINT)) {
+				|| path.startsWith(contextPath + "/public")
+			|| path.equals(contextPath + HEALTH_ENDPOINT)
+			|| path.equals(contextPath + VERSION_ENDPOINT)) {
 			logger.info("Skipping filter for path: " + path);
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
@@ -158,9 +174,6 @@ public class JwtUserIdValidationFilter implements Filter {
 					return;
 				}
 			}
-
-			logger.warn("No valid authentication token found");
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 
 			logger.warn("No valid authentication token found");
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
