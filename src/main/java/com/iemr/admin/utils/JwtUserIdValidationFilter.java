@@ -52,6 +52,17 @@ public class JwtUserIdValidationFilter implements Filter {
 			return;
 		}
 
+		String path = request.getRequestURI();
+		String contextPath = request.getContextPath();
+		
+		// FIRST: Check for health and version endpoints - skip ALL processing
+		if (path.equals(HEALTH_ENDPOINT) || path.equals(VERSION_ENDPOINT) || 
+		    path.equals(contextPath + HEALTH_ENDPOINT) || path.equals(contextPath + VERSION_ENDPOINT)) {
+			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
+			filterChain.doFilter(servletRequest, servletResponse);
+			return;
+		}
+
 		String origin = request.getHeader("Origin");
 		String method = request.getMethod();
 		String uri = request.getRequestURI();
