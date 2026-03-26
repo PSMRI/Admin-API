@@ -39,4 +39,9 @@ public interface V_fetchItemFacilityMapRepo extends CrudRepository<V_fetchItemFa
 	@Query("SELECT u FROM V_fetchItemFacilityMap u where u.facilityID = :facilityID")
 	ArrayList<V_fetchItemFacilityMap> getItemMappingsByFacilityID(@Param("facilityID") Integer facilityID);
 
+	@Query(value = "SELECT u.* FROM v_fetchItemFacilityMap u WHERE u.FacilityID = :facilityID "
+		+ "OR u.FacilityID IN (SELECT f.FacilityID FROM m_facility f WHERE f.MainFacilityID = :facilityID AND f.Deleted = false)",
+		nativeQuery = true)
+	ArrayList<V_fetchItemFacilityMap> getItemMappingsByFacilityAndSubStores(@Param("facilityID") Integer facilityID);
+
 }

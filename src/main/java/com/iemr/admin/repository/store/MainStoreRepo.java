@@ -91,4 +91,11 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID,
 			@Param("modifiedBy") String modifiedBy);
 
+	@Modifying
+	@Query(value = "UPDATE m_facility SET IsMainFacility = :isMainFacility, MainFacilityID = :mainFacilityID, StoreType = :storeType WHERE FacilityID = :facilityID", nativeQuery = true)
+	int updateStoreFields(@Param("facilityID") Integer facilityID,
+			@Param("isMainFacility") Boolean isMainFacility,
+			@Param("mainFacilityID") Integer mainFacilityID,
+			@Param("storeType") String storeType);
+
 }

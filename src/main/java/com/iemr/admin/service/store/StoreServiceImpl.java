@@ -321,6 +321,15 @@ public class StoreServiceImpl implements StoreService {
 					child.setParentFacilityID(savedFacility.getFacilityID());
 					child.setModifiedBy(facility.getCreatedBy());
 					mainStoreRepo.save(child);
+
+					// Only update store fields for NEW hierarchy facilities (PSMID is NULL)
+					// Existing stores (PSMID set) keep their store chain intact for inventory compatibility
+					if (child.getProviderServiceMapID() == null) {
+						if (child.getIsMainFacility() == null || child.getIsMainFacility()) {
+							mainStoreRepo.updateStoreFields(childID, false,
+									savedFacility.getFacilityID(), "SUB");
+						}
+					}
 				}
 			}
 		}
@@ -356,11 +365,16 @@ public class StoreServiceImpl implements StoreService {
 			throw new Exception("Facility not found");
 		}
 		// Fix 19: clear parentFacilityID on children (unlink from hierarchy, don't block)
+		// Revert children to MainStore since parent is being deleted
 		ArrayList<M_Facility> children = mainStoreRepo.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(facilityID);
 		for (M_Facility child : children) {
 			child.setParentFacilityID(null);
 			child.setModifiedBy(modifiedBy);
 			mainStoreRepo.save(child);
+			// Only revert store fields for new facilities (PSMID NULL)
+			if (child.getProviderServiceMapID() == null) {
+				mainStoreRepo.updateStoreFields(child.getFacilityID(), true, null, "MAIN");
+			}
 		}
 		facility.setDeleted(true);
 		facility.setModifiedBy(modifiedBy);
@@ -417,12 +431,8 @@ public class StoreServiceImpl implements StoreService {
 		if (facility.getBlockID() != null) {
 			existing.setBlockID(facility.getBlockID());
 		}
-		// Convert Sub Store to independent facility for hierarchy
-		if (!Boolean.TRUE.equals(existing.getIsMainFacility())) {
-			existing.setIsMainFacility(true);
-			existing.setMainFacilityID(null);
-			existing.setStoreType("MAIN");
-		}
+		// Keep store relationships intact (isMainFacility, mainFacilityID, storeType)
+		// Only hierarchy columns are added. Store chain stays for inventory compatibility.
 		existing.setMainVillageID(mainVillageID);
 		existing.setModifiedBy(facility.getModifiedBy());
 		M_Facility savedFacility = mainStoreRepo.save(existing);
@@ -487,13 +497,33 @@ public class StoreServiceImpl implements StoreService {
 					}
 				}
 			}
+			// Revert old children to MainStore before re-linking
+			ArrayList<M_Facility> oldChildren = mainStoreRepo
+					.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(facility.getFacilityID());
 			mainStoreRepo.clearParentFacilityID(facility.getFacilityID(), facility.getModifiedBy());
+			for (M_Facility oldChild : oldChildren) {
+				if (!childFacilityIDs.contains(oldChild.getFacilityID())) {
+					// Child was removed — revert to MainStore only for new facilities (PSMID NULL)
+					if (oldChild.getProviderServiceMapID() == null) {
+						mainStoreRepo.updateStoreFields(oldChild.getFacilityID(), true, null, "MAIN");
+					}
+				}
+			}
+
 			for (Integer childID : childFacilityIDs) {
 				M_Facility child = mainStoreRepo.findByFacilityID(childID);
 				if (child != null) {
 					child.setParentFacilityID(savedFacility.getFacilityID());
 					child.setModifiedBy(facility.getModifiedBy());
 					mainStoreRepo.save(child);
+
+					// Only update store fields for NEW hierarchy facilities (PSMID is NULL)
+					if (child.getProviderServiceMapID() == null) {
+						if (child.getIsMainFacility() == null || child.getIsMainFacility()) {
+							mainStoreRepo.updateStoreFields(childID, false,
+									savedFacility.getFacilityID(), "SUB");
+						}
+					}
 				}
 			}
 		}
