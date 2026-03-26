@@ -39,7 +39,9 @@ public interface M_itemfacilitymappingInter{
 	ArrayList<M_itemfacilitymapping> getsubitemforsubStote(Integer providerServiceMapID, Integer facilityID);
 
 	ArrayList<V_fetchItemFacilityMap> getAllFacilityMappedData(Integer providerServiceMapID);
-	
+
+	ArrayList<V_fetchItemFacilityMap> getItemMappingsByFacilityID(Integer facilityID);
+
 	List<ItemInStore> getItemMastersFromStoreID(Integer storeID);
 
 	Integer deleteItemStoreMapping(M_itemfacilitymapping storeID);

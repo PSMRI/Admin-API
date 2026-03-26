@@ -37,6 +37,9 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 
 	List<M_Facility> findByProviderServiceMapIDOrderByFacilityName(Integer providerServiceMapID);
 
+	@Query("SELECT f FROM M_Facility f WHERE (f.providerServiceMapID = :providerServiceMapID OR f.providerServiceMapID IS NULL) ORDER BY f.facilityName")
+	List<M_Facility> findByProviderServiceMapIDOrNullOrderByFacilityName(@Param("providerServiceMapID") Integer providerServiceMapID);
+
 	@Query("SELECT u FROM M_Facility u WHERE u.providerServiceMapID=:providerServiceMapID AND u.isMainFacility=:isMainFacility AND deleted=false order by u.facilityName")
 	ArrayList<M_Facility> getAllMainFacility(@Param("providerServiceMapID") Integer providerServiceMapID,
 			@Param("isMainFacility") Boolean isMainFacility);
@@ -89,5 +92,12 @@ public interface MainStoreRepo extends CrudRepository<M_Facility, Integer> {
 	@Query("UPDATE M_Facility f SET f.parentFacilityID = NULL, f.modifiedBy = :modifiedBy WHERE f.parentFacilityID = :parentFacilityID")
 	int clearParentFacilityID(@Param("parentFacilityID") Integer parentFacilityID,
 			@Param("modifiedBy") String modifiedBy);
+
+	@Modifying
+	@Query(value = "UPDATE m_facility SET IsMainFacility = :isMainFacility, MainFacilityID = :mainFacilityID, StoreType = :storeType WHERE FacilityID = :facilityID", nativeQuery = true)
+	int updateStoreFields(@Param("facilityID") Integer facilityID,
+			@Param("isMainFacility") Boolean isMainFacility,
+			@Param("mainFacilityID") Integer mainFacilityID,
+			@Param("storeType") String storeType);
 
 }
