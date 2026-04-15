@@ -22,6 +22,7 @@
 package com.iemr.admin.repo.employeemaster;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -87,4 +88,6 @@ public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 	ArrayList<M_User1> getempByDesiganation(@Param("designationID") Integer designationID,@Param("serviceProviderID") Integer serviceProviderID);
 	
 	M_User1 findByUserID(Integer userID);
+
+	List<M_User1> findByUserIDIn(List<Integer> userIDs);
 }

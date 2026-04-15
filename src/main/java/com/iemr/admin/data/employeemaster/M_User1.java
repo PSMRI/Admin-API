@@ -231,6 +231,9 @@ public class M_User1{
 			@Expose
 			@Column(name = "failed_attempt", insertable = false)
 			private Integer failedAttempt;
+			@Expose
+			@Column(name = "lock_timestamp", insertable = false)
+			private Timestamp lockTimestamp;
 	   public M_User1() {
 		// TODO Auto-generated constructor stub
 	}
@@ -249,6 +252,14 @@ public class M_User1{
 
 	public void setFailedAttempt(Integer failedAttempt) {
 		this.failedAttempt = failedAttempt;
+	}
+
+	public Timestamp getLockTimestamp() {
+		return lockTimestamp;
+	}
+
+	public void setLockTimestamp(Timestamp lockTimestamp) {
+		this.lockTimestamp = lockTimestamp;
 	}
 
 	public Integer getUserID() {
