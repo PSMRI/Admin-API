@@ -22,9 +22,6 @@ public class JwtUserIdValidationFilter implements Filter {
 	private static final String HEALTH_ENDPOINT = "/health";
 	private static final String VERSION_ENDPOINT = "/version";
 
-	private static final String HEALTH_ENDPOINT = "/health";
-	private static final String VERSION_ENDPOINT = "/version";
-
 	private final JwtAuthenticationUtil jwtAuthenticationUtil;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 	private final String allowedOrigins;
@@ -40,17 +37,6 @@ public class JwtUserIdValidationFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-		String path = request.getRequestURI();
-		String contextPath = request.getContextPath();
-		
-		// FIRST: Check for health and version endpoints - skip ALL processing
-		if (path.equals(HEALTH_ENDPOINT) || path.equals(VERSION_ENDPOINT) || 
-		    path.equals(contextPath + HEALTH_ENDPOINT) || path.equals(contextPath + VERSION_ENDPOINT)) {
-			logger.info("Skipping JWT validation for monitoring endpoint: {}", path);
-			filterChain.doFilter(servletRequest, servletResponse);
-			return;
-		}
 
 		String path = request.getRequestURI();
 		String contextPath = request.getContextPath();
@@ -91,11 +77,7 @@ public class JwtUserIdValidationFilter implements Filter {
 				return;
 			}
 		}
-
-		// Determine request path/context for later checks
-		String path = request.getRequestURI();
-		String contextPath = request.getContextPath();
-
+	
 		// Set CORS headers and handle OPTIONS request only if origin is valid and allowed
 		if (origin != null && isOriginAllowed(origin)) {
 			addCorsHeaders(response, origin);
@@ -139,9 +121,6 @@ public class JwtUserIdValidationFilter implements Filter {
 				|| path.startsWith(contextPath + "/swagger-ui")
 				|| path.startsWith(contextPath + "/v3/api-docs")
 				|| path.startsWith(contextPath + "/user/refreshToken")
-				|| path.startsWith(contextPath + "/public")
-			|| path.equals(contextPath + HEALTH_ENDPOINT)
-			|| path.equals(contextPath + VERSION_ENDPOINT)) {
 				|| path.startsWith(contextPath + "/public")
 			|| path.equals(contextPath + HEALTH_ENDPOINT)
 			|| path.equals(contextPath + VERSION_ENDPOINT)) {
