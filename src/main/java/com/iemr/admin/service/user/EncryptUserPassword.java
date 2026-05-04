@@ -21,7 +21,6 @@
 */
 package com.iemr.admin.service.user;
 
-import org.hibernate.engine.jdbc.env.internal.LobCreationLogging_.logger;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class EncryptUserPassword {
 
 	// private static String commonBaseURL = ConfigProperties.getPropertyByName("common-url");
 	private String encryptPasswordURL = commonBaseURL + ConfigProperties.getPropertyByName("encrypt-password-url");
-	
+
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 	@Async
