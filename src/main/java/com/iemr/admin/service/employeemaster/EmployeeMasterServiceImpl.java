@@ -116,7 +116,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Value("${common-url}")
 	private String common_url;
-	
+
 	// private String common_url = ConfigProperties.getPropertyByName("common-url");
 
 	private final String COMMON_BASE_URL = "common-url";
@@ -474,7 +474,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Set<String> resultSet = new HashSet<String>();
 		HttpEntity<Object> request = RestTemplateUtil.createRequestEntity(campaignName, authToken);
-		String url = configProperties.getPropertyByName("common-url")  + configProperties.getPropertyByName("create-feedback");
+		String url = common_url +"/"  + configProperties.getPropertyByName("create-feedback");
 		
 		ResponseEntity<String> responseStr = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 		OutputResponse response = objectMapper.readValue(responseStr.getBody(), OutputResponse.class);
@@ -717,7 +717,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		logger.info("EmployeeMasterServiceImpl.createUserInCallCentre - start");
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
-			String ctiServer = configProperties.getPropertyByName("common-url");
+			// String ctiServer = configProperties.getPropertyByName("common-url");
+			String ctiServer=common_url;
 			UserCreateAPIURL = ctiServer + configProperties.getPropertyByName("create-update-users-url");
 			HashMap<String, Object> headers = new HashMap<String, Object>();
 			JSONObject request = new JSONObject();
@@ -751,7 +752,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
-			String ctiServer = configProperties.getPropertyByName("common-url");
+			// String ctiServer = configProperties.getPropertyByName("common-url");
+			String ctiServer=common_url;
 			UserCreateAPIURL = ctiServer + configProperties.getPropertyByName("create-update-users-url");
 			HashMap<String, Object> headers = new HashMap<String, Object>();
 			JSONObject request = new JSONObject();

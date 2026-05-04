@@ -24,6 +24,7 @@ package com.iemr.admin.service.provideronboard;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +38,11 @@ import com.iemr.admin.utils.response.OutputResponse;
 @Service
 public class EncryptUserPassword123 {
 	private static HttpUtils utils = new HttpUtils();
-	private static String commonBaseURL = ConfigProperties.getPropertyByName("common-url");
-	private static String encryptPasswordURL = commonBaseURL
+	// private static String commonBaseURL = ConfigProperties.getPropertyByName("common-url");
+	@Value("common-url")
+	private String commonBaseURL;
+
+	private String encryptPasswordURL = commonBaseURL + "/"
 			+ ConfigProperties.getPropertyByName("encrypt-password-url");
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());

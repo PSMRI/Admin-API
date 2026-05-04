@@ -45,7 +45,7 @@ public class EncryptUserPassword {
 	// private String encryptPasswordEndpoint;
 
 	// private static String commonBaseURL = ConfigProperties.getPropertyByName("common-url");
-	private String encryptPasswordURL = commonBaseURL + ConfigProperties.getPropertyByName("encrypt-password-url");
+	private String encryptPasswordURL = commonBaseURL + "/" + ConfigProperties.getPropertyByName("encrypt-password-url");
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
