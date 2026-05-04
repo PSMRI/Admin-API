@@ -45,6 +45,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -113,7 +114,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	private static HttpUtils httpUtils = new HttpUtils();
 
-	private String common_url = ConfigProperties.getPropertyByName("common-url");
+	@Value("${common-url}")
+	private String common_url;
+	
+	// private String common_url = ConfigProperties.getPropertyByName("common-url");
 
 	private final String COMMON_BASE_URL = "common-url";
 
