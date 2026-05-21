@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -117,7 +119,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	private static HttpUtils httpUtils = new HttpUtils();
 
-	private String common_url = ConfigProperties.getPropertyByName("common-url");
+	@Value("${common-url}")
+	private String common_url;
+
+	// private String common_url = ConfigProperties.getPropertyByName("common-url");
 
 	private final String COMMON_BASE_URL = "common-url";
 
@@ -538,7 +543,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Set<String> resultSet = new HashSet<String>();
 		HttpEntity<Object> request = RestTemplateUtil.createRequestEntity(campaignName, authToken);
-		String url = configProperties.getPropertyByName("common-url")  + configProperties.getPropertyByName("create-feedback");
+		String url = common_url +"/"  + configProperties.getPropertyByName("create-feedback");
 		
 		ResponseEntity<String> responseStr = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
 		OutputResponse response = objectMapper.readValue(responseStr.getBody(), OutputResponse.class);
@@ -781,7 +786,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		logger.info("EmployeeMasterServiceImpl.createUserInCallCentre - start");
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
-			String ctiServer = configProperties.getPropertyByName("common-url");
+			// String ctiServer = configProperties.getPropertyByName("common-url");
+			String ctiServer=common_url;
 			UserCreateAPIURL = ctiServer + configProperties.getPropertyByName("create-update-users-url");
 			HashMap<String, Object> headers = new HashMap<String, Object>();
 			JSONObject request = new JSONObject();
@@ -815,7 +821,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 		if (ENABLE_CTI_USER_CREATION) {
 			String UserCreateAPIURL = "";
-			String ctiServer = configProperties.getPropertyByName("common-url");
+			// String ctiServer = configProperties.getPropertyByName("common-url");
+			String ctiServer=common_url;
 			UserCreateAPIURL = ctiServer + configProperties.getPropertyByName("create-update-users-url");
 			HashMap<String, Object> headers = new HashMap<String, Object>();
 			JSONObject request = new JSONObject();
@@ -1307,8 +1314,36 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 	@Override
 	public ArrayList<V_Showuser> getEmployeeDetails4(Integer serviceProviderID) {
+		ArrayList<V_Showuser> users = v_ShowuserRepo.EmployeeDetails4(serviceProviderID);
+		if (users.isEmpty()) {
+			return users;
+		}
 
-		return v_ShowuserRepo.EmployeeDetails4(serviceProviderID);
+		ArrayList<Integer> userIDs = new ArrayList<Integer>(users.size());
+		for (V_Showuser user : users) {
+			userIDs.add(user.getUserID());
+		}
+
+		Map<Integer, M_User1> userRecords = new HashMap<Integer, M_User1>();
+		for (M_User1 userRecord : employeeMasterRepoo.findByUserIDIn(userIDs)) {
+			userRecords.put(userRecord.getUserID(), userRecord);
+		}
+
+		for (V_Showuser user : users) {
+			enrichAccountLockState(user, userRecords.get(user.getUserID()));
+		}
+		return users;
+	}
+
+	private void enrichAccountLockState(V_Showuser user, M_User1 userRecord) {
+		if (userRecord == null) {
+			return;
+		}
+
+		Timestamp lockTimestamp = userRecord.getLockTimestamp();
+		user.setFailedAttempt(userRecord.getFailedAttempt() != null ? userRecord.getFailedAttempt() : 0);
+		user.setLockTimestamp(lockTimestamp);
+		user.setLockedDueToFailedAttempts(Boolean.TRUE.equals(userRecord.getDeleted()) && lockTimestamp != null);
 	}
 
 	@Override

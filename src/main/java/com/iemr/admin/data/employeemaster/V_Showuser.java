@@ -246,6 +246,18 @@ public class V_Showuser {
 	   @Column(name="DistrictID")
 	   private Integer districtID;
 
+	   @Expose
+	   @Transient
+	   private Integer failedAttempt;
+
+	   @Expose
+	   @Transient
+	   private Timestamp lockTimestamp;
+
+	   @Expose
+	   @Transient
+	   private Boolean lockedDueToFailedAttempts;
+
 	 
 	 
 	 
@@ -920,6 +932,30 @@ public class V_Showuser {
 
 	public void setDistrictID(Integer districtID) {
 		this.districtID = districtID;
+	}
+
+	public Integer getFailedAttempt() {
+		return failedAttempt;
+	}
+
+	public void setFailedAttempt(Integer failedAttempt) {
+		this.failedAttempt = failedAttempt;
+	}
+
+	public Timestamp getLockTimestamp() {
+		return lockTimestamp;
+	}
+
+	public void setLockTimestamp(Timestamp lockTimestamp) {
+		this.lockTimestamp = lockTimestamp;
+	}
+
+	public Boolean getLockedDueToFailedAttempts() {
+		return lockedDueToFailedAttempts;
+	}
+
+	public void setLockedDueToFailedAttempts(Boolean lockedDueToFailedAttempts) {
+		this.lockedDueToFailedAttempts = lockedDueToFailedAttempts;
 	}
 
 
