@@ -26,17 +26,22 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.iemr.admin.data.facilitytype.M_facilitytype;
 import com.iemr.admin.data.parkingPlace.M_Parkingplace;
+import com.iemr.admin.data.store.FacilityVillageMapping;
 import com.iemr.admin.data.store.M_Facility;
 import com.iemr.admin.data.store.M_facilityMap;
 import com.iemr.admin.data.store.V_FetchFacility;
 import com.iemr.admin.data.vanMaster.M_Van;
+import com.iemr.admin.repository.facilitytype.M_facilitytypeRepo;
 import com.iemr.admin.repository.parkingPlace.ParkingPlaceRepository;
+import com.iemr.admin.repository.store.FacilityVillageMappingRepo;
 import com.iemr.admin.repository.store.MainStoreRepo;
 import com.iemr.admin.repository.store.V_FetchFacilityRepo;
 import com.iemr.admin.repository.vanMaster.VanMasterRepository;
+import com.iemr.admin.service.employeemaster.AshaSupervisorMappingService;
 import com.iemr.admin.utils.exception.IEMRException;
 
 @Service
@@ -53,6 +58,15 @@ public class StoreServiceImpl implements StoreService {
 	
 	@Autowired
 	private V_FetchFacilityRepo fetchFacilityRepo;
+
+	@Autowired
+	private FacilityVillageMappingRepo facilityVillageMappingRepo;
+
+	@Autowired
+	private AshaSupervisorMappingService ashaSupervisorMappingService;
+
+	@Autowired
+	private M_facilitytypeRepo facilityTypeRepo;
 
 	// @Autowired
 	// private SubStoreRepo subStoreRepo;
@@ -86,7 +100,7 @@ public class StoreServiceImpl implements StoreService {
 	@Override
 	public List<M_Facility> getAllMainStore(Integer providerServiceMapID) {
 		// TODO Auto-generated method stub
-		return (List<M_Facility>) mainStoreRepo.findByProviderServiceMapIDOrderByFacilityName(providerServiceMapID);
+		return (List<M_Facility>) mainStoreRepo.findByProviderServiceMapIDOrNullOrderByFacilityName(providerServiceMapID);
 	}
 
 	// @Override
@@ -231,6 +245,290 @@ public class StoreServiceImpl implements StoreService {
 		if(manuList.size()>0)
 			return true;
 		return false;
+	}
+
+	@Override
+	public ArrayList<M_Facility> getFacilitiesByBlock(Integer blockID) {
+		return mainStoreRepo.findByBlockIDAndDeletedFalseOrderByFacilityName(blockID);
+	}
+
+	@Override
+	public ArrayList<M_Facility> getAllFacilitiesByBlock(Integer blockID) {
+		return mainStoreRepo.findByBlockIDOrderByFacilityName(blockID);
+	}
+
+	@Override
+	public ArrayList<M_Facility> getFacilitiesByBlockAndLevel(Integer blockID, Integer levelValue, String ruralUrban) {
+		if (ruralUrban == null || ruralUrban.isEmpty()) {
+			return mainStoreRepo.findByBlockIDAndLevelValue(blockID, levelValue);
+		}
+		return mainStoreRepo.findByBlockIDAndFacilityLevel(blockID, levelValue, ruralUrban);
+	}
+
+	@Transactional
+	@Override
+	public M_Facility createFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
+			Integer mainVillageID, List<Integer> childFacilityIDs) {
+		if (mainStoreRepo.existsByFacilityNameAndBlockIDAndDeletedFalse(facility.getFacilityName(), facility.getBlockID())) {
+			throw new RuntimeException("Facility with this name already exists in this block");
+		}
+		// Fix 20: validate that child facilities selected are exactly one level below this facility
+		// (parentFacilityID is not sent from frontend on create; the hierarchy is built via childFacilityIDs)
+		if (childFacilityIDs != null && !childFacilityIDs.isEmpty()
+				&& facility.getFacilityTypeID() != null) {
+			M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(facility.getFacilityTypeID());
+			if (ft != null && ft.getLevelValue() != null) {
+				for (Integer childID : childFacilityIDs) {
+					M_Facility child = mainStoreRepo.findByFacilityIDAndDeleted(childID, false);
+					if (child != null && child.getFacilityTypeID() != null) {
+						M_facilitytype childFt = facilityTypeRepo.findByFacilityTypeID(child.getFacilityTypeID());
+						if (childFt != null && childFt.getLevelValue() != null
+								&& !childFt.getLevelValue().equals(ft.getLevelValue() + 1)) {
+							throw new RuntimeException(
+									"Hierarchy level mismatch: selected child facility is not at the expected level. "
+									+ "Children must be exactly one level below this facility.");
+						}
+					}
+				}
+			}
+		}
+		facility.setMainVillageID(mainVillageID);
+		M_Facility savedFacility = mainStoreRepo.save(facility);
+
+		if (villageIDs != null && !villageIDs.isEmpty()) {
+			for (Integer villageID : villageIDs) {
+				FacilityVillageMapping existing = facilityVillageMappingRepo
+						.findByFacilityIDAndDistrictBranchIDAndDeletedTrue(savedFacility.getFacilityID(), villageID);
+				if (existing != null) {
+					existing.setDeleted(false);
+					existing.setModifiedBy(facility.getCreatedBy());
+					facilityVillageMappingRepo.save(existing);
+				} else {
+					FacilityVillageMapping mapping = new FacilityVillageMapping();
+					mapping.setFacilityID(savedFacility.getFacilityID());
+					mapping.setDistrictBranchID(villageID);
+					mapping.setCreatedBy(facility.getCreatedBy());
+					mapping.setDeleted(false);
+					facilityVillageMappingRepo.save(mapping);
+				}
+			}
+		}
+
+		if (childFacilityIDs != null && !childFacilityIDs.isEmpty()) {
+			for (Integer childID : childFacilityIDs) {
+				M_Facility child = mainStoreRepo.findByFacilityID(childID);
+				if (child != null) {
+					child.setParentFacilityID(savedFacility.getFacilityID());
+					child.setModifiedBy(facility.getCreatedBy());
+					mainStoreRepo.save(child);
+
+					// Only update store fields for NEW hierarchy facilities (PSMID is NULL)
+					// Existing stores (PSMID set) keep their store chain intact for inventory compatibility
+					if (child.getProviderServiceMapID() == null) {
+						if (child.getIsMainFacility() == null || child.getIsMainFacility()) {
+							mainStoreRepo.updateStoreFields(childID, false,
+									savedFacility.getFacilityID(), "SUB");
+						}
+					}
+				}
+			}
+		}
+
+		return savedFacility;
+	}
+
+	@Override
+	public List<Integer> getMappedVillageIDs(Integer blockID) {
+		return facilityVillageMappingRepo.findMappedVillageIDsByBlockID(blockID);
+	}
+
+	@Override
+	public ArrayList<FacilityVillageMapping> getVillageMappingsByFacility(Integer facilityID) {
+		// Return empty if facility itself is deleted
+		M_Facility facility = mainStoreRepo.findByFacilityIDAndDeleted(facilityID, false);
+		if (facility == null) {
+			return new ArrayList<>();
+		}
+		return facilityVillageMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+	}
+
+	@Override
+	public ArrayList<M_Facility> getChildFacilitiesByParent(Integer parentFacilityID) {
+		return mainStoreRepo.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(parentFacilityID);
+	}
+
+	@Transactional
+	@Override
+	public M_Facility deleteFacilityWithHierarchy(Integer facilityID, String modifiedBy) throws Exception {
+		M_Facility facility = mainStoreRepo.findByFacilityID(facilityID);
+		if (facility == null) {
+			throw new Exception("Facility not found");
+		}
+		// Fix 19: clear parentFacilityID on children (unlink from hierarchy, don't block)
+		// Revert children to MainStore since parent is being deleted
+		ArrayList<M_Facility> children = mainStoreRepo.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(facilityID);
+		for (M_Facility child : children) {
+			child.setParentFacilityID(null);
+			child.setModifiedBy(modifiedBy);
+			mainStoreRepo.save(child);
+			// Only revert store fields for new facilities (PSMID NULL)
+			if (child.getProviderServiceMapID() == null) {
+				mainStoreRepo.updateStoreFields(child.getFacilityID(), true, null, "MAIN");
+			}
+		}
+		facility.setDeleted(true);
+		facility.setModifiedBy(modifiedBy);
+		M_Facility saved = mainStoreRepo.save(facility);
+		// Fix 8: cascade soft-delete all asha_supervisor_mapping rows for this facility
+		ashaSupervisorMappingService.cascadeDeleteByFacilityID(facilityID, modifiedBy);
+		// Cascade soft-delete facility_village_mapping rows
+		ArrayList<FacilityVillageMapping> villageMappings = facilityVillageMappingRepo.findByFacilityIDAndDeletedFalse(facilityID);
+		for (FacilityVillageMapping vm : villageMappings) {
+			vm.setDeleted(true);
+			vm.setModifiedBy(modifiedBy);
+			facilityVillageMappingRepo.save(vm);
+		}
+		return saved;
+	}
+
+	@Transactional
+	@Override
+	public M_Facility updateFacilityWithHierarchy(M_Facility facility, List<Integer> villageIDs,
+			Integer mainVillageID, List<Integer> childFacilityIDs) {
+		M_Facility existing = mainStoreRepo.findByFacilityID(facility.getFacilityID());
+		if (existing == null) {
+			throw new RuntimeException("Facility not found");
+		}
+
+		if (existing.getBlockID() != null && facility.getFacilityName() != null) {
+			if (mainStoreRepo.existsByFacilityNameAndBlockIDAndNotFacilityID(facility.getFacilityName(), existing.getBlockID(), facility.getFacilityID())) {
+				throw new RuntimeException("Facility with this name already exists in this block");
+			}
+		}
+
+		if (facility.getFacilityName() != null) {
+			existing.setFacilityName(facility.getFacilityName());
+		}
+		if (facility.getFacilityDesc() != null) {
+			existing.setFacilityDesc(facility.getFacilityDesc());
+		}
+		if (facility.getFacilityCode() != null) {
+			existing.setFacilityCode(facility.getFacilityCode());
+		}
+		// Set hierarchy fields: facilityType, ruralUrban, and location
+		if (facility.getFacilityTypeID() != null) {
+			existing.setFacilityTypeID(facility.getFacilityTypeID());
+		}
+		if (facility.getRuralUrban() != null) {
+			existing.setRuralUrban(facility.getRuralUrban());
+		}
+		if (facility.getStateID() != null) {
+			existing.setStateID(facility.getStateID());
+		}
+		if (facility.getDistrictID() != null) {
+			existing.setDistrictID(facility.getDistrictID());
+		}
+		if (facility.getBlockID() != null) {
+			existing.setBlockID(facility.getBlockID());
+		}
+		// Keep store relationships intact (isMainFacility, mainFacilityID, storeType)
+		// Only hierarchy columns are added. Store chain stays for inventory compatibility.
+		existing.setMainVillageID(mainVillageID);
+		existing.setModifiedBy(facility.getModifiedBy());
+		M_Facility savedFacility = mainStoreRepo.save(existing);
+
+		if (villageIDs != null) {
+			List<FacilityVillageMapping> oldMappings = facilityVillageMappingRepo
+					.findByFacilityIDAndDeletedFalse(facility.getFacilityID());
+			// Build set of new village IDs for quick lookup
+			java.util.Set<Integer> newVillageSet = new java.util.HashSet<>(villageIDs);
+			// Soft-delete old mappings that are NOT in the new list
+			for (FacilityVillageMapping old : oldMappings) {
+				if (!newVillageSet.contains(old.getDistrictBranchID())) {
+					old.setDeleted(true);
+					old.setModifiedBy(facility.getModifiedBy());
+					facilityVillageMappingRepo.save(old);
+				}
+			}
+			// Build set of currently active village IDs
+			java.util.Set<Integer> activeVillageSet = new java.util.HashSet<>();
+			for (FacilityVillageMapping old : oldMappings) {
+				if (!Boolean.TRUE.equals(old.getDeleted())) {
+					activeVillageSet.add(old.getDistrictBranchID());
+				}
+			}
+			// Add only truly new villages (not already active)
+			for (Integer villageID : villageIDs) {
+				if (!activeVillageSet.contains(villageID)) {
+					FacilityVillageMapping softDeleted = facilityVillageMappingRepo
+							.findByFacilityIDAndDistrictBranchIDAndDeletedTrue(savedFacility.getFacilityID(), villageID);
+					if (softDeleted != null) {
+						softDeleted.setDeleted(false);
+						softDeleted.setModifiedBy(facility.getModifiedBy());
+						facilityVillageMappingRepo.save(softDeleted);
+					} else {
+						FacilityVillageMapping mapping = new FacilityVillageMapping();
+						mapping.setFacilityID(savedFacility.getFacilityID());
+						mapping.setDistrictBranchID(villageID);
+						mapping.setCreatedBy(facility.getModifiedBy());
+						mapping.setDeleted(false);
+						facilityVillageMappingRepo.save(mapping);
+					}
+				}
+			}
+		}
+
+		if (childFacilityIDs != null) {
+			// Fix 20: validate child levels before updating
+			if (!childFacilityIDs.isEmpty() && existing.getFacilityTypeID() != null) {
+				M_facilitytype ft = facilityTypeRepo.findByFacilityTypeID(existing.getFacilityTypeID());
+				if (ft != null && ft.getLevelValue() != null) {
+					for (Integer childID : childFacilityIDs) {
+						M_Facility child = mainStoreRepo.findByFacilityIDAndDeleted(childID, false);
+						if (child != null && child.getFacilityTypeID() != null) {
+							M_facilitytype childFt = facilityTypeRepo.findByFacilityTypeID(child.getFacilityTypeID());
+							if (childFt != null && childFt.getLevelValue() != null
+									&& !childFt.getLevelValue().equals(ft.getLevelValue() + 1)) {
+								throw new RuntimeException(
+										"Hierarchy level mismatch: selected child facility is not at the expected level. "
+										+ "Children must be exactly one level below this facility.");
+							}
+						}
+					}
+				}
+			}
+			// Revert old children to MainStore before re-linking
+			ArrayList<M_Facility> oldChildren = mainStoreRepo
+					.findByParentFacilityIDAndDeletedFalseOrderByFacilityName(facility.getFacilityID());
+			mainStoreRepo.clearParentFacilityID(facility.getFacilityID(), facility.getModifiedBy());
+			for (M_Facility oldChild : oldChildren) {
+				if (!childFacilityIDs.contains(oldChild.getFacilityID())) {
+					// Child was removed — revert to MainStore only for new facilities (PSMID NULL)
+					if (oldChild.getProviderServiceMapID() == null) {
+						mainStoreRepo.updateStoreFields(oldChild.getFacilityID(), true, null, "MAIN");
+					}
+				}
+			}
+
+			for (Integer childID : childFacilityIDs) {
+				M_Facility child = mainStoreRepo.findByFacilityID(childID);
+				if (child != null) {
+					child.setParentFacilityID(savedFacility.getFacilityID());
+					child.setModifiedBy(facility.getModifiedBy());
+					mainStoreRepo.save(child);
+
+					// Only update store fields for NEW hierarchy facilities (PSMID is NULL)
+					if (child.getProviderServiceMapID() == null) {
+						if (child.getIsMainFacility() == null || child.getIsMainFacility()) {
+							mainStoreRepo.updateStoreFields(childID, false,
+									savedFacility.getFacilityID(), "SUB");
+						}
+					}
+				}
+			}
+		}
+
+		return savedFacility;
 	}
 
 }

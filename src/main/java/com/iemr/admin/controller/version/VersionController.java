@@ -20,7 +20,6 @@
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
 
-
 package com.iemr.admin.controller.version;
 
 import java.util.Map;
@@ -35,7 +34,6 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 import org.springframework.http.MediaType;
-
 
 @RestController
 public class VersionController {

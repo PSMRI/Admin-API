@@ -77,25 +77,6 @@ public class JwtUserIdValidationFilter implements Filter {
 				return;
 			}
 		}
-	
-		// Set CORS headers and handle OPTIONS request only if origin is valid and allowed
-		if (origin != null && isOriginAllowed(origin)) {
-			addCorsHeaders(response, origin);
-			logger.info("Origin Validated | Origin: {} | Method: {} | URI: {}", origin, method, uri);
-			
-			if ("OPTIONS".equalsIgnoreCase(method)) {
-				// OPTIONS (preflight) - respond with full allowed methods
-				response.setStatus(HttpServletResponse.SC_OK);
-				return;
-			}
-		} else {
-			logger.warn("Origin [{}] is NOT allowed. CORS headers NOT added.", origin);
-			
-			if ("OPTIONS".equalsIgnoreCase(method)) {
-				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Origin not allowed for OPTIONS request");
-				return;
-			}
-		}
 
 		logger.info("JwtUserIdValidationFilter invoked for path: " + path);
 
@@ -128,6 +109,7 @@ public class JwtUserIdValidationFilter implements Filter {
 			filterChain.doFilter(servletRequest, servletResponse);
 			return;
 		}
+
 
 
 		try {
@@ -170,7 +152,7 @@ public class JwtUserIdValidationFilter implements Filter {
 
 		} catch (Exception e) {
 			logger.error("Authorization error: ", e);
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization error: ");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
 		}
 	}
 

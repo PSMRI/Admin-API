@@ -44,25 +44,7 @@ public class BulkRegistrationController {
     public ResponseEntity<Map<String, Object>> registerBulkUser(@RequestBody String m_user, @RequestHeader String authorization, @RequestParam String userName,
                                                                 HttpServletRequest request, @RequestParam Integer serviceProviderID
     ) {
-        String jwtToken = null;
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("jwt".equalsIgnoreCase(cookie.getName())) {   // Cookie name == jwt
-                    jwtToken = cookie.getValue();
-                    break;
-                }
-            }
-        }
-
-        logger.info("JWT Token From Cookie: " + jwtToken);
-        logger.info("M_user Request: " + m_user);
-
-        String authHeader = request.getHeader("Authorization");
-        logger.info("Authorization Token: " + authHeader);
-
-        logger.info("M_user Request: " + m_user);
         bulkRegistrationServiceimpl.bulkRegistrationErrors.clear();
         logger.info("Bulk registration request received. Request payload is omitted from logs.");
         try {

@@ -92,6 +92,11 @@ public class M_itemfacilitymappingImpl implements M_itemfacilitymappingInter {
 	}
 
 	@Override
+	public ArrayList<V_fetchItemFacilityMap> getItemMappingsByFacilityID(Integer facilityID) {
+		return v_fetchItemFacilityMapRepo.getItemMappingsByFacilityAndSubStores(facilityID);
+	}
+
+	@Override
 	public List<ItemInStore> getItemMastersFromStoreID(Integer storeID) {
 		// TODO Auto-generated method stub
 		ArrayList<ItemInStore> itemForsubStore = new ArrayList<ItemInStore>();

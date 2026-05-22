@@ -24,6 +24,7 @@ package com.iemr.admin.service.user;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +34,33 @@ import com.iemr.admin.utils.http.HttpUtils;
 import com.iemr.admin.utils.mapper.InputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class EncryptUserPassword {
 	private static HttpUtils utils = new HttpUtils();
-	private static String commonBaseURL = ConfigProperties.getPropertyByName("common-url");
-	private static String encryptPasswordURL = commonBaseURL
-			+ ConfigProperties.getPropertyByName("encrypt-password-url");
+
+	@Value("${common-url}")
+	private String commonBaseURL;
+
+	// @Value("${encrypt-password-url}")
+	// private String encryptPasswordEndpoint;
+
+	// private static String commonBaseURL =
+	// ConfigProperties.getPropertyByName("common-url");
+	// private String encryptPasswordURL = commonBaseURL + "/" +
+	// ConfigProperties.getPropertyByName("encrypt-password-url");
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
+	private String encryptPasswordURL;
+
+	@PostConstruct
+	public void init() {
+		encryptPasswordURL = commonBaseURL + "/" +
+				ConfigProperties.getPropertyByName("encrypt-password-url");
+		logger.info("commonBaseURL" + encryptPasswordURL);
+	}
 
 	@Async
 	public OutputResponse encryptUserCredentials(M_User1 data) {

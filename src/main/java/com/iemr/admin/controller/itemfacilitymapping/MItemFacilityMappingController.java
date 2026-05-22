@@ -228,6 +228,23 @@ public class MItemFacilityMappingController {
 
 	}
 
+	@RequestMapping(value = "/getItemMappingsByFacility", headers = "Authorization", method = {
+			RequestMethod.POST }, produces = { "application/json" })
+	public String getItemMappingsByFacility(@RequestBody String request) {
+		OutputResponse response = new OutputResponse();
+		try {
+			V_fetchItemFacilityMap reqObj = InputMapper.gson().fromJson(request,
+					V_fetchItemFacilityMap.class);
+			ArrayList<V_fetchItemFacilityMap> data = M_itemfacilitymappingInter
+					.getItemMappingsByFacilityID(reqObj.getFacilityID());
+			response.setResponse(data.toString());
+		} catch (Exception e) {
+			logger.error("Unexpected error:", e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
 	@Operation(summary = "Get item from store id")
 	@RequestMapping(value = "/getItemFromStoreID/{storeID}", headers = "Authorization", method = {
 			RequestMethod.POST }, produces = { "application/json" })
