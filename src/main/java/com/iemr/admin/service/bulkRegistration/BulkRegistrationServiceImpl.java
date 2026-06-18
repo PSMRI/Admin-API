@@ -305,7 +305,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setTitleID(getTitleId(employee.getTitle()));
                             mUser.setFirstName(employee.getFirstName());
                             mUser.setLastName(employee.getLastName());
-                            mUser.setUserName(employee.getContactNo());
+                            mUser.setUserName(employee.getUserName());
                             mUser.setdOB(convertStringIntoDate(employee.getDob()));
                             mUser.setEmployeeID(employee.getUserName());
                             mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
