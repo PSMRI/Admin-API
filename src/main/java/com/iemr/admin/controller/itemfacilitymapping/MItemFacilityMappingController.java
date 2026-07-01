@@ -93,6 +93,7 @@ public class MItemFacilityMappingController {
 					resList.add(resDataMap);
 				}
 
+				itemDetailsIndex++;
 			}
 
 			ArrayList<M_itemfacilitymapping> data = M_itemfacilitymappingInter.mapItemtoStore(resList);
