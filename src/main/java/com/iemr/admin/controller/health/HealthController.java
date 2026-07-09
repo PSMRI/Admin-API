@@ -27,6 +27,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,8 +53,8 @@ public class HealthController {
         this.healthService = healthService;
     }
 
-    @GetMapping
-    @Operation(summary = "Check infrastructure health", 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Check infrastructure health",
                description = "Returns the health status of MySQL, Redis, and other configured services")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Services are UP or DEGRADED (operational with warnings)"),
@@ -61,7 +62,7 @@ public class HealthController {
     })
     public ResponseEntity<Map<String, Object>> checkHealth() {
         logger.debug("Health check endpoint called");
-        
+
         try {
             Map<String, Object> healthStatus = healthService.checkHealth();
             String overallStatus = (String) healthStatus.get("status");
