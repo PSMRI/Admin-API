@@ -423,6 +423,15 @@ public class M_UserServiceRoleMapping2 {
 	@Column(name = "isOutbound")
 	private Boolean outbound;
 
+	// Stop TB / Nikshay location scope — populated only when serviceName = "Stop TB"
+	@Expose
+	@Column(name = "NikshayTUID")
+	private Integer nikshayTUID;
+
+	@Expose
+	@Column(name = "NikshayFacilityID")
+	private Integer nikshayFacilityID;
+
 	public M_UserServiceRoleMapping2() {
 	}
 

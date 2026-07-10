@@ -34,6 +34,8 @@ public class Previleges1097_3 {
 	private String[] villageID;
 	private String[] villageName;
 	private Integer facilityID;
+	private Integer nikshayTUID;
+	private Integer nikshayFacilityID;
 
 	public Integer getProviderServiceMapID() {
 		return providerServiceMapID;
@@ -94,5 +96,17 @@ public class Previleges1097_3 {
 	}
 	public void setFacilityID(Integer facilityID) {
 		this.facilityID = facilityID;
+	}
+	public Integer getNikshayTUID() {
+		return nikshayTUID;
+	}
+	public void setNikshayTUID(Integer nikshayTUID) {
+		this.nikshayTUID = nikshayTUID;
+	}
+	public Integer getNikshayFacilityID() {
+		return nikshayFacilityID;
+	}
+	public void setNikshayFacilityID(Integer nikshayFacilityID) {
+		this.nikshayFacilityID = nikshayFacilityID;
 	}
 }

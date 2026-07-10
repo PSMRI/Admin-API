@@ -1025,6 +1025,11 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
+	public int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer excludeUSRMappingID) {
+		return employeeMasterRepo.softDeleteOldMappings(userID, providerServiceMapID, excludeUSRMappingID);
+	}
+
+	@Override
 	public void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole) {
 		Integer userID = usrRole.getUserID();
 		M_Role role = usrRole.getRoleID() != null ? roleRepo.findByRoleID(usrRole.getRoleID()) : null;
