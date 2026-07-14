@@ -36,34 +36,33 @@ import jakarta.persistence.Transient;
 import lombok.Data;
 
 /**
- * Links an existing AMRIT village (m_DistrictBranchMapping.DistrictBranchID)
- * to the Nikshay Facility/TU it falls under. Built once from the location
- * import's name-matching results — used to trace a beneficiary's existing
- * village back to their Nikshay Facility/TU without asking the field worker
- * to re-select it per case.
+ * Nikshay's own State master — imported directly from Nikshay's location
+ * data, independent of AMRIT's existing state master. No name-matching
+ * against AMRIT is performed; this is the top of a fully self-contained
+ * Nikshay hierarchy (State -> District -> TU -> Facility -> Village).
  */
 @Data
 @Entity
-@Table(name = "m_nikshay_village_facility_mapping")
-public class NikshayVillageFacilityMapping {
+@Table(name = "m_nikshay_state")
+public class NikshayState {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Expose
-	@Column(name = "MappingID")
-	private Integer mappingID;
+	@Column(name = "NikshayStateID")
+	private Integer nikshayStateID;
 
 	@Expose
-	@Column(name = "AmritVillageID")
-	private Integer amritVillageID;
+	@Column(name = "NikshayCode")
+	private String nikshayCode;
 
 	@Expose
-	@Column(name = "NikshayFacilityID")
-	private Integer nikshayFacilityID;
+	@Column(name = "StateName")
+	private String stateName;
 
 	@Expose
-	@Column(name = "NikshayTUID")
-	private Integer nikshayTUID;
+	@Column(name = "Deleted")
+	private Boolean deleted = false;
 
 	@Expose
 	@Column(name = "CreatedBy")
@@ -72,6 +71,14 @@ public class NikshayVillageFacilityMapping {
 	@Expose
 	@Column(name = "CreatedDate", insertable = false, updatable = false)
 	private Timestamp createdDate;
+
+	@Expose
+	@Column(name = "ModifiedBy")
+	private String modifiedBy;
+
+	@Expose
+	@Column(name = "LastModDate", insertable = false, updatable = false)
+	private Timestamp lastModDate;
 
 	@Transient
 	private OutputMapper outputMapper = new OutputMapper();

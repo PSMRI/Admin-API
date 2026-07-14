@@ -28,15 +28,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.nikshay.NikshayVillageFacilityMapping;
+import com.iemr.admin.data.nikshay.NikshayDistrict;
 
 @Repository
-public interface NikshayVillageFacilityMappingRepo extends CrudRepository<NikshayVillageFacilityMapping, Integer> {
+public interface NikshayDistrictRepo extends CrudRepository<NikshayDistrict, Integer> {
 
-	@Query("select m from NikshayVillageFacilityMapping m where m.nikshayFacilityID in (:facilityIDs)")
-	List<NikshayVillageFacilityMapping> findByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
-
-	// Reverse lookup: given a beneficiary's existing village ID, find their Nikshay Facility/TU
-	@Query("select m from NikshayVillageFacilityMapping m where m.amritVillageID = :amritVillageID")
-	List<NikshayVillageFacilityMapping> findByAmritVillageID(@Param("amritVillageID") Integer amritVillageID);
+	@Query("select d from NikshayDistrict d where d.nikshayStateID = :stateID and d.deleted = false order by d.districtName")
+	List<NikshayDistrict> findByStateID(@Param("stateID") Integer stateID);
 }
