@@ -22,7 +22,9 @@
 package com.iemr.admin.controller.nikshay;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -32,11 +34,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+import com.iemr.admin.data.employeemaster.M_UserServiceRoleMapping2;
 import com.iemr.admin.data.nikshay.NikshayDistrict;
 import com.iemr.admin.data.nikshay.NikshayFacility;
 import com.iemr.admin.data.nikshay.NikshayState;
 import com.iemr.admin.data.nikshay.NikshayTU;
 import com.iemr.admin.data.nikshay.NikshayVillage;
+import com.iemr.admin.repo.employeemaster.EmployeeMasterRepo;
 import com.iemr.admin.repo.nikshay.NikshayDistrictRepo;
 import com.iemr.admin.repo.nikshay.NikshayFacilityRepo;
 import com.iemr.admin.repo.nikshay.NikshayStateRepo;
@@ -66,6 +71,9 @@ public class NikshayLocationController {
 
 	@Autowired
 	private NikshayStateRepo nikshayStateRepo;
+
+	@Autowired
+	private EmployeeMasterRepo employeeMasterRepo;
 
 	@Autowired
 	private NikshayDistrictRepo nikshayDistrictRepo;
@@ -146,6 +154,30 @@ public class NikshayLocationController {
 			response.setResponse(villages.toString());
 		} catch (Exception e) {
 			logger.error("Error fetching villages for facilityIDs " + facilityIDs + ": " + e.getMessage(), e);
+			response.setError(e);
+		}
+		return response.toString();
+	}
+
+	@Operation(summary = "Get the Nikshay DistrictID/TUID/FacilityID saved on a Stop TB "
+			+ "user-role mapping row, by USRMappingID. Reads m_userservicerolemapping "
+			+ "directly (NOT the shared v_userservicerolemapping view, which does not "
+			+ "expose these Stop TB-only columns), so the view and every other service "
+			+ "line reading it are untouched.")
+	@GetMapping(value = "/nikshay/location/userMapping", produces = "application/json")
+	public String getUserMappingNikshayData(@RequestParam("usrMappingID") Integer usrMappingID) {
+		OutputResponse response = new OutputResponse();
+		try {
+			M_UserServiceRoleMapping2 row = employeeMasterRepo.findByUSRMappingID(usrMappingID);
+			Map<String, Object> result = new HashMap<>();
+			if (row != null) {
+				result.put("districtID", row.getDistrictID());
+				result.put("nikshayTUID", row.getNikshayTUID());
+				result.put("nikshayFacilityID", row.getNikshayFacilityID());
+			}
+			response.setResponse(new Gson().toJson(result));
+		} catch (Exception e) {
+			logger.error("Error fetching Nikshay data for usrMappingID " + usrMappingID + ": " + e.getMessage(), e);
 			response.setError(e);
 		}
 		return response.toString();
