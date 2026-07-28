@@ -28,14 +28,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.nikshay.NikshayTU;
+import com.iemr.admin.data.nikshay.NikshayDistrict;
 
 @Repository
-public interface NikshayTURepo extends CrudRepository<NikshayTU, Integer> {
+public interface NikshayDistrictRepo extends CrudRepository<NikshayDistrict, Integer> {
 
-	@Query("select t from NikshayTU t where t.nikshayDistrictID = :districtID and t.deleted = false order by t.tUName")
-	List<NikshayTU> findByDistrictID(@Param("districtID") Integer districtID);
-
-	@Query("select t from NikshayTU t where t.nikshayTUID in (:tuIDs) and t.deleted = false")
-	List<NikshayTU> findByIds(@Param("tuIDs") List<Integer> tuIDs);
+	@Query("select d from NikshayDistrict d where d.nikshayStateID = :stateID and d.deleted = false order by d.districtName")
+	List<NikshayDistrict> findByStateID(@Param("stateID") Integer stateID);
 }

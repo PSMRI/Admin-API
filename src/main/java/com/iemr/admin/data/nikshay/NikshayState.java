@@ -36,33 +36,29 @@ import jakarta.persistence.Transient;
 import lombok.Data;
 
 /**
- * Nikshay's TU (Tuberculosis Unit) master — Nikshay's own sub-district
- * administrative unit, referred to as "Block" on some Nikshay screens.
- * No equivalent exists in AMRIT's own masters; linked to Nikshay's own
- * District master (NikshayDistrict), not AMRIT's m_District.
+ * Nikshay's own State master — imported directly from Nikshay's location
+ * data, independent of AMRIT's existing state master. No name-matching
+ * against AMRIT is performed; this is the top of a fully self-contained
+ * Nikshay hierarchy (State -> District -> TU -> Facility -> Village).
  */
 @Data
 @Entity
-@Table(name = "m_nikshay_tu")
-public class NikshayTU {
+@Table(name = "m_nikshay_state")
+public class NikshayState {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Expose
-	@Column(name = "NikshayTUID")
-	private Integer nikshayTUID;
+	@Column(name = "NikshayStateID")
+	private Integer nikshayStateID;
 
 	@Expose
 	@Column(name = "NikshayCode")
 	private String nikshayCode;
 
 	@Expose
-	@Column(name = "TUName")
-	private String tUName;
-
-	@Expose
-	@Column(name = "NikshayDistrictID")
-	private Integer nikshayDistrictID;
+	@Column(name = "StateName")
+	private String stateName;
 
 	@Expose
 	@Column(name = "Deleted")

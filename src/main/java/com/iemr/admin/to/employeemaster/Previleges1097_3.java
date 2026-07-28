@@ -34,8 +34,10 @@ public class Previleges1097_3 {
 	private String[] villageID;
 	private String[] villageName;
 	private Integer facilityID;
-	private Integer nikshayTUID;
-	private Integer nikshayFacilityID;
+	// Comma-joined list of Nikshay TU/Facility IDs (e.g. "12,45,78"), matching
+	// M_UserServiceRoleMapping2's NikshayTUID/NikshayFacilityID columns.
+	private String nikshayTUID;
+	private String nikshayFacilityID;
 
 	public Integer getProviderServiceMapID() {
 		return providerServiceMapID;
@@ -97,16 +99,16 @@ public class Previleges1097_3 {
 	public void setFacilityID(Integer facilityID) {
 		this.facilityID = facilityID;
 	}
-	public Integer getNikshayTUID() {
+	public String getNikshayTUID() {
 		return nikshayTUID;
 	}
-	public void setNikshayTUID(Integer nikshayTUID) {
+	public void setNikshayTUID(String nikshayTUID) {
 		this.nikshayTUID = nikshayTUID;
 	}
-	public Integer getNikshayFacilityID() {
+	public String getNikshayFacilityID() {
 		return nikshayFacilityID;
 	}
-	public void setNikshayFacilityID(Integer nikshayFacilityID) {
+	public void setNikshayFacilityID(String nikshayFacilityID) {
 		this.nikshayFacilityID = nikshayFacilityID;
 	}
 }

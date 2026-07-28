@@ -156,6 +156,7 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 	long countByUserIDAndRoleIDAndDeletedFalse(Integer userID, Integer roleID);
 
 	// Soft-delete old duplicate mappings for same user+service, excluding the current row being updated
+	@Transactional
 	@Modifying
 	@Query("UPDATE M_UserServiceRoleMapping2 u SET u.deleted = true WHERE u.userID = :userID AND u.providerServiceMapID = :providerServiceMapID AND u.uSRMappingID != :excludeUSRMappingID AND u.deleted = false")
 	int softDeleteOldMappings(@Param("userID") Integer userID, @Param("providerServiceMapID") Integer providerServiceMapID, @Param("excludeUSRMappingID") Integer excludeUSRMappingID);
