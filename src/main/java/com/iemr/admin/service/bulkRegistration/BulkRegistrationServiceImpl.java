@@ -5,8 +5,13 @@ import com.iemr.admin.data.bulkuser.Employee;
 import com.iemr.admin.data.bulkuser.EmployeeList;
 import com.iemr.admin.data.employeemaster.*;
 import com.iemr.admin.data.locationmaster.M_District;
+import com.iemr.admin.data.nikshay.NikshayDistrict;
+import com.iemr.admin.data.nikshay.NikshayState;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
+import com.iemr.admin.repo.nikshay.NikshayDistrictRepo;
+import com.iemr.admin.repo.nikshay.NikshayStateRepo;
+import com.iemr.admin.repository.provideronboard.M_ProviderServiceMappingRepo;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import com.iemr.admin.service.rolemaster.Role_MasterInter;
@@ -60,6 +65,20 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     @Autowired
     EmployeeXmlService employeeXmlService;
 
+    @Autowired
+    private NikshayStateRepo nikshayStateRepo;
+    @Autowired
+    private NikshayDistrictRepo nikshayDistrictRepo;
+    @Autowired
+    private M_ProviderServiceMappingRepo providerServiceMappingRepo;
+
+    // ServiceID for "Stop TB" in m_servicemaster. Stop TB users' District is
+    // resolved against Nikshay's own district master (m_nikshay_district) instead
+    // of AMRIT's m_District, because AMRIT's district data is stale for several
+    // states post the 2022 district reorganizations while Nikshay's is current.
+    // Every other service line is unaffected and keeps using m_District as before.
+    private static final Integer STOP_TB_SERVICE_ID = 12;
+
     public ArrayList<String> errorLogs = new ArrayList<>();
     public ArrayList<M_User1> m_bulkUser = new ArrayList<>();
     public ArrayList<M_UserDemographics> m_UserDemographics = new ArrayList<>();
@@ -101,6 +120,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
 
     private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
+        boolean isStopTB = providerServiceMappingRepo.existsByServiceProviderIDAndServiceID(serviceProviderID, STOP_TB_SERVICE_ID);
         List<String> validationErrors = new ArrayList<>();
         BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
         M_User1 mUser = new M_User1();
@@ -232,6 +252,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         validationErrors.add("Qualification is missing");
 
                     }
+                    if (!employee.getQualification().isEmpty()) {
+                        if (getQualificationId(employee.getQualification()) == 0) {
+                            validationErrors.add("Qualification is invalid.");
+
+                        }
+                    }
 
                     if (employee.getState().isEmpty()) {
                         validationErrors.add("Current State is missing.");
@@ -246,7 +272,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         validationErrors.add("Current District is missing.");
                     }
                     if (!employee.getDistrict().isEmpty()) {
-                        if (getDistrictId(employee.getDistrict()) == 0) {
+                        int districtId = isStopTB ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                                : getDistrictId(employee.getDistrict());
+                        if (districtId == 0) {
                             validationErrors.add("Current District is invalid.");
 
                         }
@@ -266,7 +294,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     }
 
                     if (!employee.getPermanentDistrict().isEmpty()) {
-                        if (getDistrictId(employee.getPermanentDistrict()) == 0) {
+                        int permDistrictId = isStopTB ? getNikshayDistrictId(employee.getPermanentState(), employee.getPermanentDistrict())
+                                : getDistrictId(employee.getPermanentDistrict());
+                        if (permDistrictId == 0) {
                             validationErrors.add("Permanent District is invalid.");
 
                         }
@@ -299,7 +329,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                     //  showLogger(employee);
 
-                    if (!employee.getTitle().isEmpty() && !employee.getFirstName().isEmpty() && !employee.getLastName().isEmpty() && !employee.getContactNo().isEmpty() && !employee.getEmergencyContactNo().isEmpty() && !employee.getDob().isEmpty() && !employee.getUserName().isEmpty() && !employee.getPassword().isEmpty() && !employee.getState().isEmpty() && !employee.getDistrict().isEmpty() && !employee.getPermanentState().isEmpty() && !employee.getPermanentDistrict().isEmpty() && !employee.getGender().isEmpty() && !employee.getQualification().isEmpty() && isValidDate(convertStringIntoDate(employee.getDob()).toString()) && isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString())) {
+                    if (validationErrors.isEmpty()) {
                         try {
 
                             mUser.setTitleID(getTitleId(employee.getTitle()));
@@ -372,7 +402,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                             }
                             if (!employee.getPermanentDistrict().isEmpty()) {
-                                mUserDemographics.setPermDistrictID(getDistrictId(employee.getPermanentDistrict()));
+                                mUserDemographics.setPermDistrictID(isStopTB
+                                        ? getNikshayDistrictId(employee.getPermanentState(), employee.getPermanentDistrict())
+                                        : getDistrictId(employee.getPermanentDistrict()));
 
                             }
                             mUserDemographics.setIsPermanent(false);
@@ -399,7 +431,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             }
                             mUserDemographics.setIsPresent(false);
                             if (!employee.getDistrict().isEmpty()) {
-                                mUserDemographics.setDistrictID(getDistrictId(employee.getDistrict()));
+                                mUserDemographics.setDistrictID(isStopTB
+                                        ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                                        : getDistrictId(employee.getDistrict()));
 
                             }
                             if (!employee.getPincode().isEmpty()) {
@@ -643,6 +677,33 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
 
+    }
+
+    // Stop TB-only equivalent of getDistrictId(): resolves against Nikshay's own
+    // district master (m_nikshay_district) instead of AMRIT's m_District, since
+    // Nikshay's data reflects current district boundaries (e.g. post-2022 AP
+    // reorganization) while m_District does not. Not used for any other service
+    // line.
+    public int getNikshayDistrictId(String stateName, String districtName) {
+        if (stateName == null || stateName.isEmpty() || districtName == null || districtName.isEmpty()) {
+            return 0;
+        }
+
+        int nikshayStateId = nikshayStateRepo.findAllActive().stream()
+                .filter(s -> s.getStateName().equalsIgnoreCase(stateName))
+                .map(NikshayState::getNikshayStateID)
+                .findFirst()
+                .orElse(0);
+
+        if (nikshayStateId == 0) {
+            return 0;
+        }
+
+        return nikshayDistrictRepo.findByStateID(nikshayStateId).stream()
+                .filter(d -> d.getDistrictName().equalsIgnoreCase(districtName))
+                .map(NikshayDistrict::getNikshayDistrictID)
+                .findFirst()
+                .orElse(0);
     }
 
 
