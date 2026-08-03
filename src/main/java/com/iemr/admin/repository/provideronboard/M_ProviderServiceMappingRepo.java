@@ -36,4 +36,7 @@ public interface M_ProviderServiceMappingRepo extends CrudRepository<M_ProviderS
 	@Query("SELECT u FROM M_ProviderServiceMapping u where u.serviceProviderID = :serviceProviderID AND deleted=false")
 	M_ProviderServiceMapping getPSMapIDByServiceProviderID(@Param ("serviceProviderID") Integer serviceProviderID);
 
+	@Query("SELECT COUNT(u) > 0 FROM M_ProviderServiceMapping u WHERE u.serviceProviderID = :serviceProviderID AND u.serviceID = :serviceID AND deleted=false")
+	boolean existsByServiceProviderIDAndServiceID(@Param("serviceProviderID") Integer serviceProviderID, @Param("serviceID") Integer serviceID);
+
 }
