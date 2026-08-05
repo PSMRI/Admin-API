@@ -1494,4 +1494,39 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		return data;
 	}
 
+	@Override
+	public String FindEmployeeContactForUpdate(String contactNo, Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeContactForUpdate - start");
+		M_User1 data = employeeMasterRepo11.findEmployeeByContactForUpdate(contactNo, userID);
+		String result;
+		if (data == null) {
+			result = "contactnotexist";
+		} else {
+			result = "contactexist";
+		}
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeContactForUpdate - finish");
+		return result;
+	}
+
+	@Override
+	public String FindEmployeeAadhaarForUpdate(String aadhaarNo, Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeAadhaarForUpdate - start");
+		M_User1 data = employeeMasterRepo11.findEmployeeAadhaarNoForUpdate(aadhaarNo, userID);
+		String result;
+		if (data == null) {
+			result = "aadhaarnotexist";
+		} else {
+			result = "aadhaarexist";
+		}
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeAadhaarForUpdate - finish");
+		return result;
+	}
+
+	@Override
+	public M_UserDemographics getUserDemographicsByUserID(Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.getUserDemographicsByUserID - start");
+		M_UserDemographics data = m_UserDemographicsRepo.findByUserID(userID);
+		logger.info("EmployeeMasterServiceImpl.getUserDemographicsByUserID - finish");
+		return data;
+	}
 }
