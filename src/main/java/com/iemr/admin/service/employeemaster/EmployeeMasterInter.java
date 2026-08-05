@@ -201,4 +201,10 @@ public interface EmployeeMasterInter {
 	M_UserServiceRoleMapping2 deleteuserrolemapTM(M_UserServiceRoleMapping2 pre) throws Exception;
 
     M_User1 saveBulkUserEmployee(M_User1 mUser);
+
+	String FindEmployeeContactForUpdate(String contactNo, Integer userID);
+
+	String FindEmployeeAadhaarForUpdate(String aadhaarNo, Integer userID);
+
+	M_UserDemographics getUserDemographicsByUserID(Integer userID);
 }
