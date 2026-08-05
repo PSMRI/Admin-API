@@ -90,4 +90,8 @@ public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 	M_User1 findByUserID(Integer userID);
 
 	List<M_User1> findByUserIDIn(List<Integer> userIDs);
+
+	M_User1 findEmployeeByContactForUpdate(String contactNo, Integer userID);
+
+	M_User1 findEmployeeAadhaarNoForUpdate(String aadhaarNo, Integer userID);
 }
