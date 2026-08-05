@@ -22,6 +22,7 @@
 package com.iemr.admin.repo.employeemaster;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -34,5 +35,7 @@ public interface M_DesignationRepo extends CrudRepository<M_Designation, Integer
    
 	@Query("SELECT u FROM M_Designation u where deleted=false order by u.designationName")
 	ArrayList<M_Designation> getDesinationlist();
+
+	List<M_Designation> findByDesignationName(String designationName);
 
 }

@@ -6,6 +6,8 @@ import com.iemr.admin.data.bulkuser.EmployeeList;
 import com.iemr.admin.data.employeemaster.*;
 import com.iemr.admin.data.locationmaster.M_District;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
+import com.iemr.admin.repo.employeemaster.M_DesignationRepo;
+import com.iemr.admin.repo.employeemaster.M_UserDemographicsRepo;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
@@ -46,9 +48,16 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     public static final String FILE_PATH = "error_log.xlsx"; // Excel file path
     public List<BulkRegistrationError> bulkRegistrationErrors = new ArrayList<>();
 
+    @Autowired
+    private M_UserDemographicsRepo m_UserDemographicsRepo;
+
 
     @Autowired
     private EmployeeMasterInter employeeMasterInter;
+
+    @Autowired
+    private M_DesignationRepo m_DesignationRepo;
+
     @Autowired
     private Role_MasterInter roleMasterInter;
 
@@ -76,7 +85,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 logger.info("employee_list" + employeeList.getEmployees().toString());
                 totalEmployeeListSize = employeeList.getEmployees().size();
                 for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
+                    processUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
 
 
                 }
@@ -98,7 +107,31 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         // Only escape & that are not already part of valid XML entities
         return xml.replaceAll("&(?!amp;|lt;|gt;|apos;|quot;|#\\d+;)", "&amp;");
     }
+    /**
+     * Common entry point — decides create vs update based on whether the user already exists,
+     * then delegates to the respective method.
+     */
+    private void processUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
 
+        if (employee.getUserName() == null || employee.getUserName().isEmpty()) {
+            List<String> validationErrors = new ArrayList<>();
+            BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
+            validationErrors.add("Please Enter UserName");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            return;
+        }
+
+        String checkUserIsExist = employeeMasterInter.FindEmployeeName(employee.getUserName());
+        logger.info("checkUserIsExist" + checkUserIsExist);
+
+        if (checkUserIsExist.equalsIgnoreCase("usernotexist")) {
+            // user not found → create flow
+            saveUserUser(employee, row, authorization, createdBy, serviceProviderID);
+        } else {
+            // user already exists → update flow
+            updateUserUser(employee, row, authorization, createdBy, serviceProviderID);
+        }
+    }
 
     private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
         List<String> validationErrors = new ArrayList<>();
@@ -470,6 +503,284 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
      */
 
 
+    private void updateUserUser(Employee employee, Integer row, String authorization, String modifiedBy, Integer serviceProviderID) throws Exception {
+        List<String> validationErrors = new ArrayList<>();
+        BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
+
+        logger.info("employee_list update flow" + employee.toString());
+
+        // fetch existing user record to update
+        M_User1 existingUser = employeeMasterInter.FindEmployeeName1(employee.getUserName());
+        if (existingUser == null) {
+            validationErrors.add("User not found for update");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            return;
+        }
+        Integer userID = existingUser.getUserID();
+
+        // duplicate contact check excluding current user
+        String checkContactIsExist = employeeMasterInter.FindEmployeeContactForUpdate(employee.getContactNo(), userID);
+
+        if (checkContactIsExist.equalsIgnoreCase("contactnotexist")) {
+
+            if (employee.getTitle() == null || employee.getTitle().isEmpty()) {
+                validationErrors.add("Title is missing.");
+            }
+            if (!employee.getTitle().isEmpty() && getTitleId(employee.getTitle()) == 0) {
+                validationErrors.add("Title is invalid.");
+            }
+
+            if (employee.getFirstName() == null || employee.getFirstName().isEmpty()) {
+                validationErrors.add("First Name is missing.");
+            }
+            if (!employee.getFirstName().isEmpty()) {
+                if (employee.getFirstName().length() > 50) {
+                    validationErrors.add("First name is invalid.");
+                }
+                if (isNumeric(employee.getFirstName())) {
+                    validationErrors.add("First name is invalid.");
+                }
+            }
+
+            if (!employee.getMiddleName().isEmpty()) {
+                if (employee.getMiddleName().length() > 50) {
+                    validationErrors.add("Middle name is invalid.");
+                }
+                if (isNumeric(employee.getMiddleName())) {
+                    validationErrors.add("Middle name is invalid.");
+                }
+            }
+
+            if (employee.getLastName() == null || employee.getLastName().isEmpty()) {
+                validationErrors.add("Last Name is missing.");
+            }
+            if (!employee.getLastName().isEmpty()) {
+                if (employee.getLastName().length() > 50) {
+                    validationErrors.add("Last name is invalid.");
+                }
+                if (isNumeric(employee.getLastName())) {
+                    validationErrors.add("Last name is invalid.");
+                }
+            }
+
+            if (employee.getGender().isEmpty()) {
+                validationErrors.add("Gender is missing");
+            }
+            if (employee.getContactNo().isEmpty()) {
+                validationErrors.add("Contact number missing");
+            }
+            if (!employee.getContactNo().isEmpty() && !isValidPhoneNumber(String.valueOf(employee.getContactNo()))) {
+                validationErrors.add("Contact Number is invalid");
+            }
+
+            if (employee.getDesignation().isEmpty()) {
+                validationErrors.add("Designation is missing");
+            }
+
+            if (employee.getEmergencyContactNo().isEmpty()) {
+                validationErrors.add("Emergency contact number is missing");
+            }
+            if (!employee.getEmergencyContactNo().isEmpty() && !isValidPhoneNumber(String.valueOf(employee.getEmergencyContactNo()))) {
+                validationErrors.add("Emergency Contact Number is invalid.");
+            }
+
+            if (employee.getDob().isEmpty()) {
+                validationErrors.add("Date of Birth is missing.");
+            }
+            if (!employee.getDob().isEmpty() && !isValidDate(convertStringIntoDate(employee.getDob()).toString())) {
+                validationErrors.add("Date of Birth is invalid.");
+            }
+
+            if (employee.getEmail().isEmpty()) {
+                validationErrors.add("Email is missing.");
+            }
+            if (!employee.getEmail().isEmpty() && !employee.getEmail().matches(EMAIL_REGEX)) {
+                validationErrors.add("Invalid Email format.");
+            }
+
+            // password optional on update — only validated if provided
+            if (!employee.getPassword().isEmpty() && employee.getPassword().length() < 6) {
+                validationErrors.add("Please enter a valid password.");
+            }
+
+            if (!employee.getAadhaarNo().isEmpty()) {
+                String checkAadhaarIsExist = employeeMasterInter.FindEmployeeAadhaarForUpdate(employee.getAadhaarNo(), userID);
+                if (!checkAadhaarIsExist.equalsIgnoreCase("aadhaarnotexist")) {
+                    validationErrors.add("Duplicate aadhaar number found");
+                }
+                if (isValidAadhar(employee.getAadhaarNo())) {
+                    validationErrors.add("Aadhaar number is invalid");
+                }
+            }
+
+            if (employee.getQualification().isEmpty()) {
+                validationErrors.add("Qualification is missing");
+            }
+
+            if (employee.getState().isEmpty()) {
+                validationErrors.add("Current State is missing.");
+            }
+            if (!employee.getState().isEmpty() && getStateId(employee.getState()) == 0) {
+                validationErrors.add("Current State is invalid.");
+            }
+
+            if (employee.getDistrict().isEmpty()) {
+                validationErrors.add("Current District is missing.");
+            }
+            if (!employee.getDistrict().isEmpty() && getDistrictId(employee.getDistrict()) == 0) {
+                validationErrors.add("Current District is invalid.");
+            }
+
+            if (employee.getPermanentState().isEmpty()) {
+                validationErrors.add("Permanent State is missing.");
+            }
+            if (!employee.getPermanentState().isEmpty() && getStateId(employee.getPermanentState()) == 0) {
+                validationErrors.add("Permanent State is invalid.");
+            }
+
+            if (employee.getPermanentDistrict().isEmpty()) {
+                validationErrors.add("Permanent District is missing.");
+            }
+            if (!employee.getPermanentDistrict().isEmpty() && getDistrictId(employee.getPermanentDistrict()) == 0) {
+                validationErrors.add("Permanent District is invalid.");
+            }
+
+            if (employee.getDateOfJoining().isEmpty()) {
+                validationErrors.add("Date of Joining is missing.");
+            }
+            if (!employee.getDateOfJoining().isEmpty() && !isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString())) {
+                validationErrors.add("Date of Joining is invalid.");
+            }
+
+            if (!validationErrors.isEmpty()) {
+                logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            }
+
+            boolean coreFieldsValid = !employee.getTitle().isEmpty() && !employee.getFirstName().isEmpty()
+                    && !employee.getLastName().isEmpty() && !employee.getContactNo().isEmpty()
+                    && !employee.getEmergencyContactNo().isEmpty() && !employee.getDob().isEmpty()
+                    && !employee.getUserName().isEmpty() && !employee.getState().isEmpty()
+                    && !employee.getDistrict().isEmpty() && !employee.getPermanentState().isEmpty()
+                    && !employee.getPermanentDistrict().isEmpty() && !employee.getGender().isEmpty()
+                    && !employee.getQualification().isEmpty()
+                    && isValidDate(convertStringIntoDate(employee.getDob()).toString())
+                    && isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString());
+
+            if (coreFieldsValid) {
+                try {
+                    M_User1 mUser = existingUser;
+                    mUser.setUserID(mUser.getUserID());
+                    mUser.setTitleID(getTitleId(employee.getTitle()));
+                    mUser.setFirstName(employee.getFirstName());
+                    mUser.setLastName(employee.getLastName());
+                    mUser.setdOB(convertStringIntoDate(employee.getDob()));
+                    mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
+                    mUser.setContactNo(String.valueOf(employee.getContactNo()));
+
+                    if (!employee.getMiddleName().isEmpty()) {
+                        mUser.setMiddleName(employee.getMiddleName());
+                    }
+                    if (!employee.getDesignation().isEmpty()) {
+                        mUser.setDesignationID(getDesignationId(employee.getDesignation()));
+                        mUser.setDesignationName(employee.getDesignation());
+                    }
+                    if (!employee.getAadhaarNo().isEmpty() && isValidAadhar(employee.getAadhaarNo())) {
+                        mUser.setAadhaarNo(String.valueOf(employee.getAadhaarNo()));
+                    }
+                    if (!employee.getPan().isEmpty()) {
+                        mUser.setpAN(employee.getPan());
+                    }
+                    mUser.setEmailID(employee.getEmail());
+                    mUser.setGenderID(Short.parseShort(String.valueOf(getGenderId(employee.getGender()))));
+                    if (!employee.getQualification().isEmpty()) {
+                        mUser.setQualificationID(getQualificationId(employee.getQualification()));
+                    }
+                    mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
+                    mUser.setModifiedBy(modifiedBy);
+                    mUser.setServiceProviderID(serviceProviderID);
+
+                    // password touched only if a new one was supplied
+                    if (!employee.getPassword().isEmpty()) {
+                        mUser.setPassword(generateStrongPassword(employee.getPassword()));
+                    }
+
+                    M_User1 updatedUser = employeeMasterInter.saveBulkUserEmployee(mUser);
+
+                    M_UserDemographics mUserDemographics = employeeMasterInter.getUserDemographicsByUserID(updatedUser.getUserID());
+                    if (mUserDemographics == null) {
+                        mUserDemographics = new M_UserDemographics();
+                        mUserDemographics.setUserID(updatedUser.getUserID());
+                        mUserDemographics.setCountryID(91);
+                    }
+
+                    if (!employee.getCommunity().isEmpty()) {
+                        mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
+                    }
+                    if (!employee.getReligion().isEmpty()) {
+                        mUserDemographics.setReligionID(getReligionStringId(employee.getReligion()));
+                    }
+                    mUserDemographics.setModifiedBy(modifiedBy);
+
+                    if (!employee.getPermanentAddressLine1().isEmpty()) {
+                        mUserDemographics.setPermAddressLine1(employee.getPermanentAddressLine1());
+                    }
+                    if (!employee.getPermanentState().isEmpty()) {
+                        mUserDemographics.setPermStateID(getStateId(employee.getPermanentState()));
+                    }
+                    if (!employee.getPermanentDistrict().isEmpty()) {
+                        mUserDemographics.setPermDistrictID(getDistrictId(employee.getPermanentDistrict()));
+                    }
+                    if (!employee.getPermanentPincode().isEmpty()) {
+                        mUserDemographics.setPermPinCode(Integer.valueOf(employee.getPermanentPincode()));
+                    }
+                    if (!employee.getMotherName().isEmpty()) {
+                        mUserDemographics.setMothersName(employee.getMotherName());
+                    }
+                    if (!employee.getFatherName().isEmpty()) {
+                        mUserDemographics.setFathersName(employee.getFatherName());
+                    }
+                    if (!employee.getAddressLine1().isEmpty()) {
+                        mUserDemographics.setAddressLine1(employee.getAddressLine1());
+                    }
+                    if (!employee.getState().isEmpty()) {
+                        mUserDemographics.setStateID(getStateId(employee.getState()));
+                    }
+                    if (!employee.getDistrict().isEmpty()) {
+                        mUserDemographics.setDistrictID(getDistrictId(employee.getDistrict()));
+                    }
+                    if (!employee.getPincode().isEmpty()) {
+                        mUserDemographics.setPinCode(employee.getPincode().toString());
+                    }
+
+                    m_UserDemographicsRepo.save(mUserDemographics);
+
+                    m_bulkUser.add(mUser);
+                    m_UserDemographics.add(mUserDemographics);
+
+                } catch (Exception e) {
+                    errorLogs.add("Row :" + (row + 1) + e.getMessage());
+                    logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+                }
+            }
+
+        } else {
+            validationErrors.add("Contact No already belongs to another user");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+        }
+    }
+
+    // shared helper — same duplicated block ko replace kar diya
+    private void logAndCollectError(Integer row, Employee employee, List<String> validationErrors,
+                                    BulkRegistrationError bulkRegistrationErrors_) {
+        if (!validationErrors.isEmpty()) {
+            errorLogs.add("Row " + (row + 1) + ": " + String.join(", ", validationErrors));
+            bulkRegistrationErrors_.setRowNumber((row + 1));
+            bulkRegistrationErrors_.setUserName(employee.getUserName());
+            bulkRegistrationErrors_.setError(validationErrors);
+            bulkRegistrationErrors.add(bulkRegistrationErrors_);
+        }
+    }
+
     private boolean isValidDate(String dateStr) {
         try {
             String[] parts = dateStr.split("-");
@@ -587,8 +898,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
 
     public int getDesignationId(String designationString) {
+         if(!m_DesignationRepo.findByDesignationName(designationString).isEmpty()){
+             return m_DesignationRepo.findByDesignationName(designationString).get(0).getDesignationID();
 
-        return 20;
+         }else {
+             return 0;
+         }
     }
 
 
