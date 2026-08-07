@@ -1848,6 +1848,10 @@ public class EmployeeMasterController {
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
 
+			// Fix 19: capture the DB deleted-flag BEFORE any mutation (this endpoint doesn't change
+			// it, but the flag must be read before mutation to be meaningful downstream)
+			boolean wasDeleted = Boolean.TRUE.equals(usrRole.getDeleted());
+
 			// Fix 1/3: cascade asha_supervisor_mapping BEFORE modifying entity to avoid JPA L1 cache issue
 			if (usrRole != null && usrRole.getUserID() != null) {
 				boolean roleChanged = pre.getRoleID() != null && usrRole.getRoleID() != null
@@ -1886,7 +1890,7 @@ public class EmployeeMasterController {
 				usrRole.setOutbound(pre.getOutbound());
 			}
 
-			M_UserServiceRoleMapping2 savedata = employeeMasterInter.saveRoleMappingeditedData(usrRole,
+			M_UserServiceRoleMapping2 savedata = employeeMasterInter.saveRoleMappingeditedData(usrRole, wasDeleted,
 					request.getHeader("Authorization"));
 
 			response.setResponse(savedata.toString());
@@ -1916,11 +1920,16 @@ public class EmployeeMasterController {
 
 			M_UserServiceRoleMapping2 usrRole = employeeMasterInter.getDataUsrId(pre.getuSRMappingID());
 
+			// Fix 19: capture the DB deleted-flag BEFORE any mutation, so saveRoleMappingeditedData
+			// can tell a reactivation apart from a fresh create/update without re-fetching (which
+			// would hit the JPA L1 cache and return this same already-mutated instance).
+			boolean wasDeleted = Boolean.TRUE.equals(usrRole.getDeleted());
+
 			// Fix 2: cascade asha_supervisor_mapping BEFORE setDeleted() to avoid JPA L1 cache issue.
 			// After setDeleted(true), findById() in saveRoleMappingeditedData hits the L1 cache
 			// returning the already-modified entity, so the "old vs new deleted" check always fails.
 			// For ASHA Supervisor with multiple facilities: only delete mappings for this facilityID
-			if (Boolean.TRUE.equals(pre.getDeleted()) && !Boolean.TRUE.equals(usrRole.getDeleted())
+			if (Boolean.TRUE.equals(pre.getDeleted()) && !wasDeleted
 					&& usrRole.getUserID() != null) {
 				logger.info("Fix2: cascading asha_supervisor_mapping soft-delete for userID={}, uSRMappingID={}",
 						usrRole.getUserID(), pre.getuSRMappingID());
@@ -1929,7 +1938,7 @@ public class EmployeeMasterController {
 
 			usrRole.setDeleted(pre.getDeleted());
 
-			M_UserServiceRoleMapping2 savedata = employeeMasterInter.saveRoleMappingeditedData(usrRole,
+			M_UserServiceRoleMapping2 savedata = employeeMasterInter.saveRoleMappingeditedData(usrRole, wasDeleted,
 					request.getHeader("Authorization"));
 
 			response.setResponse(savedata.toString());
