@@ -1043,16 +1043,26 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
-	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException {
+	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, boolean wasDeleted, String authToken) throws JsonMappingException, JsonProcessingException {
 
-		// Fix 4 + Fix 16 + Fix 17 + Fix 14: validate only on create/update, skip for deactivation
+		// Fix 4 + Fix 16 + Fix 17 + Fix 14: validate only on create/update, skip entirely for deactivation.
+		// Fix 19: on reactivation, waive ONLY Fix 4 (facility-mandatory) — legacy ASHA rows created
+		// before this rule existed may have no facility, and reactivation alone shouldn't be blocked
+		// by that. Fix 16/17 must still run whenever a facility IS present (reactivation or not), so
+		// a reactivated row can't silently resume pointing at a facility that went stale (soft-deleted,
+		// or no longer SC-level) while the user was inactive.
+		// wasDeleted is captured by the caller BEFORE usrRole is mutated — re-fetching it here via
+		// findById() would return the same JPA-managed instance as usrRole (Open-Session-In-View
+		// keeps one L1 cache per request), which already reflects the new (mutated) state.
 		M_Role role = null;
+		boolean isReactivation = usrRole.getuSRMappingID() != null && wasDeleted
+				&& Boolean.FALSE.equals(usrRole.getDeleted());
 		if (!Boolean.TRUE.equals(usrRole.getDeleted())) {
 			if (usrRole.getRoleID() != null) {
 				role = roleRepo.findByRoleID(usrRole.getRoleID());
-				// Fix 4: ASHA must have a facilityID
+				// Fix 4: ASHA must have a facilityID (waived on reactivation of a legacy row)
 				if (role != null && "asha".equalsIgnoreCase(role.getRoleName())
-						&& usrRole.getFacilityID() == null) {
+						&& usrRole.getFacilityID() == null && !isReactivation) {
 					throw new RuntimeException(
 							"Facility (SC) is mandatory for ASHA role. Please select a facility before saving.");
 				}

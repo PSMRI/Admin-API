@@ -161,7 +161,10 @@ public interface EmployeeMasterInter {
 	M_UserServiceRoleMapping2 getDataUsrId(Integer uSRMappingID);
 
 //	M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String string);
-	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, String authToken) throws JsonMappingException, JsonProcessingException;
+	// wasDeleted: the row's deleted flag as read from the DB BEFORE the caller mutated usrRole.
+	// Must be captured by the caller before mutation — a re-fetch here would hit the JPA L1 cache
+	// and return the already-mutated instance (Open-Session-In-View keeps one L1 cache per request).
+	public M_UserServiceRoleMapping2 saveRoleMappingeditedData(M_UserServiceRoleMapping2 usrRole, boolean wasDeleted, String authToken) throws JsonMappingException, JsonProcessingException;
 
 	// Fix 2: cascade soft-delete asha_supervisor_mapping rows when a user is deactivated
 	void cascadeDeleteAshaMappingsForUser(Integer userID);
