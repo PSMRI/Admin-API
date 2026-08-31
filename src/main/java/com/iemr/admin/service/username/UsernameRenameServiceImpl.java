@@ -1,0 +1,152 @@
+/*
+* AMRIT – Accessible Medical Records via Integrated Technology 
+* Integrated EHR (Electronic Health Records) Solution 
+*
+* Copyright (C) "Piramal Swasthya Management and Research Institute" 
+*
+* This file is part of AMRIT.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/.
+*/
+package com.iemr.admin.service.username;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.iemr.admin.model.username.UsernameRenameRequest;
+import com.iemr.admin.model.username.UsernameRenameResponse;
+import com.iemr.admin.repository.username.UsernameAuditTables;
+import com.iemr.admin.repository.username.UsernameAuditTables.AuditTable;
+import com.iemr.admin.repository.username.UsernameRenameRepository;
+
+@Service
+public class UsernameRenameServiceImpl implements UsernameRenameService {
+
+	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
+	/** m_user.UserName and m_user.EmployeeID are both varchar(20). */
+	private static final int MAX_USERNAME_LENGTH = 20;
+
+	/**
+	 * m_user.ContactNo is varchar(12) — the tightest column the rename writes
+	 * into. Anything longer would be truncated silently, or rejected outright
+	 * under strict mode, so the whole rename is refused up front instead.
+	 */
+	private static final int MAX_CONTACT_LENGTH = 12;
+
+	@Autowired
+	private UsernameRenameRepository usernameRenameRepository;
+
+	@Override
+	@Transactional(readOnly = true)
+	public UsernameRenameResponse preview(UsernameRenameRequest request) throws Exception {
+		validate(request);
+
+		UsernameRenameResponse response = newResponse(request, true);
+		for (AuditTable table : UsernameAuditTables.TABLES) {
+			response.addTable(table.getQualifiedName(),
+					usernameRenameRepository.countAffected(table, request.getOldUserName()));
+		}
+		return response;
+	}
+
+	/**
+	 * Runs in one transaction spanning db_iemr and db_identity, so a failure
+	 * part-way through rolls the whole rename back rather than stranding the
+	 * user half-renamed.
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception {
+		validate(request);
+
+		String oldUserName = request.getOldUserName();
+		String newUserName = request.getNewUserName();
+		logger.info("Username rename starting: {} -> {}", oldUserName, newUserName);
+
+		UsernameRenameResponse response = newResponse(request, false);
+
+		// The identity row goes first: if the unique key on UserName or
+		// EmployeeID rejects the new value, nothing else has been touched yet.
+		long userRows = usernameRenameRepository.renameUserRow(oldUserName, newUserName,
+				request.isUpdateContactFields());
+		response.addTable("db_iemr.m_user", userRows);
+
+		for (AuditTable table : UsernameAuditTables.TABLES) {
+			long rows = usernameRenameRepository.renameInTable(table, oldUserName, newUserName);
+			response.addTable(table.getQualifiedName(), rows);
+		}
+
+		logger.info("Username rename complete: {} -> {}, {} rows across {} tables", oldUserName, newUserName,
+				response.getTotalRowsAffected(), response.getTablesAffected());
+		return response;
+	}
+
+	private UsernameRenameResponse newResponse(UsernameRenameRequest request, boolean preview) {
+		UsernameRenameResponse response = new UsernameRenameResponse();
+		response.setOldUserName(request.getOldUserName());
+		response.setNewUserName(request.getNewUserName());
+		response.setPreview(preview);
+		return response;
+	}
+
+	private void validate(UsernameRenameRequest request) throws Exception {
+		if (request == null) {
+			throw new IllegalArgumentException("Request body is required");
+		}
+
+		String oldUserName = trimToNull(request.getOldUserName());
+		String newUserName = trimToNull(request.getNewUserName());
+
+		if (oldUserName == null) {
+			throw new IllegalArgumentException("Current username is required");
+		}
+		if (newUserName == null) {
+			throw new IllegalArgumentException("New username is required");
+		}
+		if (oldUserName.equals(newUserName)) {
+			throw new IllegalArgumentException("New username is the same as the current username");
+		}
+		if (newUserName.length() > MAX_USERNAME_LENGTH) {
+			throw new IllegalArgumentException(
+					"New username exceeds " + MAX_USERNAME_LENGTH + " characters (m_user.UserName limit)");
+		}
+		if (request.isUpdateContactFields() && newUserName.length() > MAX_CONTACT_LENGTH) {
+			throw new IllegalArgumentException("New username exceeds " + MAX_CONTACT_LENGTH
+					+ " characters and cannot be written to ContactNo. Either shorten it or "
+					+ "turn off updating contact numbers.");
+		}
+		if (!usernameRenameRepository.userExists(oldUserName)) {
+			throw new IllegalArgumentException("No user found with username " + oldUserName);
+		}
+		if (usernameRenameRepository.userNameOrEmployeeIdTaken(newUserName)) {
+			throw new IllegalArgumentException(
+					"Username " + newUserName + " is already in use as a username or employee ID");
+		}
+
+		request.setOldUserName(oldUserName);
+		request.setNewUserName(newUserName);
+	}
+
+	private String trimToNull(String value) {
+		if (value == null) {
+			return null;
+		}
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
+	}
+}

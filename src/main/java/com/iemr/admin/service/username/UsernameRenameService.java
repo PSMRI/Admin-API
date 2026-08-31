@@ -1,0 +1,34 @@
+/*
+* AMRIT – Accessible Medical Records via Integrated Technology 
+* Integrated EHR (Electronic Health Records) Solution 
+*
+* Copyright (C) "Piramal Swasthya Management and Research Institute" 
+*
+* This file is part of AMRIT.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/.
+*/
+package com.iemr.admin.service.username;
+
+import com.iemr.admin.model.username.UsernameRenameRequest;
+import com.iemr.admin.model.username.UsernameRenameResponse;
+
+public interface UsernameRenameService {
+
+	/** Reports what a rename would touch, without committing anything. */
+	UsernameRenameResponse preview(UsernameRenameRequest request) throws Exception;
+
+	/** Performs the rename across m_user and the whitelisted audit tables. */
+	UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception;
+}
