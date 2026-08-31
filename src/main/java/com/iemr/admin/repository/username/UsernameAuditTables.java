@@ -99,7 +99,7 @@ public final class UsernameAuditTables {
 			pascal("db_identity.i_benfamilytag"),
 
 			// --- db_iemr : created_by / updated_by ---
-			snake("db_iemr.ELIGIBLE_COUPLE_TRACKING"),
+			snake("db_iemr.eligible_couple_tracking"),
 			snake("db_iemr.t_pregnant_woman_register"),
 			snake("db_iemr.t_eligible_couple_register"),
 			snake("db_iemr.t_delivery_outcome"),
