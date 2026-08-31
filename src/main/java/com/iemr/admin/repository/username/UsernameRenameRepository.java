@@ -49,31 +49,13 @@ public class UsernameRenameRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	/**
-	 * Rows {@link #renameInTable} would update in {@code table}.
-	 *
-	 * <p>Counted as two single-column queries mirroring the two UPDATEs rather
-	 * than one {@code createdBy = :u OR modifiedBy = :u}. That matters twice
-	 * over: a row the user both created and last modified is updated by each
-	 * statement, so counting it once would under-report what the rename
-	 * reports; and an OR across two columns cannot use the single-column
-	 * indexes on them, which turned this into a full table scan.
-	 */
+	/** Rows in {@code table} attributed to {@code userName} in either audit column. */
 	public long countAffected(AuditTable table, String userName) {
-		return countByColumn(table.getQualifiedName(), table.getCreatedByColumn(), userName)
-				+ countByColumn(table.getQualifiedName(), table.getModifiedByColumn(), userName);
-	}
-
-	private long countByColumn(String qualifiedName, String column, String userName) {
-		String sql = String.format("SELECT COUNT(*) FROM %s WHERE %s = :userName", qualifiedName, column);
+		String sql = String.format("SELECT COUNT(*) FROM %s WHERE %s = :userName OR %s = :userName",
+				table.getQualifiedName(), table.getCreatedByColumn(), table.getModifiedByColumn());
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("userName", userName);
 		return toLong(query.getSingleResult());
-	}
-
-	/** Rows the m_user update itself would touch, for parity with the rename report. */
-	public long countUserRow(String userName) {
-		return countByColumn("db_iemr.m_user", "UserName", userName);
 	}
 
 	/**

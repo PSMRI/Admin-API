@@ -57,11 +57,6 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		validate(request);
 
 		UsernameRenameResponse response = newResponse(request, true);
-
-		// Listed first, and counted the same way, so the preview lines up row
-		// for row with what rename() reports.
-		response.addTable("db_iemr.m_user", usernameRenameRepository.countUserRow(request.getOldUserName()));
-
 		for (AuditTable table : UsernameAuditTables.TABLES) {
 			response.addTable(table.getQualifiedName(),
 					usernameRenameRepository.countAffected(table, request.getOldUserName()));
