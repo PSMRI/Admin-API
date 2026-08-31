@@ -49,34 +49,39 @@ public class UsernameRenameRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	/** Rows in {@code table} attributed to {@code userName} in either audit column. */
+	/** Rows the rename would update in {@code table} — those the user created. */
 	public long countAffected(AuditTable table, String userName) {
-		String sql = String.format("SELECT COUNT(*) FROM %s WHERE %s = :userName OR %s = :userName",
-				table.getQualifiedName(), table.getCreatedByColumn(), table.getModifiedByColumn());
+		String sql = String.format("SELECT COUNT(*) FROM %s WHERE %s = :userName", table.getQualifiedName(),
+				table.getCreatedByColumn());
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("userName", userName);
 		return toLong(query.getSingleResult());
 	}
 
-	/**
-	 * Repoints both audit columns in one table.
-	 *
-	 * <p>Deliberately two statements rather than one combined UPDATE: a single
-	 * {@code SET CreatedBy=:new, ModifiedBy=:new WHERE CreatedBy=:old} would
-	 * overwrite ModifiedBy on rows a DIFFERENT user last modified, destroying
-	 * their attribution, and would miss rows this user only modified.
-	 *
-	 * @return rows touched across both statements (a row updated in each counts twice)
-	 */
-	public long renameInTable(AuditTable table, String oldUserName, String newUserName) {
-		long updated = executeUpdate(table.getQualifiedName(), table.getCreatedByColumn(), oldUserName, newUserName);
-		updated += executeUpdate(table.getQualifiedName(), table.getModifiedByColumn(), oldUserName, newUserName);
-		return updated;
+	/** Rows the m_user update itself would touch, so the preview matches the rename report. */
+	public long countUserRow(String userName) {
+		Query query = entityManager
+				.createNativeQuery("SELECT COUNT(*) FROM db_iemr.m_user WHERE UserName = :userName");
+		query.setParameter("userName", userName);
+		return toLong(query.getSingleResult());
 	}
 
-	private long executeUpdate(String qualifiedName, String column, String oldUserName, String newUserName) {
-		String sql = String.format("UPDATE %s SET %s = :newUserName WHERE %s = :oldUserName", qualifiedName, column,
-				column);
+	/**
+	 * Repoints both audit columns on the rows this user created.
+	 *
+	 * <p>Driven by primary key through a derived table rather than filtering the
+	 * UPDATE on the audit column directly. The extra {@code SELECT ... AS temp}
+	 * wrapper is required by MySQL, which will not read from the same table an
+	 * UPDATE targets unless the subquery is materialised (error 1093).
+	 *
+	 * @return rows updated
+	 */
+	public long renameInTable(AuditTable table, String oldUserName, String newUserName) {
+		String sql = String.format(
+				"UPDATE %1$s SET %2$s = :newUserName, %3$s = :newUserName "
+						+ "WHERE %4$s IN (SELECT %4$s FROM (SELECT %4$s FROM %1$s WHERE %2$s = :oldUserName) AS temp)",
+				table.getQualifiedName(), table.getCreatedByColumn(), table.getModifiedByColumn(),
+				table.getPrimaryKeyColumn());
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("newUserName", newUserName);
 		query.setParameter("oldUserName", oldUserName);

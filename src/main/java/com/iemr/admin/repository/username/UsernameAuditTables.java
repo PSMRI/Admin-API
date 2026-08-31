@@ -33,6 +33,10 @@ import java.util.List;
  * column (there are ~594 of those across db_iemr and db_identity). Renaming a
  * user therefore leaves the old username intact in tables outside this list.
  *
+ * <p>Each entry carries its primary key, because the rename drives updates by
+ * PK through a derived table rather than filtering the UPDATE directly. Every
+ * key here was verified against the AMRIT-DB migrations.
+ *
  * <p>Names here are compile-time constants and are interpolated into SQL. They
  * must never be sourced from request input; only the username values are bound
  * as parameters.
@@ -42,16 +46,19 @@ public final class UsernameAuditTables {
 	private UsernameAuditTables() {
 	}
 
-	/** One sweepable table and the audit columns it happens to use. */
+	/** One sweepable table: its audit columns and the primary key driving the update. */
 	public static final class AuditTable {
 		private final String qualifiedName;
 		private final String createdByColumn;
 		private final String modifiedByColumn;
+		private final String primaryKeyColumn;
 
-		public AuditTable(String qualifiedName, String createdByColumn, String modifiedByColumn) {
+		public AuditTable(String qualifiedName, String createdByColumn, String modifiedByColumn,
+				String primaryKeyColumn) {
 			this.qualifiedName = qualifiedName;
 			this.createdByColumn = createdByColumn;
 			this.modifiedByColumn = modifiedByColumn;
+			this.primaryKeyColumn = primaryKeyColumn;
 		}
 
 		public String getQualifiedName() {
@@ -65,14 +72,18 @@ public final class UsernameAuditTables {
 		public String getModifiedByColumn() {
 			return modifiedByColumn;
 		}
+
+		public String getPrimaryKeyColumn() {
+			return primaryKeyColumn;
+		}
 	}
 
-	private static AuditTable pascal(String qualifiedName) {
-		return new AuditTable(qualifiedName, "CreatedBy", "ModifiedBy");
+	private static AuditTable pascal(String qualifiedName, String primaryKeyColumn) {
+		return new AuditTable(qualifiedName, "CreatedBy", "ModifiedBy", primaryKeyColumn);
 	}
 
-	private static AuditTable snake(String qualifiedName) {
-		return new AuditTable(qualifiedName, "created_by", "updated_by");
+	private static AuditTable snake(String qualifiedName, String primaryKeyColumn) {
+		return new AuditTable(qualifiedName, "created_by", "updated_by", primaryKeyColumn);
 	}
 
 	/**
@@ -80,39 +91,42 @@ public final class UsernameAuditTables {
 	 * every db_identity table below uses CreatedBy/ModifiedBy, while db_iemr is
 	 * split — the newer RMNCH register tables use created_by/updated_by and the
 	 * older visit tables use CreatedBy/ModifiedBy.
+	 *
+	 * <p>eligible_couple_tracking is lower case here on purpose: the schema
+	 * creates it that way and MySQL table names are case sensitive on Linux.
 	 */
 	public static final List<AuditTable> TABLES = List.of(
 			// --- db_identity : CreatedBy / ModifiedBy ---
-			pascal("db_identity.i_beneficiarydetails_rmnch"),
-			pascal("db_identity.i_beneficiaryfamilymapping"),
-			pascal("db_identity.i_beneficiarydetails"),
-			pascal("db_identity.i_beneficiarymapping"),
-			pascal("db_identity.i_beneficiaryidentity"),
-			pascal("db_identity.i_householddetails"),
-			pascal("db_identity.i_beneficiaryimage"),
-			pascal("db_identity.i_beneficiaryaddress"),
-			pascal("db_identity.i_beneficiaryservicemapping"),
-			pascal("db_identity.m_beneficiaryregidmapping"),
-			pascal("db_identity.i_bornbirthdeatils"),
-			pascal("db_identity.i_beneficiarycontacts"),
-			pascal("db_identity.i_beneficiaryconsent"),
-			pascal("db_identity.i_benfamilytag"),
+			pascal("db_identity.i_beneficiarydetails_rmnch", "beneficiaryDetails_RmnchId"),
+			pascal("db_identity.i_beneficiaryfamilymapping", "BenFamilyMapId"),
+			pascal("db_identity.i_beneficiarydetails", "BeneficiaryDetailsId"),
+			pascal("db_identity.i_beneficiarymapping", "BenMapId"),
+			pascal("db_identity.i_beneficiaryidentity", "BenIdentityId"),
+			pascal("db_identity.i_householddetails", "houseHoldDetailsId"),
+			pascal("db_identity.i_beneficiaryimage", "BenImageId"),
+			pascal("db_identity.i_beneficiaryaddress", "BenAddressID"),
+			pascal("db_identity.i_beneficiaryservicemapping", "BenServiceMapID"),
+			pascal("db_identity.m_beneficiaryregidmapping", "BenRegId"),
+			pascal("db_identity.i_bornbirthdeatils", "BornBirthDeatilsId"),
+			pascal("db_identity.i_beneficiarycontacts", "BenContactsID"),
+			pascal("db_identity.i_beneficiaryconsent", "BenConsentID"),
+			pascal("db_identity.i_benfamilytag", "BenFamilyTagId"),
 
 			// --- db_iemr : created_by / updated_by ---
-			snake("db_iemr.ELIGIBLE_COUPLE_TRACKING"),
-			snake("db_iemr.t_pregnant_woman_register"),
-			snake("db_iemr.t_eligible_couple_register"),
-			snake("db_iemr.t_delivery_outcome"),
-			snake("db_iemr.t_infant_register"),
-			snake("db_iemr.t_pnc_visit"),
-			snake("db_iemr.t_anc_visit"),
-			snake("db_iemr.t_child_register"),
-			snake("db_iemr.t_pmsma"),
+			snake("db_iemr.eligible_couple_tracking", "id"),
+			snake("db_iemr.t_pregnant_woman_register", "id"),
+			snake("db_iemr.t_eligible_couple_register", "id"),
+			snake("db_iemr.t_delivery_outcome", "id"),
+			snake("db_iemr.t_infant_register", "id"),
+			snake("db_iemr.t_pnc_visit", "ID"),
+			snake("db_iemr.t_anc_visit", "ID"),
+			snake("db_iemr.t_child_register", "ID"),
+			snake("db_iemr.t_pmsma", "id"),
 
 			// --- db_iemr : CreatedBy / ModifiedBy ---
-			pascal("db_iemr.t_cbacdetails"),
-			pascal("db_iemr.t_pnccare"),
-			pascal("db_iemr.t_anccare"),
-			pascal("db_iemr.t_benvisitdetail"),
-			pascal("db_iemr.t_childvaccinedetail1"));
+			pascal("db_iemr.t_cbacdetails", "id"),
+			pascal("db_iemr.t_pnccare", "id"),
+			pascal("db_iemr.t_anccare", "ID"),
+			pascal("db_iemr.t_benvisitdetail", "BenVisitID"),
+			pascal("db_iemr.t_childvaccinedetail1", "ID"));
 }
