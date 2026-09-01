@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iemr.admin.model.username.UsernameAvailabilityResponse;
 import com.iemr.admin.model.username.UsernameRenameRequest;
 import com.iemr.admin.model.username.UsernameRenameResponse;
 import com.iemr.admin.repository.username.UsernameAuditTables;
@@ -51,6 +52,37 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 	@Autowired
 	private UsernameRenameRepository usernameRenameRepository;
+
+	/**
+	 * Uses the same repository checks as {@link #rename}, so a name the screen
+	 * reports as free cannot then be rejected on submit. Blank input is treated
+	 * as available — there is nothing to clash with yet.
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public UsernameAvailabilityResponse checkAvailability(UsernameRenameRequest request) throws Exception {
+		UsernameAvailabilityResponse response = new UsernameAvailabilityResponse();
+		if (request == null) {
+			return response;
+		}
+
+		String oldUserName = trimToNull(request.getOldUserName());
+		if (oldUserName == null) {
+			throw new IllegalArgumentException("Current username is required");
+		}
+
+		String newUserName = trimToNull(request.getNewUserName());
+		if (newUserName != null && !newUserName.equals(oldUserName)) {
+			response.setUserNameAvailable(!usernameRenameRepository.userNameTaken(newUserName, oldUserName));
+		}
+
+		String newEmployeeId = trimToNull(request.getNewEmployeeId());
+		if (newEmployeeId != null) {
+			response.setEmployeeIdAvailable(!usernameRenameRepository.employeeIdTaken(newEmployeeId, oldUserName));
+		}
+
+		return response;
+	}
 
 	/**
 	 * Runs in one transaction spanning db_iemr and db_identity, so a failure
