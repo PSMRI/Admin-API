@@ -72,19 +72,30 @@ public class UsernameRenameRepository {
 	}
 
 	/**
-	 * Updates the identity row itself. EmployeeID tracks the username per the
-	 * existing bulk-registration convention; the contact columns are only
-	 * rewritten where the username is known to be the user's mobile number.
+	 * Updates the identity row itself.
+	 *
+	 * <p>UserName always changes. EmployeeID is only touched when a new value is
+	 * supplied — it holds its own UNIQUE key and need not track the username.
+	 * The contact columns are only rewritten where the username is known to be
+	 * the user's mobile number.
 	 */
-	public long renameUserRow(String oldUserName, String newUserName, boolean updateContactFields) {
-		String sql = updateContactFields
-				? "UPDATE db_iemr.m_user SET UserName = :newUserName, EmployeeID = :newUserName, "
-						+ "EmergencyContactNo = :newUserName, ContactNo = :newUserName WHERE UserName = :oldUserName"
-				: "UPDATE db_iemr.m_user SET UserName = :newUserName, EmployeeID = :newUserName "
-						+ "WHERE UserName = :oldUserName";
-		Query query = entityManager.createNativeQuery(sql);
+	public long renameUserRow(String oldUserName, String newUserName, String newEmployeeId,
+			boolean updateContactFields) {
+		StringBuilder sql = new StringBuilder("UPDATE db_iemr.m_user SET UserName = :newUserName");
+		if (newEmployeeId != null) {
+			sql.append(", EmployeeID = :newEmployeeId");
+		}
+		if (updateContactFields) {
+			sql.append(", EmergencyContactNo = :newUserName, ContactNo = :newUserName");
+		}
+		sql.append(" WHERE UserName = :oldUserName");
+
+		Query query = entityManager.createNativeQuery(sql.toString());
 		query.setParameter("newUserName", newUserName);
 		query.setParameter("oldUserName", oldUserName);
+		if (newEmployeeId != null) {
+			query.setParameter("newEmployeeId", newEmployeeId);
+		}
 		return query.executeUpdate();
 	}
 
@@ -96,14 +107,28 @@ public class UsernameRenameRepository {
 	}
 
 	/**
-	 * Both UserName and EmployeeID carry UNIQUE keys on m_user and the rename
-	 * writes the new value into both, so either being taken blocks the rename.
+	 * UserName and EmployeeID carry separate UNIQUE keys on m_user, so each is
+	 * only in conflict with its own column. Checked independently now that a
+	 * rename no longer forces EmployeeID to equal the username.
 	 */
-	public boolean userNameOrEmployeeIdTaken(String userName) {
-		Query query = entityManager.createNativeQuery(
-				"SELECT COUNT(*) FROM db_iemr.m_user WHERE UserName = :userName OR EmployeeID = :userName");
-		query.setParameter("userName", userName);
-		return toLong(query.getSingleResult()) > 0;
+	public boolean userNameTaken(String userName, String excludeUserName) {
+		return countMatching("UserName", userName, excludeUserName) > 0;
+	}
+
+	public boolean employeeIdTaken(String employeeId, String excludeUserName) {
+		return countMatching("EmployeeID", employeeId, excludeUserName) > 0;
+	}
+
+	/**
+	 * {@code excludeUserName} skips the row being renamed, so re-entering the
+	 * value that row already holds is not reported as a conflict with itself.
+	 */
+	private long countMatching(String column, String value, String excludeUserName) {
+		Query query = entityManager.createNativeQuery(String.format(
+				"SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserName <> :excludeUserName", column));
+		query.setParameter("value", value);
+		query.setParameter("excludeUserName", excludeUserName);
+		return toLong(query.getSingleResult());
 	}
 
 	private long toLong(Object result) {

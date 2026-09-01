@@ -32,6 +32,15 @@ public class UsernameRenameRequest {
 
 	private String oldUserName;
 	private String newUserName;
+
+	/**
+	 * Employee ID is left untouched unless this is set. It carries its own
+	 * UNIQUE key on m_user and is not required to track the username, so a
+	 * rename does not imply a new Employee ID.
+	 */
+	private boolean updateEmployeeId = false;
+	private String newEmployeeId;
+
 	private boolean updateContactFields = true;
 
 	public String getOldUserName() {
@@ -48,6 +57,22 @@ public class UsernameRenameRequest {
 
 	public void setNewUserName(String newUserName) {
 		this.newUserName = newUserName;
+	}
+
+	public boolean isUpdateEmployeeId() {
+		return updateEmployeeId;
+	}
+
+	public void setUpdateEmployeeId(boolean updateEmployeeId) {
+		this.updateEmployeeId = updateEmployeeId;
+	}
+
+	public String getNewEmployeeId() {
+		return newEmployeeId;
+	}
+
+	public void setNewEmployeeId(String newEmployeeId) {
+		this.newEmployeeId = newEmployeeId;
 	}
 
 	public boolean isUpdateContactFields() {

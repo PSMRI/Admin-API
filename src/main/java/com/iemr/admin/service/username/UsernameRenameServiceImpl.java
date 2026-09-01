@@ -40,6 +40,7 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 	/** m_user.UserName and m_user.EmployeeID are both varchar(20). */
 	private static final int MAX_USERNAME_LENGTH = 20;
+	private static final int MAX_EMPLOYEE_ID_LENGTH = 20;
 
 	/**
 	 * m_user.ContactNo is varchar(12) — the tightest column the rename writes
@@ -70,6 +71,7 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		// The identity row goes first: if the unique key on UserName or
 		// EmployeeID rejects the new value, nothing else has been touched yet.
 		long userRows = usernameRenameRepository.renameUserRow(oldUserName, newUserName,
+				request.isUpdateEmployeeId() ? request.getNewEmployeeId() : null,
 				request.isUpdateContactFields());
 		response.addTable("db_iemr.m_user", userRows);
 
@@ -119,13 +121,39 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		if (!usernameRenameRepository.userExists(oldUserName)) {
 			throw new IllegalArgumentException("No user found with username " + oldUserName);
 		}
-		if (usernameRenameRepository.userNameOrEmployeeIdTaken(newUserName)) {
-			throw new IllegalArgumentException(
-					"Username " + newUserName + " is already in use as a username or employee ID");
+		if (usernameRenameRepository.userNameTaken(newUserName, oldUserName)) {
+			throw new IllegalArgumentException("Username " + newUserName + " is already in use");
 		}
 
 		request.setOldUserName(oldUserName);
 		request.setNewUserName(newUserName);
+		validateEmployeeId(request);
+	}
+
+	/**
+	 * Employee ID is optional: left alone entirely unless the caller asks for it.
+	 * It is checked against its own column only, since UserName and EmployeeID
+	 * are independent UNIQUE keys.
+	 */
+	private void validateEmployeeId(UsernameRenameRequest request) throws Exception {
+		if (!request.isUpdateEmployeeId()) {
+			request.setNewEmployeeId(null);
+			return;
+		}
+
+		String newEmployeeId = trimToNull(request.getNewEmployeeId());
+		if (newEmployeeId == null) {
+			throw new IllegalArgumentException("New employee ID is required when updating employee ID");
+		}
+		if (newEmployeeId.length() > MAX_EMPLOYEE_ID_LENGTH) {
+			throw new IllegalArgumentException(
+					"New employee ID exceeds " + MAX_EMPLOYEE_ID_LENGTH + " characters (m_user.EmployeeID limit)");
+		}
+		if (usernameRenameRepository.employeeIdTaken(newEmployeeId, request.getOldUserName())) {
+			throw new IllegalArgumentException("Employee ID " + newEmployeeId + " is already in use");
+		}
+
+		request.setNewEmployeeId(newEmployeeId);
 	}
 
 	private String trimToNull(String value) {
