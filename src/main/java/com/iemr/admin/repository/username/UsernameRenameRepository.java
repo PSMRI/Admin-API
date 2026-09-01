@@ -49,23 +49,6 @@ public class UsernameRenameRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	/** Rows the rename would update in {@code table} — those the user created. */
-	public long countAffected(AuditTable table, String userName) {
-		String sql = String.format("SELECT COUNT(*) FROM %s WHERE %s = :userName", table.getQualifiedName(),
-				table.getCreatedByColumn());
-		Query query = entityManager.createNativeQuery(sql);
-		query.setParameter("userName", userName);
-		return toLong(query.getSingleResult());
-	}
-
-	/** Rows the m_user update itself would touch, so the preview matches the rename report. */
-	public long countUserRow(String userName) {
-		Query query = entityManager
-				.createNativeQuery("SELECT COUNT(*) FROM db_iemr.m_user WHERE UserName = :userName");
-		query.setParameter("userName", userName);
-		return toLong(query.getSingleResult());
-	}
-
 	/**
 	 * Repoints both audit columns on the rows this user created.
 	 *

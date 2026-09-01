@@ -25,14 +25,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Result of a rename (or of a preview run, where nothing is committed).
+ * Result of a rename.
  * {@code rowsPerTable} is ordered so the report reads in execution order.
  */
 public class UsernameRenameResponse {
 
 	private String oldUserName;
 	private String newUserName;
-	private boolean preview;
 	private int tablesAffected;
 	private long totalRowsAffected;
 	private Map<String, Long> rowsPerTable = new LinkedHashMap<>();
@@ -59,14 +58,6 @@ public class UsernameRenameResponse {
 
 	public void setNewUserName(String newUserName) {
 		this.newUserName = newUserName;
-	}
-
-	public boolean isPreview() {
-		return preview;
-	}
-
-	public void setPreview(boolean preview) {
-		this.preview = preview;
 	}
 
 	public int getTablesAffected() {

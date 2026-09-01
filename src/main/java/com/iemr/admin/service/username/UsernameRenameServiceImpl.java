@@ -51,24 +51,6 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 	@Autowired
 	private UsernameRenameRepository usernameRenameRepository;
 
-	@Override
-	@Transactional(readOnly = true)
-	public UsernameRenameResponse preview(UsernameRenameRequest request) throws Exception {
-		validate(request);
-
-		UsernameRenameResponse response = newResponse(request, true);
-
-		// Listed first, and counted the same way, so the preview lines up row
-		// for row with what rename() reports.
-		response.addTable("db_iemr.m_user", usernameRenameRepository.countUserRow(request.getOldUserName()));
-
-		for (AuditTable table : UsernameAuditTables.TABLES) {
-			response.addTable(table.getQualifiedName(),
-					usernameRenameRepository.countAffected(table, request.getOldUserName()));
-		}
-		return response;
-	}
-
 	/**
 	 * Runs in one transaction spanning db_iemr and db_identity, so a failure
 	 * part-way through rolls the whole rename back rather than stranding the
@@ -83,7 +65,7 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		String newUserName = request.getNewUserName();
 		logger.info("Username rename starting: {} -> {}", oldUserName, newUserName);
 
-		UsernameRenameResponse response = newResponse(request, false);
+		UsernameRenameResponse response = newResponse(request);
 
 		// The identity row goes first: if the unique key on UserName or
 		// EmployeeID rejects the new value, nothing else has been touched yet.
@@ -101,11 +83,10 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		return response;
 	}
 
-	private UsernameRenameResponse newResponse(UsernameRenameRequest request, boolean preview) {
+	private UsernameRenameResponse newResponse(UsernameRenameRequest request) {
 		UsernameRenameResponse response = new UsernameRenameResponse();
 		response.setOldUserName(request.getOldUserName());
 		response.setNewUserName(request.getNewUserName());
-		response.setPreview(preview);
 		return response;
 	}
 

@@ -53,22 +53,6 @@ public class UsernameRenameController {
 	@Autowired
 	private UsernameRenameService usernameRenameService;
 
-	@Operation(summary = "Preview a username rename without applying it")
-	@RequestMapping(value = "/renameUsername/preview", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
-	public String previewRename(@RequestBody UsernameRenameRequest renameRequest, HttpServletRequest request) {
-		OutputResponse response = new OutputResponse();
-		try {
-			logger.info("previewRename received request");
-			response.setResponse(
-					OutputMapper.gsonWithoutExpose().toJson(usernameRenameService.preview(renameRequest)));
-		} catch (Exception e) {
-			logger.error("previewRename failed", e);
-			response.setError(e);
-		}
-		logger.info("previewRename sending response");
-		return response.toString();
-	}
-
 	@Operation(summary = "Rename a username and repoint its audit records")
 	@RequestMapping(value = "/renameUsername", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String renameUsername(@RequestBody UsernameRenameRequest renameRequest, HttpServletRequest request) {

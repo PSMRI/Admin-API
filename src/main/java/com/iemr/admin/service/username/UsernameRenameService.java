@@ -26,9 +26,6 @@ import com.iemr.admin.model.username.UsernameRenameResponse;
 
 public interface UsernameRenameService {
 
-	/** Reports what a rename would touch, without committing anything. */
-	UsernameRenameResponse preview(UsernameRenameRequest request) throws Exception;
-
 	/** Performs the rename across m_user and the whitelisted audit tables. */
 	UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception;
 }
