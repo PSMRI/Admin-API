@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.iemr.admin.model.username.UsernameAvailabilityResponse;
 import com.iemr.admin.model.username.UsernameRenameRequest;
 import com.iemr.admin.model.username.UsernameRenameResponse;
 import com.iemr.admin.repository.username.UsernameAuditTables;
@@ -54,37 +53,6 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 	private UsernameRenameRepository usernameRenameRepository;
 
 	/**
-	 * Uses the same repository checks as {@link #rename}, so a name the screen
-	 * reports as free cannot then be rejected on submit. Blank input is treated
-	 * as available — there is nothing to clash with yet.
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public UsernameAvailabilityResponse checkAvailability(UsernameRenameRequest request) throws Exception {
-		UsernameAvailabilityResponse response = new UsernameAvailabilityResponse();
-		if (request == null) {
-			return response;
-		}
-
-		String oldUserName = trimToNull(request.getOldUserName());
-		if (oldUserName == null) {
-			throw new IllegalArgumentException("Current username is required");
-		}
-
-		String newUserName = trimToNull(request.getNewUserName());
-		if (newUserName != null && !newUserName.equals(oldUserName)) {
-			response.setUserNameAvailable(!usernameRenameRepository.userNameTaken(newUserName, oldUserName));
-		}
-
-		String newEmployeeId = trimToNull(request.getNewEmployeeId());
-		if (newEmployeeId != null) {
-			response.setEmployeeIdAvailable(!usernameRenameRepository.employeeIdTaken(newEmployeeId, oldUserName));
-		}
-
-		return response;
-	}
-
-	/**
 	 * Runs in one transaction spanning db_iemr and db_identity, so a failure
 	 * part-way through rolls the whole rename back rather than stranding the
 	 * user half-renamed.
@@ -96,24 +64,31 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 		String oldUserName = request.getOldUserName();
 		String newUserName = request.getNewUserName();
-		logger.info("Username rename starting: {} -> {}", oldUserName, newUserName);
+		String newEmployeeId = request.getNewEmployeeId();
+		logger.info("Username rename starting: user {} -> {}, employeeId -> {}", oldUserName,
+				newUserName == null ? "(unchanged)" : newUserName,
+				newEmployeeId == null ? "(unchanged)" : newEmployeeId);
 
 		UsernameRenameResponse response = newResponse(request);
 
-		// The identity row goes first: if the unique key on UserName or
-		// EmployeeID rejects the new value, nothing else has been touched yet.
-		long userRows = usernameRenameRepository.renameUserRow(oldUserName, newUserName,
-				request.isUpdateEmployeeId() ? request.getNewEmployeeId() : null,
+		// The identity row goes first: if a unique key rejects either new value,
+		// nothing else has been touched yet.
+		long userRows = usernameRenameRepository.renameUserRow(oldUserName, newUserName, newEmployeeId,
 				request.isUpdateContactFields());
 		response.addTable("db_iemr.m_user", userRows);
 
-		for (AuditTable table : UsernameAuditTables.TABLES) {
-			long rows = usernameRenameRepository.renameInTable(table, oldUserName, newUserName);
-			response.addTable(table.getQualifiedName(), rows);
+		// CreatedBy/ModifiedBy record the username, so the sweep is only needed
+		// when the username itself changed. An employee-ID-only change leaves
+		// every audit row already correct.
+		if (newUserName != null) {
+			for (AuditTable table : UsernameAuditTables.TABLES) {
+				response.addTable(table.getQualifiedName(),
+						usernameRenameRepository.renameInTable(table, oldUserName, newUserName));
+			}
 		}
 
-		logger.info("Username rename complete: {} -> {}, {} rows across {} tables", oldUserName, newUserName,
-				response.getTotalRowsAffected(), response.getTablesAffected());
+		logger.info("Username rename complete: {} rows across {} tables", response.getTotalRowsAffected(),
+				response.getTablesAffected());
 		return response;
 	}
 
@@ -124,22 +99,37 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		return response;
 	}
 
+	/**
+	 * Both new values are optional. Each is normalised to null when it is blank
+	 * or already equal to what the row holds, which is what the repository
+	 * reads as "leave this column alone". At least one must actually change.
+	 */
 	private void validate(UsernameRenameRequest request) throws Exception {
 		if (request == null) {
 			throw new IllegalArgumentException("Request body is required");
 		}
 
 		String oldUserName = trimToNull(request.getOldUserName());
-		String newUserName = trimToNull(request.getNewUserName());
-
 		if (oldUserName == null) {
 			throw new IllegalArgumentException("Current username is required");
 		}
-		if (newUserName == null) {
-			throw new IllegalArgumentException("New username is required");
+		if (!usernameRenameRepository.userExists(oldUserName)) {
+			throw new IllegalArgumentException("No user found with username " + oldUserName);
 		}
-		if (oldUserName.equals(newUserName)) {
-			throw new IllegalArgumentException("New username is the same as the current username");
+		request.setOldUserName(oldUserName);
+
+		request.setNewUserName(resolveNewUserName(request, oldUserName));
+		request.setNewEmployeeId(resolveNewEmployeeId(request, oldUserName));
+
+		if (request.getNewUserName() == null && request.getNewEmployeeId() == null) {
+			throw new IllegalArgumentException("Nothing to update — enter a new username or a new employee ID");
+		}
+	}
+
+	private String resolveNewUserName(UsernameRenameRequest request, String oldUserName) throws Exception {
+		String newUserName = trimToNull(request.getNewUserName());
+		if (newUserName == null || newUserName.equals(oldUserName)) {
+			return null;
 		}
 		if (newUserName.length() > MAX_USERNAME_LENGTH) {
 			throw new IllegalArgumentException(
@@ -150,42 +140,25 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 					+ " characters and cannot be written to ContactNo. Either shorten it or "
 					+ "turn off updating contact numbers.");
 		}
-		if (!usernameRenameRepository.userExists(oldUserName)) {
-			throw new IllegalArgumentException("No user found with username " + oldUserName);
-		}
 		if (usernameRenameRepository.userNameTaken(newUserName, oldUserName)) {
 			throw new IllegalArgumentException("Username " + newUserName + " is already in use");
 		}
-
-		request.setOldUserName(oldUserName);
-		request.setNewUserName(newUserName);
-		validateEmployeeId(request);
+		return newUserName;
 	}
 
-	/**
-	 * Employee ID is optional: left alone entirely unless the caller asks for it.
-	 * It is checked against its own column only, since UserName and EmployeeID
-	 * are independent UNIQUE keys.
-	 */
-	private void validateEmployeeId(UsernameRenameRequest request) throws Exception {
-		if (!request.isUpdateEmployeeId()) {
-			request.setNewEmployeeId(null);
-			return;
-		}
-
+	private String resolveNewEmployeeId(UsernameRenameRequest request, String oldUserName) throws Exception {
 		String newEmployeeId = trimToNull(request.getNewEmployeeId());
-		if (newEmployeeId == null) {
-			throw new IllegalArgumentException("New employee ID is required when updating employee ID");
+		if (newEmployeeId == null || newEmployeeId.equals(usernameRenameRepository.currentEmployeeId(oldUserName))) {
+			return null;
 		}
 		if (newEmployeeId.length() > MAX_EMPLOYEE_ID_LENGTH) {
 			throw new IllegalArgumentException(
 					"New employee ID exceeds " + MAX_EMPLOYEE_ID_LENGTH + " characters (m_user.EmployeeID limit)");
 		}
-		if (usernameRenameRepository.employeeIdTaken(newEmployeeId, request.getOldUserName())) {
+		if (usernameRenameRepository.employeeIdTaken(newEmployeeId, oldUserName)) {
 			throw new IllegalArgumentException("Employee ID " + newEmployeeId + " is already in use");
 		}
-
-		request.setNewEmployeeId(newEmployeeId);
+		return newEmployeeId;
 	}
 
 	private String trimToNull(String value) {

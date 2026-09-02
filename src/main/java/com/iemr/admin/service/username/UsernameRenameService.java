@@ -21,14 +21,10 @@
 */
 package com.iemr.admin.service.username;
 
-import com.iemr.admin.model.username.UsernameAvailabilityResponse;
 import com.iemr.admin.model.username.UsernameRenameRequest;
 import com.iemr.admin.model.username.UsernameRenameResponse;
 
 public interface UsernameRenameService {
-
-	/** Reports whether a proposed username / employee ID are free to take. */
-	UsernameAvailabilityResponse checkAvailability(UsernameRenameRequest request) throws Exception;
 
 	/** Performs the rename across m_user and the whitelisted audit tables. */
 	UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception;

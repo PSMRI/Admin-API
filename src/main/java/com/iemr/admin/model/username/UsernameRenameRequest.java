@@ -34,11 +34,10 @@ public class UsernameRenameRequest {
 	private String newUserName;
 
 	/**
-	 * Employee ID is left untouched unless this is set. It carries its own
-	 * UNIQUE key on m_user and is not required to track the username, so a
-	 * rename does not imply a new Employee ID.
+	 * Both new values are optional and independent. A blank value, or one equal
+	 * to what the row already holds, means "leave this column alone" — so the
+	 * caller can change the username, the employee ID, or both.
 	 */
-	private boolean updateEmployeeId = false;
 	private String newEmployeeId;
 
 	private boolean updateContactFields = true;
@@ -57,14 +56,6 @@ public class UsernameRenameRequest {
 
 	public void setNewUserName(String newUserName) {
 		this.newUserName = newUserName;
-	}
-
-	public boolean isUpdateEmployeeId() {
-		return updateEmployeeId;
-	}
-
-	public void setUpdateEmployeeId(boolean updateEmployeeId) {
-		this.updateEmployeeId = updateEmployeeId;
 	}
 
 	public String getNewEmployeeId() {

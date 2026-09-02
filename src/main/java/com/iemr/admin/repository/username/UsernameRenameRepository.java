@@ -22,6 +22,8 @@
 package com.iemr.admin.repository.username;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
@@ -71,28 +73,46 @@ public class UsernameRenameRepository {
 		return query.executeUpdate();
 	}
 
+	/** Current Employee ID for a user, or null where none is set. */
+	public String currentEmployeeId(String userName) {
+		Query query = entityManager
+				.createNativeQuery("SELECT EmployeeID FROM db_iemr.m_user WHERE UserName = :userName");
+		query.setParameter("userName", userName);
+		List<?> rows = query.getResultList();
+		return rows.isEmpty() ? null : (String) rows.get(0);
+	}
+
 	/**
-	 * Updates the identity row itself.
+	 * Updates the identity row, touching only the columns that actually change.
 	 *
-	 * <p>UserName always changes. EmployeeID is only touched when a new value is
-	 * supplied — it holds its own UNIQUE key and need not track the username.
-	 * The contact columns are only rewritten where the username is known to be
-	 * the user's mobile number.
+	 * <p>Either new value may be null, meaning "leave alone". The contact
+	 * columns follow the username, so they are only rewritten alongside it.
+	 *
+	 * @return rows updated, or 0 when there was nothing to change
 	 */
 	public long renameUserRow(String oldUserName, String newUserName, String newEmployeeId,
 			boolean updateContactFields) {
-		StringBuilder sql = new StringBuilder("UPDATE db_iemr.m_user SET UserName = :newUserName");
+		List<String> assignments = new ArrayList<>();
+		if (newUserName != null) {
+			assignments.add("UserName = :newUserName");
+			if (updateContactFields) {
+				assignments.add("EmergencyContactNo = :newUserName");
+				assignments.add("ContactNo = :newUserName");
+			}
+		}
 		if (newEmployeeId != null) {
-			sql.append(", EmployeeID = :newEmployeeId");
+			assignments.add("EmployeeID = :newEmployeeId");
 		}
-		if (updateContactFields) {
-			sql.append(", EmergencyContactNo = :newUserName, ContactNo = :newUserName");
+		if (assignments.isEmpty()) {
+			return 0;
 		}
-		sql.append(" WHERE UserName = :oldUserName");
 
-		Query query = entityManager.createNativeQuery(sql.toString());
-		query.setParameter("newUserName", newUserName);
+		Query query = entityManager.createNativeQuery("UPDATE db_iemr.m_user SET " + String.join(", ", assignments)
+				+ " WHERE UserName = :oldUserName");
 		query.setParameter("oldUserName", oldUserName);
+		if (newUserName != null) {
+			query.setParameter("newUserName", newUserName);
+		}
 		if (newEmployeeId != null) {
 			query.setParameter("newEmployeeId", newEmployeeId);
 		}

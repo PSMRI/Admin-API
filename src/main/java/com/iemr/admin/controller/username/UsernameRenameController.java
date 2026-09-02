@@ -53,20 +53,6 @@ public class UsernameRenameController {
 	@Autowired
 	private UsernameRenameService usernameRenameService;
 
-	@Operation(summary = "Check whether a username / employee ID are free to take")
-	@RequestMapping(value = "/checkAvailability", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
-	public String checkAvailability(@RequestBody UsernameRenameRequest renameRequest, HttpServletRequest request) {
-		OutputResponse response = new OutputResponse();
-		try {
-			response.setResponse(
-					OutputMapper.gsonWithoutExpose().toJson(usernameRenameService.checkAvailability(renameRequest)));
-		} catch (Exception e) {
-			logger.error("checkAvailability failed", e);
-			response.setError(e);
-		}
-		return response.toString();
-	}
-
 	@Operation(summary = "Rename a username and repoint its audit records")
 	@RequestMapping(value = "/renameUsername", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON, headers = "Authorization")
 	public String renameUsername(@RequestBody UsernameRenameRequest renameRequest, HttpServletRequest request) {
