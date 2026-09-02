@@ -22,9 +22,7 @@
 package com.iemr.admin.repository.username;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Repository;
 
@@ -42,25 +40,34 @@ public class UsernameRenameRepository {
 	 * statement, so a value that is not a plain SQL identifier can never be
 	 * concatenated in. All caller-supplied data is bound, never interpolated.
 	 */
-	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)?");
+	private static final String COUNT_BY_USER_NAME =
+			"SELECT COUNT(*) FROM db_iemr.m_user WHERE UserName = :value AND UserID <> :excludeUserID";
+
+	private static final String COUNT_BY_EMPLOYEE_ID =
+			"SELECT COUNT(*) FROM db_iemr.m_user WHERE EmployeeID = :value AND UserID <> :excludeUserID";
+
+	private static final String SET_USER_NAME =
+			"UPDATE db_iemr.m_user SET UserName = :newUserName WHERE UserID = :userID";
+
+	private static final String SET_USER_NAME_AND_CONTACTS =
+			"UPDATE db_iemr.m_user SET UserName = :newUserName, EmergencyContactNo = :newUserName,"
+					+ " ContactNo = :newUserName WHERE UserID = :userID";
+
+	private static final String SET_EMPLOYEE_ID =
+			"UPDATE db_iemr.m_user SET EmployeeID = :newEmployeeId WHERE UserID = :userID";
+
+	private static final String SET_USER_NAME_AND_EMPLOYEE_ID =
+			"UPDATE db_iemr.m_user SET UserName = :newUserName, EmployeeID = :newEmployeeId WHERE UserID = :userID";
+
+	private static final String SET_USER_NAME_CONTACTS_AND_EMPLOYEE_ID =
+			"UPDATE db_iemr.m_user SET UserName = :newUserName, EmergencyContactNo = :newUserName,"
+					+ " ContactNo = :newUserName, EmployeeID = :newEmployeeId WHERE UserID = :userID";
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	private static String identifier(String name) {
-		if (name == null || !SQL_IDENTIFIER.matcher(name).matches()) {
-			throw new IllegalArgumentException("Illegal SQL identifier: " + name);
-		}
-		return name;
-	}
-
 	public long renameInTable(AuditTable table, String oldUserName, String newUserName) {
-		String sql = String.format(
-				"UPDATE %1$s SET %2$s = :newUserName, %3$s = :newUserName "
-						+ "WHERE %4$s IN (SELECT %4$s FROM (SELECT %4$s FROM %1$s WHERE %2$s = :oldUserName) AS temp)",
-				identifier(table.getQualifiedName()), identifier(table.getCreatedByColumn()),
-				identifier(table.getModifiedByColumn()), identifier(table.getPrimaryKeyColumn()));
-		Query query = entityManager.createNativeQuery(sql);
+		Query query = entityManager.createNativeQuery(table.getRenameSql());
 		query.setParameter("newUserName", newUserName);
 		query.setParameter("oldUserName", oldUserName);
 		return query.executeUpdate();
@@ -83,23 +90,12 @@ public class UsernameRenameRepository {
 
 	public long renameUserRow(Integer userID, String newUserName, String newEmployeeId,
 			boolean updateContactFields) {
-		List<String> assignments = new ArrayList<>();
-		if (newUserName != null) {
-			assignments.add("UserName = :newUserName");
-			if (updateContactFields) {
-				assignments.add("EmergencyContactNo = :newUserName");
-				assignments.add("ContactNo = :newUserName");
-			}
-		}
-		if (newEmployeeId != null) {
-			assignments.add("EmployeeID = :newEmployeeId");
-		}
-		if (assignments.isEmpty()) {
+		String sql = selectUserUpdate(newUserName, newEmployeeId, updateContactFields);
+		if (sql == null) {
 			return 0;
 		}
 
-		Query query = entityManager.createNativeQuery(
-				"UPDATE db_iemr.m_user SET " + String.join(", ", assignments) + " WHERE UserID = :userID");
+		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("userID", userID);
 		if (newUserName != null) {
 			query.setParameter("newUserName", newUserName);
@@ -110,18 +106,26 @@ public class UsernameRenameRepository {
 		return query.executeUpdate();
 	}
 
+	private static String selectUserUpdate(String newUserName, String newEmployeeId, boolean updateContactFields) {
+		if (newUserName == null) {
+			return newEmployeeId == null ? null : SET_EMPLOYEE_ID;
+		}
+		if (newEmployeeId == null) {
+			return updateContactFields ? SET_USER_NAME_AND_CONTACTS : SET_USER_NAME;
+		}
+		return updateContactFields ? SET_USER_NAME_CONTACTS_AND_EMPLOYEE_ID : SET_USER_NAME_AND_EMPLOYEE_ID;
+	}
+
 	public boolean userNameTaken(String userName, Integer excludeUserID) {
-		return countMatching("UserName", userName, excludeUserID) > 0;
+		return countMatching(COUNT_BY_USER_NAME, userName, excludeUserID) > 0;
 	}
 
 	public boolean employeeIdTaken(String employeeId, Integer excludeUserID) {
-		return countMatching("EmployeeID", employeeId, excludeUserID) > 0;
+		return countMatching(COUNT_BY_EMPLOYEE_ID, employeeId, excludeUserID) > 0;
 	}
 
-	private long countMatching(String column, String value, Integer excludeUserID) {
-		Query query = entityManager.createNativeQuery(String.format(
-				"SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserID <> :excludeUserID",
-				identifier(column)));
+	private long countMatching(String sql, String value, Integer excludeUserID) {
+		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("value", value);
 		query.setParameter("excludeUserID", excludeUserID);
 		return toLong(query.getSingleResult());

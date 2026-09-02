@@ -22,9 +22,19 @@
 package com.iemr.admin.repository.username;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public final class UsernameAuditTables {
 	private UsernameAuditTables() {
+	}
+
+	private static final Pattern SQL_IDENTIFIER = Pattern.compile("\\w+(\\.\\w+)?");
+
+	private static String identifier(String name) {
+		if (name == null || !SQL_IDENTIFIER.matcher(name).matches()) {
+			throw new IllegalArgumentException("Illegal SQL identifier: " + name);
+		}
+		return name;
 	}
 
 	public static final class AuditTable {
@@ -32,13 +42,23 @@ public final class UsernameAuditTables {
 		private final String createdByColumn;
 		private final String modifiedByColumn;
 		private final String primaryKeyColumn;
+		private final String renameSql;
 
 		public AuditTable(String qualifiedName, String createdByColumn, String modifiedByColumn,
 				String primaryKeyColumn) {
-			this.qualifiedName = qualifiedName;
-			this.createdByColumn = createdByColumn;
-			this.modifiedByColumn = modifiedByColumn;
-			this.primaryKeyColumn = primaryKeyColumn;
+			this.qualifiedName = identifier(qualifiedName);
+			this.createdByColumn = identifier(createdByColumn);
+			this.modifiedByColumn = identifier(modifiedByColumn);
+			this.primaryKeyColumn = identifier(primaryKeyColumn);
+			this.renameSql = String.format(
+					"UPDATE %1$s SET %2$s = :newUserName, %3$s = :newUserName "
+							+ "WHERE %4$s IN (SELECT %4$s FROM (SELECT %4$s FROM %1$s WHERE %2$s = :oldUserName)"
+							+ " AS temp)",
+					this.qualifiedName, this.createdByColumn, this.modifiedByColumn, this.primaryKeyColumn);
+		}
+
+		public String getRenameSql() {
+			return renameSql;
 		}
 
 		public String getQualifiedName() {
