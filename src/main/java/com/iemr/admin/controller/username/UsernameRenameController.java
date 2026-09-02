@@ -39,15 +39,9 @@ import com.iemr.admin.utils.response.OutputResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * Username rename, kept off the employee edit screen on purpose: changing a
- * username has to be propagated to every CreatedBy/ModifiedBy column that
- * records it, which is a different operation from editing a user's details.
- */
 @RestController
 @RequestMapping(value = "/username")
 public class UsernameRenameController {
-
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
 	@Autowired

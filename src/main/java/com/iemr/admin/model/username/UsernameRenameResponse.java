@@ -21,29 +21,13 @@
 */
 package com.iemr.admin.model.username;
 
-/**
- * Result of a rename: what changed, and whether each column was written.
- */
 public class UsernameRenameResponse {
-
 	private String oldUserName;
 	private String newUserName;
 
-	/**
-	 * The Employee ID before and after. Both mirror the username pair: the "new"
-	 * value is null when the column was left alone, and the old value is read
-	 * before the update so the caller can see what it replaced.
-	 */
 	private String oldEmployeeId;
 	private String newEmployeeId;
 
-	/**
-	 * Whether each column was actually written. Booleans rather than inference
-	 * from the strings above: OutputResponse re-serialises without
-	 * serializeNulls, so a null "new" value drops out of the JSON entirely and
-	 * the caller cannot tell "unchanged" from "missing". A primitive always
-	 * survives that pass.
-	 */
 	private boolean userNameUpdated;
 	private boolean employeeIdUpdated;
 

@@ -35,28 +35,16 @@ import com.iemr.admin.repository.username.UsernameRenameRepository;
 
 @Service
 public class UsernameRenameServiceImpl implements UsernameRenameService {
-
 	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
-	/** m_user.UserName and m_user.EmployeeID are both varchar(20). */
 	private static final int MAX_USERNAME_LENGTH = 20;
 	private static final int MAX_EMPLOYEE_ID_LENGTH = 20;
 
-	/**
-	 * m_user.ContactNo is varchar(12) — the tightest column the rename writes
-	 * into. Anything longer would be truncated silently, or rejected outright
-	 * under strict mode, so the whole rename is refused up front instead.
-	 */
 	private static final int MAX_CONTACT_LENGTH = 12;
 
 	@Autowired
 	private UsernameRenameRepository usernameRenameRepository;
 
-	/**
-	 * Runs in one transaction spanning db_iemr and db_identity, so a failure
-	 * part-way through rolls the whole rename back rather than stranding the
-	 * user half-renamed.
-	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception {
@@ -69,26 +57,18 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 				newUserName == null ? "(unchanged)" : newUserName,
 				newEmployeeId == null ? "(unchanged)" : newEmployeeId);
 
-		// Read before the update, so the response can report what was replaced.
 		UsernameRenameResponse response = newResponse(request);
 		response.setOldEmployeeId(usernameRenameRepository.currentEmployeeId(request.getUserID()));
 
-		// The identity row goes first: if a unique key rejects either new value,
-		// nothing else has been touched yet.
 		long rowsUpdated = usernameRenameRepository.renameUserRow(request.getUserID(), newUserName, newEmployeeId,
 				request.isUpdateContactFields());
 
-		// CreatedBy/ModifiedBy record the username, so the sweep is only needed
-		// when the username itself changed. An employee-ID-only change leaves
-		// every audit row already correct.
 		if (newUserName != null) {
 			for (AuditTable table : UsernameAuditTables.TABLES) {
 				rowsUpdated += usernameRenameRepository.renameInTable(table, oldUserName, newUserName);
 			}
 		}
 
-		// Row counts stay in the log for operational traceability; the response
-		// reports only what changed.
 		logger.info("Username rename complete: {} rows updated", rowsUpdated);
 		return response;
 	}
@@ -103,11 +83,6 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		return response;
 	}
 
-	/**
-	 * Both new values are optional. Each is normalised to null when it is blank
-	 * or already equal to what the row holds, which is what the repository
-	 * reads as "leave this column alone". At least one must actually change.
-	 */
 	private void validate(UsernameRenameRequest request) throws Exception {
 		if (request == null) {
 			throw new IllegalArgumentException("Request body is required");
@@ -122,8 +97,6 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 			throw new IllegalArgumentException("No user found with ID " + request.getUserID());
 		}
 
-		// Guard against a stale screen: if the row has been renamed since the
-		// list was loaded, the audit sweep would match the wrong username.
 		String oldUserName = trimToNull(request.getOldUserName());
 		if (oldUserName != null && !oldUserName.equals(storedUserName)) {
 			throw new IllegalArgumentException("User " + request.getUserID() + " is now named " + storedUserName

@@ -21,30 +21,12 @@
 */
 package com.iemr.admin.model.username;
 
-/**
- * Request payload for the username rename operation.
- *
- * <p>{@code updateContactFields} controls whether the user's ContactNo and
- * EmergencyContactNo in m_user are also set to the new username. That is only
- * meaningful in deployments where the username is the user's mobile number.
- */
 public class UsernameRenameRequest {
-
-	/**
-	 * Identifies the row to change. The username is itself being renamed, so the
-	 * primary key is the stable way to address it; oldUserName is still required
-	 * because the audit sweep matches on the username string.
-	 */
 	private Integer userID;
 
 	private String oldUserName;
 	private String newUserName;
 
-	/**
-	 * Both new values are optional and independent. A blank value, or one equal
-	 * to what the row already holds, means "leave this column alone" — so the
-	 * caller can change the username, the employee ID, or both.
-	 */
 	private String newEmployeeId;
 
 	private boolean updateContactFields = true;
