@@ -73,11 +73,19 @@ public class UsernameRenameRepository {
 		return query.executeUpdate();
 	}
 
-	/** Current Employee ID for a user, or null where none is set. */
-	public String currentEmployeeId(String userName) {
-		Query query = entityManager
-				.createNativeQuery("SELECT EmployeeID FROM db_iemr.m_user WHERE UserName = :userName");
-		query.setParameter("userName", userName);
+	/** The row's current username, or null when no user has that ID. */
+	public String currentUserName(Integer userID) {
+		return single("SELECT UserName FROM db_iemr.m_user WHERE UserID = :userID", userID);
+	}
+
+	/** The row's current Employee ID, or null where none is set. */
+	public String currentEmployeeId(Integer userID) {
+		return single("SELECT EmployeeID FROM db_iemr.m_user WHERE UserID = :userID", userID);
+	}
+
+	private String single(String sql, Integer userID) {
+		Query query = entityManager.createNativeQuery(sql);
+		query.setParameter("userID", userID);
 		List<?> rows = query.getResultList();
 		return rows.isEmpty() ? null : (String) rows.get(0);
 	}
@@ -85,12 +93,16 @@ public class UsernameRenameRepository {
 	/**
 	 * Updates the identity row, touching only the columns that actually change.
 	 *
+	 * <p>Targeted by UserID rather than by username: the username is the very
+	 * thing being changed, and the primary key is unambiguous where a string
+	 * match is not.
+	 *
 	 * <p>Either new value may be null, meaning "leave alone". The contact
 	 * columns follow the username, so they are only rewritten alongside it.
 	 *
 	 * @return rows updated, or 0 when there was nothing to change
 	 */
-	public long renameUserRow(String oldUserName, String newUserName, String newEmployeeId,
+	public long renameUserRow(Integer userID, String newUserName, String newEmployeeId,
 			boolean updateContactFields) {
 		List<String> assignments = new ArrayList<>();
 		if (newUserName != null) {
@@ -107,9 +119,9 @@ public class UsernameRenameRepository {
 			return 0;
 		}
 
-		Query query = entityManager.createNativeQuery("UPDATE db_iemr.m_user SET " + String.join(", ", assignments)
-				+ " WHERE UserName = :oldUserName");
-		query.setParameter("oldUserName", oldUserName);
+		Query query = entityManager.createNativeQuery(
+				"UPDATE db_iemr.m_user SET " + String.join(", ", assignments) + " WHERE UserID = :userID");
+		query.setParameter("userID", userID);
 		if (newUserName != null) {
 			query.setParameter("newUserName", newUserName);
 		}
@@ -119,35 +131,27 @@ public class UsernameRenameRepository {
 		return query.executeUpdate();
 	}
 
-	public boolean userExists(String userName) {
-		Query query = entityManager
-				.createNativeQuery("SELECT COUNT(*) FROM db_iemr.m_user WHERE UserName = :userName");
-		query.setParameter("userName", userName);
-		return toLong(query.getSingleResult()) > 0;
-	}
-
 	/**
 	 * UserName and EmployeeID carry separate UNIQUE keys on m_user, so each is
-	 * only in conflict with its own column. Checked independently now that a
-	 * rename no longer forces EmployeeID to equal the username.
+	 * only in conflict with its own column.
+	 *
+	 * <p>Self is excluded by UserID, matching how the Employee Master edit path
+	 * does it (findEmployeeByNameForUpdate), so re-entering a value the row
+	 * already holds is not reported as a conflict with itself.
 	 */
-	public boolean userNameTaken(String userName, String excludeUserName) {
-		return countMatching("UserName", userName, excludeUserName) > 0;
+	public boolean userNameTaken(String userName, Integer excludeUserID) {
+		return countMatching("UserName", userName, excludeUserID) > 0;
 	}
 
-	public boolean employeeIdTaken(String employeeId, String excludeUserName) {
-		return countMatching("EmployeeID", employeeId, excludeUserName) > 0;
+	public boolean employeeIdTaken(String employeeId, Integer excludeUserID) {
+		return countMatching("EmployeeID", employeeId, excludeUserID) > 0;
 	}
 
-	/**
-	 * {@code excludeUserName} skips the row being renamed, so re-entering the
-	 * value that row already holds is not reported as a conflict with itself.
-	 */
-	private long countMatching(String column, String value, String excludeUserName) {
-		Query query = entityManager.createNativeQuery(String.format(
-				"SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserName <> :excludeUserName", column));
+	private long countMatching(String column, String value, Integer excludeUserID) {
+		Query query = entityManager.createNativeQuery(String
+				.format("SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserID <> :excludeUserID", column));
 		query.setParameter("value", value);
-		query.setParameter("excludeUserName", excludeUserName);
+		query.setParameter("excludeUserID", excludeUserID);
 		return toLong(query.getSingleResult());
 	}
 

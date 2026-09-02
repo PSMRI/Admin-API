@@ -30,6 +30,13 @@ package com.iemr.admin.model.username;
  */
 public class UsernameRenameRequest {
 
+	/**
+	 * Identifies the row to change. The username is itself being renamed, so the
+	 * primary key is the stable way to address it; oldUserName is still required
+	 * because the audit sweep matches on the username string.
+	 */
+	private Integer userID;
+
 	private String oldUserName;
 	private String newUserName;
 
@@ -41,6 +48,14 @@ public class UsernameRenameRequest {
 	private String newEmployeeId;
 
 	private boolean updateContactFields = true;
+
+	public Integer getUserID() {
+		return userID;
+	}
+
+	public void setUserID(Integer userID) {
+		this.userID = userID;
+	}
 
 	public String getOldUserName() {
 		return oldUserName;

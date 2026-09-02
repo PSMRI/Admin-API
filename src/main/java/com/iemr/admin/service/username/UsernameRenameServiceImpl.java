@@ -73,7 +73,7 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 		// The identity row goes first: if a unique key rejects either new value,
 		// nothing else has been touched yet.
-		long userRows = usernameRenameRepository.renameUserRow(oldUserName, newUserName, newEmployeeId,
+		long userRows = usernameRenameRepository.renameUserRow(request.getUserID(), newUserName, newEmployeeId,
 				request.isUpdateContactFields());
 		response.addTable("db_iemr.m_user", userRows);
 
@@ -109,17 +109,27 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 			throw new IllegalArgumentException("Request body is required");
 		}
 
+		if (request.getUserID() == null) {
+			throw new IllegalArgumentException("User ID is required");
+		}
+
+		String storedUserName = usernameRenameRepository.currentUserName(request.getUserID());
+		if (storedUserName == null) {
+			throw new IllegalArgumentException("No user found with ID " + request.getUserID());
+		}
+
+		// Guard against a stale screen: if the row has been renamed since the
+		// list was loaded, the audit sweep would match the wrong username.
 		String oldUserName = trimToNull(request.getOldUserName());
-		if (oldUserName == null) {
-			throw new IllegalArgumentException("Current username is required");
+		if (oldUserName != null && !oldUserName.equals(storedUserName)) {
+			throw new IllegalArgumentException("User " + request.getUserID() + " is now named " + storedUserName
+					+ ", not " + oldUserName + ". Reload the user list and try again.");
 		}
-		if (!usernameRenameRepository.userExists(oldUserName)) {
-			throw new IllegalArgumentException("No user found with username " + oldUserName);
-		}
-		request.setOldUserName(oldUserName);
+		request.setOldUserName(storedUserName);
+		oldUserName = storedUserName;
 
 		request.setNewUserName(resolveNewUserName(request, oldUserName));
-		request.setNewEmployeeId(resolveNewEmployeeId(request, oldUserName));
+		request.setNewEmployeeId(resolveNewEmployeeId(request));
 
 		if (request.getNewUserName() == null && request.getNewEmployeeId() == null) {
 			throw new IllegalArgumentException("Nothing to update — enter a new username or a new employee ID");
@@ -140,22 +150,23 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 					+ " characters and cannot be written to ContactNo. Either shorten it or "
 					+ "turn off updating contact numbers.");
 		}
-		if (usernameRenameRepository.userNameTaken(newUserName, oldUserName)) {
+		if (usernameRenameRepository.userNameTaken(newUserName, request.getUserID())) {
 			throw new IllegalArgumentException("Username " + newUserName + " is already in use");
 		}
 		return newUserName;
 	}
 
-	private String resolveNewEmployeeId(UsernameRenameRequest request, String oldUserName) throws Exception {
+	private String resolveNewEmployeeId(UsernameRenameRequest request) throws Exception {
 		String newEmployeeId = trimToNull(request.getNewEmployeeId());
-		if (newEmployeeId == null || newEmployeeId.equals(usernameRenameRepository.currentEmployeeId(oldUserName))) {
+		if (newEmployeeId == null
+				|| newEmployeeId.equals(usernameRenameRepository.currentEmployeeId(request.getUserID()))) {
 			return null;
 		}
 		if (newEmployeeId.length() > MAX_EMPLOYEE_ID_LENGTH) {
 			throw new IllegalArgumentException(
 					"New employee ID exceeds " + MAX_EMPLOYEE_ID_LENGTH + " characters (m_user.EmployeeID limit)");
 		}
-		if (usernameRenameRepository.employeeIdTaken(newEmployeeId, oldUserName)) {
+		if (usernameRenameRepository.employeeIdTaken(newEmployeeId, request.getUserID())) {
 			throw new IllegalArgumentException("Employee ID " + newEmployeeId + " is already in use");
 		}
 		return newEmployeeId;
