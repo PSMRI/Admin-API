@@ -75,22 +75,21 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 		// The identity row goes first: if a unique key rejects either new value,
 		// nothing else has been touched yet.
-		long userRows = usernameRenameRepository.renameUserRow(request.getUserID(), newUserName, newEmployeeId,
+		long rowsUpdated = usernameRenameRepository.renameUserRow(request.getUserID(), newUserName, newEmployeeId,
 				request.isUpdateContactFields());
-		response.addTable("db_iemr.m_user", userRows);
 
 		// CreatedBy/ModifiedBy record the username, so the sweep is only needed
 		// when the username itself changed. An employee-ID-only change leaves
 		// every audit row already correct.
 		if (newUserName != null) {
 			for (AuditTable table : UsernameAuditTables.TABLES) {
-				response.addTable(table.getQualifiedName(),
-						usernameRenameRepository.renameInTable(table, oldUserName, newUserName));
+				rowsUpdated += usernameRenameRepository.renameInTable(table, oldUserName, newUserName);
 			}
 		}
 
-		logger.info("Username rename complete: {} rows across {} tables", response.getTotalRowsAffected(),
-				response.getTablesAffected());
+		// Row counts stay in the log for operational traceability; the response
+		// reports only what changed.
+		logger.info("Username rename complete: {} rows updated", rowsUpdated);
 		return response;
 	}
 

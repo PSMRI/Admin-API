@@ -21,12 +21,8 @@
 */
 package com.iemr.admin.model.username;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
- * Result of a rename.
- * {@code rowsPerTable} is ordered so the report reads in execution order.
+ * Result of a rename: what changed, and whether each column was written.
  */
 public class UsernameRenameResponse {
 
@@ -50,17 +46,6 @@ public class UsernameRenameResponse {
 	 */
 	private boolean userNameUpdated;
 	private boolean employeeIdUpdated;
-	private int tablesAffected;
-	private long totalRowsAffected;
-	private Map<String, Long> rowsPerTable = new LinkedHashMap<>();
-
-	public void addTable(String table, long rows) {
-		rowsPerTable.put(table, rows);
-		totalRowsAffected += rows;
-		if (rows > 0) {
-			tablesAffected++;
-		}
-	}
 
 	public boolean isUserNameUpdated() {
 		return userNameUpdated;
@@ -108,17 +93,5 @@ public class UsernameRenameResponse {
 
 	public void setNewUserName(String newUserName) {
 		this.newUserName = newUserName;
-	}
-
-	public int getTablesAffected() {
-		return tablesAffected;
-	}
-
-	public long getTotalRowsAffected() {
-		return totalRowsAffected;
-	}
-
-	public Map<String, Long> getRowsPerTable() {
-		return rowsPerTable;
 	}
 }
