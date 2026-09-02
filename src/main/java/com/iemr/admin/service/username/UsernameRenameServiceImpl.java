@@ -69,7 +69,9 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 				newUserName == null ? "(unchanged)" : newUserName,
 				newEmployeeId == null ? "(unchanged)" : newEmployeeId);
 
+		// Read before the update, so the response can report what was replaced.
 		UsernameRenameResponse response = newResponse(request);
+		response.setOldEmployeeId(usernameRenameRepository.currentEmployeeId(request.getUserID()));
 
 		// The identity row goes first: if a unique key rejects either new value,
 		// nothing else has been touched yet.
@@ -96,6 +98,9 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		UsernameRenameResponse response = new UsernameRenameResponse();
 		response.setOldUserName(request.getOldUserName());
 		response.setNewUserName(request.getNewUserName());
+		response.setNewEmployeeId(request.getNewEmployeeId());
+		response.setUserNameUpdated(request.getNewUserName() != null);
+		response.setEmployeeIdUpdated(request.getNewEmployeeId() != null);
 		return response;
 	}
 

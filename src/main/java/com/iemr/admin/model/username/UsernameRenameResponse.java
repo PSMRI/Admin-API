@@ -32,6 +32,24 @@ public class UsernameRenameResponse {
 
 	private String oldUserName;
 	private String newUserName;
+
+	/**
+	 * The Employee ID before and after. Both mirror the username pair: the "new"
+	 * value is null when the column was left alone, and the old value is read
+	 * before the update so the caller can see what it replaced.
+	 */
+	private String oldEmployeeId;
+	private String newEmployeeId;
+
+	/**
+	 * Whether each column was actually written. Booleans rather than inference
+	 * from the strings above: OutputResponse re-serialises without
+	 * serializeNulls, so a null "new" value drops out of the JSON entirely and
+	 * the caller cannot tell "unchanged" from "missing". A primitive always
+	 * survives that pass.
+	 */
+	private boolean userNameUpdated;
+	private boolean employeeIdUpdated;
 	private int tablesAffected;
 	private long totalRowsAffected;
 	private Map<String, Long> rowsPerTable = new LinkedHashMap<>();
@@ -42,6 +60,38 @@ public class UsernameRenameResponse {
 		if (rows > 0) {
 			tablesAffected++;
 		}
+	}
+
+	public boolean isUserNameUpdated() {
+		return userNameUpdated;
+	}
+
+	public void setUserNameUpdated(boolean userNameUpdated) {
+		this.userNameUpdated = userNameUpdated;
+	}
+
+	public boolean isEmployeeIdUpdated() {
+		return employeeIdUpdated;
+	}
+
+	public void setEmployeeIdUpdated(boolean employeeIdUpdated) {
+		this.employeeIdUpdated = employeeIdUpdated;
+	}
+
+	public String getOldEmployeeId() {
+		return oldEmployeeId;
+	}
+
+	public void setOldEmployeeId(String oldEmployeeId) {
+		this.oldEmployeeId = oldEmployeeId;
+	}
+
+	public String getNewEmployeeId() {
+		return newEmployeeId;
+	}
+
+	public void setNewEmployeeId(String newEmployeeId) {
+		this.newEmployeeId = newEmployeeId;
 	}
 
 	public String getOldUserName() {
