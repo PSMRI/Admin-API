@@ -135,9 +135,8 @@ public class UsernameRenameRepository {
 	 * UserName and EmployeeID carry separate UNIQUE keys on m_user, so each is
 	 * only in conflict with its own column.
 	 *
-	 * <p>Self is excluded by UserID, matching how the Employee Master edit path
-	 * does it (findEmployeeByNameForUpdate), so re-entering a value the row
-	 * already holds is not reported as a conflict with itself.
+	 * <p>Self is excluded by UserID so that re-entering a value the row already
+	 * holds is not reported as a conflict with itself.
 	 */
 	public boolean userNameTaken(String userName, Integer excludeUserID) {
 		return countMatching("UserName", userName, excludeUserID) > 0;
