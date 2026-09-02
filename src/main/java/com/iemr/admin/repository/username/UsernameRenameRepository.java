@@ -24,6 +24,7 @@ package com.iemr.admin.repository.username;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Repository;
 
@@ -35,15 +36,30 @@ import jakarta.persistence.Query;
 
 @Repository
 public class UsernameRenameRepository {
+	/**
+	 * Schema, table and column names cannot be bound as parameters, so they are
+	 * interpolated. Every identifier is checked against this before it reaches a
+	 * statement, so a value that is not a plain SQL identifier can never be
+	 * concatenated in. All caller-supplied data is bound, never interpolated.
+	 */
+	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)?");
+
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	private static String identifier(String name) {
+		if (name == null || !SQL_IDENTIFIER.matcher(name).matches()) {
+			throw new IllegalArgumentException("Illegal SQL identifier: " + name);
+		}
+		return name;
+	}
 
 	public long renameInTable(AuditTable table, String oldUserName, String newUserName) {
 		String sql = String.format(
 				"UPDATE %1$s SET %2$s = :newUserName, %3$s = :newUserName "
 						+ "WHERE %4$s IN (SELECT %4$s FROM (SELECT %4$s FROM %1$s WHERE %2$s = :oldUserName) AS temp)",
-				table.getQualifiedName(), table.getCreatedByColumn(), table.getModifiedByColumn(),
-				table.getPrimaryKeyColumn());
+				identifier(table.getQualifiedName()), identifier(table.getCreatedByColumn()),
+				identifier(table.getModifiedByColumn()), identifier(table.getPrimaryKeyColumn()));
 		Query query = entityManager.createNativeQuery(sql);
 		query.setParameter("newUserName", newUserName);
 		query.setParameter("oldUserName", oldUserName);
@@ -103,8 +119,9 @@ public class UsernameRenameRepository {
 	}
 
 	private long countMatching(String column, String value, Integer excludeUserID) {
-		Query query = entityManager.createNativeQuery(String
-				.format("SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserID <> :excludeUserID", column));
+		Query query = entityManager.createNativeQuery(String.format(
+				"SELECT COUNT(*) FROM db_iemr.m_user WHERE %s = :value AND UserID <> :excludeUserID",
+				identifier(column)));
 		query.setParameter("value", value);
 		query.setParameter("excludeUserID", excludeUserID);
 		return toLong(query.getSingleResult());

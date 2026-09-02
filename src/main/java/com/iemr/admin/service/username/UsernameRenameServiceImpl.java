@@ -21,6 +21,8 @@
 */
 package com.iemr.admin.service.username;
 
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 
 	private static final int MAX_CONTACT_LENGTH = 12;
 
+	private static final Pattern LOG_UNSAFE = Pattern.compile("[^A-Za-z0-9_.@+-]");
+
 	@Autowired
 	private UsernameRenameRepository usernameRenameRepository;
 
@@ -53,9 +57,8 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 		String oldUserName = request.getOldUserName();
 		String newUserName = request.getNewUserName();
 		String newEmployeeId = request.getNewEmployeeId();
-		logger.info("Username rename starting: user {} -> {}, employeeId -> {}", oldUserName,
-				newUserName == null ? "(unchanged)" : newUserName,
-				newEmployeeId == null ? "(unchanged)" : newEmployeeId);
+		logger.info("Username rename starting: userID {}, user {} -> {}, employeeId -> {}", request.getUserID(),
+				forLog(oldUserName), forLog(newUserName), forLog(newEmployeeId));
 
 		UsernameRenameResponse response = newResponse(request);
 		response.setOldEmployeeId(usernameRenameRepository.currentEmployeeId(request.getUserID()));
@@ -147,6 +150,14 @@ public class UsernameRenameServiceImpl implements UsernameRenameService {
 			throw new IllegalArgumentException("Employee ID " + newEmployeeId + " is already in use");
 		}
 		return newEmployeeId;
+	}
+
+	private static String forLog(String value) {
+		if (value == null) {
+			return "(unchanged)";
+		}
+		String flattened = LOG_UNSAFE.matcher(value).replaceAll("_");
+		return flattened.length() > MAX_USERNAME_LENGTH ? flattened.substring(0, MAX_USERNAME_LENGTH) : flattened;
 	}
 
 	private String trimToNull(String value) {
