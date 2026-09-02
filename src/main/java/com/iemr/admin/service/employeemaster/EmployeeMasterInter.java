@@ -206,7 +206,5 @@ public interface EmployeeMasterInter {
 
 	String FindEmployeeAadhaarForUpdate(String aadhaarNo, Integer userID);
 
-	String FindEmployeeNameForUpdate(String userName, Integer userID);
-
 	M_UserDemographics getUserDemographicsByUserID(Integer userID);
 }

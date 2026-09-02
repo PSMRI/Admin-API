@@ -1537,20 +1537,6 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
-	public String FindEmployeeNameForUpdate(String userName, Integer userID) {
-		logger.info("EmployeeMasterServiceImpl.FindEmployeeNameForUpdate - start");
-		M_User1 data = employeeMasterRepo11.findEmployeeByNameForUpdate(userName, userID);
-		String result;
-		if (data == null) {
-			result = "usernotexist";
-		} else {
-			result = "userexist";
-		}
-		logger.info("EmployeeMasterServiceImpl.FindEmployeeNameForUpdate - finish");
-		return result;
-	}
-
-	@Override
 	public M_UserDemographics getUserDemographicsByUserID(Integer userID) {
 		logger.info("EmployeeMasterServiceImpl.getUserDemographicsByUserID - start");
 		M_UserDemographics data = m_UserDemographicsRepo.findByUserID(userID);

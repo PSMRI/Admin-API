@@ -1425,20 +1425,6 @@ public class EmployeeMasterController {
 			M_UserDemographics demographics = InputMapper.gson().fromJson(editUserDetails, M_UserDemographics.class);
 			M_User1 getIdforedit = employeeMasterInter.editData(employeeMaster.getUserID());
 
-			String newUserName = employeeMaster.getUserName();
-			if (newUserName != null && !newUserName.trim().isEmpty()
-					&& !newUserName.equals(getIdforedit.getUserName())) {
-				String availability = employeeMasterInter.FindEmployeeNameForUpdate(newUserName,
-						getIdforedit.getUserID());
-				if ("userexist".equals(availability)) {
-					response.setError(OutputResponse.OBJECT_FAILURE,
-							"User Name '" + newUserName + "' is already in use by another employee");
-					logger.debug("response" + response);
-					return response.toString();
-				}
-				getIdforedit.setUserName(newUserName);
-			}
-
 			getIdforedit.setTitleID(employeeMaster.getTitleID());
 			getIdforedit.setFirstName(employeeMaster.getFirstName());
 			getIdforedit.setMiddleName(employeeMaster.getMiddleName());
@@ -1448,12 +1434,7 @@ public class EmployeeMasterController {
 			getIdforedit.setAadhaarNo(employeeMaster.getAadhaarNo());
 			getIdforedit.setpAN(employeeMaster.getpAN());
 			getIdforedit.setdOB(employeeMaster.getdOB());
-			// Only overwrite when the caller actually sent a value — the Employee Master edit
-			// form never submits this field (it's read-only there), and blindly copying a
-			// missing/null value here previously nulled out Employee ID on every single edit.
-			if (employeeMaster.getEmployeeID() != null) {
-				getIdforedit.setEmployeeID(employeeMaster.getEmployeeID());
-			}
+			getIdforedit.setEmployeeID(employeeMaster.getEmployeeID());
 			getIdforedit.setdOJ(employeeMaster.getdOJ());
 			getIdforedit.setQualificationID(employeeMaster.getQualificationID());
 			getIdforedit.setHealthProfessionalID(employeeMaster.getHealthProfessionalID());
