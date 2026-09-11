@@ -155,10 +155,15 @@ public interface EmployeeMasterRepo extends CrudRepository<M_UserServiceRoleMapp
 	// Fix 2: count active USR rows for supervisor (check if other facilities remain)
 	long countByUserIDAndRoleIDAndDeletedFalse(Integer userID, Integer roleID);
 
-	// Soft-delete old duplicate mappings for same user+service, excluding the current row being updated
+	// Soft-delete old duplicate mappings for the SAME user+service+role, excluding
+	// the current row being updated. Previously left roleID out of the WHERE
+	// clause entirely, so updating any one role's mapping soft-deleted every
+	// OTHER active role that user held under the same service line (e.g. saving
+	// Registration Officer wiped out an unrelated, already-active Counsellor
+	// mapping) instead of only cleaning up true duplicates of the same role.
 	@Transactional
 	@Modifying
-	@Query("UPDATE M_UserServiceRoleMapping2 u SET u.deleted = true WHERE u.userID = :userID AND u.providerServiceMapID = :providerServiceMapID AND u.uSRMappingID != :excludeUSRMappingID AND u.deleted = false")
-	int softDeleteOldMappings(@Param("userID") Integer userID, @Param("providerServiceMapID") Integer providerServiceMapID, @Param("excludeUSRMappingID") Integer excludeUSRMappingID);
+	@Query("UPDATE M_UserServiceRoleMapping2 u SET u.deleted = true WHERE u.userID = :userID AND u.providerServiceMapID = :providerServiceMapID AND u.roleID = :roleID AND u.uSRMappingID != :excludeUSRMappingID AND u.deleted = false")
+	int softDeleteOldMappings(@Param("userID") Integer userID, @Param("providerServiceMapID") Integer providerServiceMapID, @Param("roleID") Integer roleID, @Param("excludeUSRMappingID") Integer excludeUSRMappingID);
 
 }
