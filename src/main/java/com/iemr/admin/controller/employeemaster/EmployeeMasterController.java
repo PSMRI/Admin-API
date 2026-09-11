@@ -1498,19 +1498,37 @@ public class EmployeeMasterController {
 
 			M_User1 employeeMaster = InputMapper.gson().fromJson(deletedUserDetails, M_User1.class);
 			M_UserDemographics demographics = InputMapper.gson().fromJson(deletedUserDetails, M_UserDemographics.class);
+
+			if (employeeMaster.getUserID() == null) {
+				throw new Exception("userID is mandatory");
+			}
+			if (employeeMaster.getDeleted() == null) {
+				throw new Exception("deleted flag is mandatory");
+			}
+
 			M_User1 getIdforedit = employeeMasterInter.editData(employeeMaster.getUserID());
+			if (getIdforedit == null) {
+				throw new Exception("No user found for userID " + employeeMaster.getUserID());
+			}
 			getIdforedit.setDeleted(employeeMaster.getDeleted());
 			M_User1 editedData = employeeMasterInter.saveeditedData(getIdforedit);
 
 			M_UserDemographics getdemographicsData = employeeMasterInter.DataByUserID(employeeMaster.getUserID());
-			getdemographicsData.setDeleted(demographics.getDeleted());
-			M_UserDemographics saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
-			if (employeeMaster.getDeleted()) {
+			M_UserDemographics saveDemoData = null;
+			if (getdemographicsData != null) {
+				getdemographicsData.setDeleted(demographics.getDeleted());
+				saveDemoData = employeeMasterInter.saveeditedDemoData(getdemographicsData);
+			} else {
+				logger.warn("No m_userdemographics row for userID {} - activation/deactivation applied to m_user only",
+						employeeMaster.getUserID());
+			}
+
+			if (Boolean.TRUE.equals(employeeMaster.getDeleted())) {
 				usrAgentMappingService.updateDeletedAgentIDStatus(editedData.getAgentID());
 			}
 			String auth = httpRequest.getHeader("authorization");
 			employeeMasterInter.expireAuth(editedData, auth);
-			response.setResponse(saveDemoData.toString());
+			response.setResponse(saveDemoData != null ? saveDemoData.toString() : editedData.toString());
 
 		} catch (Exception e) {
 			logger.error("Unexpected error:", e);
