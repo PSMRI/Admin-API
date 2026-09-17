@@ -95,32 +95,49 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID) {
+    public void registerBulkUser(
+            String xml,
+            String authorization,
+            String userName,
+            Integer serviceProviderID) {
+
+        EmployeeList employeeList;
+
         try {
             xml = escapeXmlSpecialChars(xml);
-
-            EmployeeList employeeList = employeeXmlService.parseXml(xml);
-            if (!employeeList.getEmployees().isEmpty()) {
-                logger.info("employee_list" + employeeList.getEmployees().toString());
-                totalEmployeeListSize = employeeList.getEmployees().size();
-                for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    processUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
-
-
-                }
-            } else {
-                errorLogs.add("Data is invalid or empty");
-
-            }
-
-
+            employeeList = employeeXmlService.parseXml(xml);
         } catch (Exception e) {
-            logger.error("Exception:" + e.getMessage());
-            errorLogs.add("Data is invalid or empty");
-
+            logger.error("Bulk user XML parsing failed", e);
+            errorLogs.add("Unable to parse uploaded data: "
+                    + (e.getMessage() != null
+                    ? e.getMessage()
+                    : e.getClass().getSimpleName()));
+            return;
         }
 
+        if (employeeList == null
+                || employeeList.getEmployees() == null
+                || employeeList.getEmployees().isEmpty()) {
+            errorLogs.add("Data is invalid or empty");
+            return;
+        }
 
+        totalEmployeeListSize = employeeList.getEmployees().size();
+
+        for (int i = 0; i < totalEmployeeListSize; i++) {
+            Employee employee = employeeList.getEmployees().get(i);
+
+            try {
+                processUserUser(
+                        employee,
+                        i,
+                        authorization,
+                        userName,
+                        serviceProviderID);
+            } catch (Exception e) {
+                collectBulkException(i, employee, e);
+            }
+        }
     }
     public static String escapeXmlSpecialChars(String xml) {
         // Only escape & that are not already part of valid XML entities
@@ -370,9 +387,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setLastName(employee.getLastName());
                             mUser.setUserName(employee.getUserName());
                             mUser.setdOB(convertStringIntoDate(employee.getDob()));
-                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
                             mUser.setContactNo(String.valueOf(employee.getContactNo()));
+                            if(!employee.getEmployeeId().isEmpty()){
+                                mUser.setEmployeeID(employee.getEmployeeId());
+
+                            }
                             if (!employee.getMiddleName().isEmpty()) {
                                 mUser.setMiddleName(employee.getMiddleName());
 
@@ -531,11 +551,34 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
 
+
     }
     /**
      * Validate employee details.
      */
 
+    private void collectBulkException(
+            Integer row, Employee employee, Exception exception) {
+
+        String message = exception.getMessage();
+        if (message == null || message.isBlank()) {
+            message = exception.getClass().getSimpleName();
+        }
+
+        List<String> errors = new ArrayList<>();
+        errors.add(message);
+
+        BulkRegistrationError error = new BulkRegistrationError();
+        error.setRowNumber(row + 1);
+        error.setUserName(employee != null ? employee.getUserName() : null);
+        error.setError(errors);
+
+        bulkRegistrationErrors.add(error);
+        errorLogs.add("Row " + (row + 1) + ": " + message);
+
+        logger.error("Bulk user processing failed at row " + (row + 1),
+                exception);
+    }
 
     private void updateUserUser(Employee employee, Integer row, String authorization, String modifiedBy, Integer serviceProviderID) throws Exception {
         boolean isStopTB = providerServiceMappingRepo.existsByServiceProviderIDAndServiceID(serviceProviderID, STOP_TB_SERVICE_ID);
@@ -712,6 +755,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     mUser.setdOB(convertStringIntoDate(employee.getDob()));
                     mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
                     mUser.setContactNo(String.valueOf(employee.getContactNo()));
+
+                    if(!employee.getEmployeeId().isEmpty()){
+                        mUser.setEmployeeID(employee.getEmployeeId());
+                    }
 
                     if (!employee.getMiddleName().isEmpty()) {
                         mUser.setMiddleName(employee.getMiddleName());
