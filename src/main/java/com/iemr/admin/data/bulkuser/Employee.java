@@ -99,7 +99,7 @@ public class Employee {
     private String Password="";
 
     @JacksonXmlProperty(localName = "EmployeeId")
-    private String EmployeeId;
+    private String EmployeeId="";
 
 
 }
