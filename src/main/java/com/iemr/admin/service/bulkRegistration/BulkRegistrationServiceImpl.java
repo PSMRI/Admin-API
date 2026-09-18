@@ -872,20 +872,21 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
     private boolean isValidDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return false;
+        }
+
         try {
-            String[] parts = dateStr.split("-");
-            int year = Integer.parseInt(parts[0]);
+            LocalDate date = LocalDate.parse(
+                    dateStr.trim(),
+                    DateTimeFormatter.ISO_LOCAL_DATE
+            );
 
-            if (year > 2025) {
-                return false; // Year should not be greater than 2025
-            }
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(dateStr, formatter); // Validates if the full date is correct
-
-            return true; // Valid date within range
-        } catch (Exception e) {
-            return false; // Invalid date format or parsing error
+            return !date.isAfter(
+                    LocalDate.now(ZoneId.of("Asia/Kolkata"))
+            );
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
