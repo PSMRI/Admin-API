@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -38,6 +39,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Date;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1123,18 +1125,42 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return headerMap;
     }
 
-
     public static Date convertStringIntoDate(String date) {
+        if (date == null || date.trim().isEmpty()) {
+            throw new IllegalArgumentException("Date cannot be null or empty");
+        }
 
-        final long MILLISECONDS_PER_DAY = 86400000L;
-        final long EPOCH_OFFSET = 2209161600000L;
+        String value = date.trim();
+        LocalDate parsedDate;
 
-        // Calculate milliseconds since epoch
-        long javaMillis = (long) (Double.parseDouble(date) * MILLISECONDS_PER_DAY - EPOCH_OFFSET);
+        try {
+            if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                // Example: 2009-10-20
+                parsedDate = LocalDate.parse(value);
+            } else {
+                // Excel 1900 date system.
+                // Fractional part represents time; ignored for DOB/joining date.
+                long serial = new BigDecimal(value).longValueExact();
 
-        return new Date(javaMillis);
+                if (serial < 1 || serial > 2958465 || serial == 60) {
+                    throw new IllegalArgumentException(
+                            "Invalid Excel date serial: " + value);
+                }
 
+                // Excel incorrectly treats 1900 as a leap year.
+                long days = serial < 60 ? serial : serial - 1;
+                parsedDate = LocalDate.of(1899, 12, 31).plusDays(days);
+            }
 
+            return java.sql.Date.valueOf(parsedDate);
+
+        } catch (NumberFormatException | ArithmeticException
+                 | DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Invalid date: " + value
+                            + ". Expected yyyy-MM-dd or a whole Excel serial number.",
+                    e);
+        }
     }
 
 
