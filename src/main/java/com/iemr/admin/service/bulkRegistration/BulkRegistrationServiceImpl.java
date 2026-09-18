@@ -435,10 +435,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 //                            m_userServiceRoleMapping.setRoleID(122);
                             mUserDemographics.setUserID(bulkUserID.getUserID());
                             mUserDemographics.setCountryID(91);
-                            if(!employee.getEmployeeId().isEmpty()){
-                                mUser.setEmployeeID(employee.getEmployeeId());
 
-                            }
                             if (!employee.getCommunity().isEmpty()) {
                                 mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
 
