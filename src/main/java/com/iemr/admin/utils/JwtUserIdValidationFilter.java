@@ -111,7 +111,6 @@ public class JwtUserIdValidationFilter implements Filter {
 		}
 
 
-
 		try {
 			String jwtFromCookie = getJwtTokenFromCookies(request);
 			String jwtFromHeader = request.getHeader(Constants.JWT_TOKEN);

@@ -1,8 +1,8 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology 
-* Integrated EHR (Electronic Health Records) Solution 
+* AMRIT – Accessible Medical Records via Integrated Technology
+* Integrated EHR (Electronic Health Records) Solution
 *
-* Copyright (C) "Piramal Swasthya Management and Research Institute" 
+* Copyright (C) "Piramal Swasthya Management and Research Institute"
 *
 * This file is part of AMRIT.
 *
@@ -22,26 +22,29 @@
 
 package com.iemr.admin.controller.version;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.v3.oas.annotations.Operation;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Properties;
-import org.springframework.http.MediaType;
 
 @RestController
 public class VersionController {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
-	
+	private final Logger logger =
+			LoggerFactory.getLogger(this.getClass().getSimpleName());
+
 	private static final String UNKNOWN_VALUE = "unknown";
-	
+
 	@Operation(summary = "Get version information")
 	@GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Map<String, String>> versionInformation() {

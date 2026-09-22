@@ -49,15 +49,14 @@ public interface M_UserservicerolemappingForRoleProviderAdminRepo
 	 * serviceProviderID, Integer serviceID);
 	 */
 
-	@Query("SELECT sm.serviceName as serviceName," +
+	@Query("SELECT DISTINCT sm.serviceName as serviceName," +
 	        " ssm.serviceID," +
 	        " sm.isNational as isNational," +
 	        " ssm.statusID" +
 	        " FROM M_UserservicerolemappingForRoleProviderAdmin usr" +
 	        " JOIN usr.stateServiceMapping ssm" +
 	        " JOIN ssm.serviceMaster sm" +
-	        " WHERE usr.userID = :userID AND ssm.statusID = 2 AND usr.deleted = false" +
-	        " GROUP BY sm.serviceName")
+	        " WHERE usr.userID = :userID AND ssm.statusID = 2 AND usr.deleted = false")
 	ArrayList<Object[]> getServiceByServiceProviderIds(@Param("userID") Integer serviceProviderID);
 
 	@Query("SELECT distinct ssm.stateID," + " sm.stateName, " + " ssm.providerServiceMapID," + " ssm.statusID"

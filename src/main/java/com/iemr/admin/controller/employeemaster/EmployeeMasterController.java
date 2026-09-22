@@ -1813,6 +1813,8 @@ public class EmployeeMasterController {
 					resDataMap1.setVillageID(previl.getVillageID());
 					resDataMap1.setVillageName(previl.getVillageName());
 					resDataMap1.setFacilityID(previl.getFacilityID());
+					resDataMap1.setNikshayTUID(previl.getNikshayTUID());
+					resDataMap1.setNikshayFacilityID(previl.getNikshayFacilityID());
 					resList1.add(resDataMap1);
 
 				}
@@ -1861,6 +1863,13 @@ public class EmployeeMasterController {
 				}
 			}
 
+			// Soft-delete other active mappings for same user+service to prevent duplicates
+			// (e.g. old roleID 122 rows left over when new roleID 128 mapping was created)
+			if (pre.getUserID() != null && pre.getProviderServiceMapID() != null && pre.getuSRMappingID() != null) {
+				employeeMasterInter.softDeleteOldMappings(
+						pre.getUserID(), pre.getProviderServiceMapID(), pre.getuSRMappingID());
+			}
+
 			usrRole.setUserID(pre.getUserID());
 			usrRole.setRoleID(pre.getRoleID());
 			usrRole.setAgentPassword(pre.getAgentPassword());
@@ -1874,6 +1883,8 @@ public class EmployeeMasterController {
 			usrRole.setVillageID(pre.getVillageID());
 			usrRole.setVillageName(pre.getVillageName());
 			usrRole.setFacilityID(pre.getFacilityID());
+			usrRole.setNikshayTUID(pre.getNikshayTUID());
+			usrRole.setNikshayFacilityID(pre.getNikshayFacilityID());
 
 			if (pre.getTeleConsultation() != null) {
 				usrRole.setTeleConsultation(pre.getTeleConsultation());

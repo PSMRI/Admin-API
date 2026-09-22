@@ -85,7 +85,7 @@ public interface MProviderservicemappingBlockingRepo extends CrudRepository<M_Pr
 	@Query(" SELECT distinct srm.providerServiceMapID,srm.serviceProviderID,srm.serviceID,"
 			+ " sm.serviceName as serviceName," + " sm.isNational as isNational "
 			+ " FROM M_Providerservicemapping_Blocking srm " + "  JOIN srm.m_ServicemasterForBlocking sm"
-			+ " WHERE srm.serviceProviderID =:serviceProviderID AND srm.deleted=false" + " GROUP BY sm.serviceName")
+			+ " WHERE srm.serviceProviderID =:serviceProviderID AND srm.deleted=false")
 	ArrayList<Object[]> getServiceLiensUsingProvider(@Param("serviceProviderID") Integer serviceProviderID);
 
 	@Transactional

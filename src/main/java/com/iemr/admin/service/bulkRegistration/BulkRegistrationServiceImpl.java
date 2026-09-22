@@ -5,8 +5,15 @@ import com.iemr.admin.data.bulkuser.Employee;
 import com.iemr.admin.data.bulkuser.EmployeeList;
 import com.iemr.admin.data.employeemaster.*;
 import com.iemr.admin.data.locationmaster.M_District;
+import com.iemr.admin.data.nikshay.NikshayDistrict;
+import com.iemr.admin.data.nikshay.NikshayState;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
+import com.iemr.admin.repo.employeemaster.M_DesignationRepo;
+import com.iemr.admin.repo.employeemaster.M_UserDemographicsRepo;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
+import com.iemr.admin.repo.nikshay.NikshayDistrictRepo;
+import com.iemr.admin.repo.nikshay.NikshayStateRepo;
+import com.iemr.admin.repository.provideronboard.M_ProviderServiceMappingRepo;
 import com.iemr.admin.service.employeemaster.EmployeeMasterInter;
 import com.iemr.admin.service.locationmaster.LocationMasterServiceInter;
 import com.iemr.admin.service.rolemaster.Role_MasterInter;
@@ -24,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -31,6 +39,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Date;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,9 +55,16 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     public static final String FILE_PATH = "error_log.xlsx"; // Excel file path
     public List<BulkRegistrationError> bulkRegistrationErrors = new ArrayList<>();
 
+    @Autowired
+    private M_UserDemographicsRepo m_UserDemographicsRepo;
+
 
     @Autowired
     private EmployeeMasterInter employeeMasterInter;
+
+    @Autowired
+    private M_DesignationRepo m_DesignationRepo;
+
     @Autowired
     private Role_MasterInter roleMasterInter;
 
@@ -60,6 +76,20 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     @Autowired
     EmployeeXmlService employeeXmlService;
 
+    @Autowired
+    private NikshayStateRepo nikshayStateRepo;
+    @Autowired
+    private NikshayDistrictRepo nikshayDistrictRepo;
+    @Autowired
+    private M_ProviderServiceMappingRepo providerServiceMappingRepo;
+
+    // ServiceID for "Stop TB" in m_servicemaster. Stop TB users' District is
+    // resolved against Nikshay's own district master (m_nikshay_district) instead
+    // of AMRIT's m_District, because AMRIT's district data is stale for several
+    // states post the 2022 district reorganizations while Nikshay's is current.
+    // Every other service line is unaffected and keeps using m_District as before.
+    private static final Integer STOP_TB_SERVICE_ID = 12;
+
     public ArrayList<String> errorLogs = new ArrayList<>();
     public ArrayList<M_User1> m_bulkUser = new ArrayList<>();
     public ArrayList<M_UserDemographics> m_UserDemographics = new ArrayList<>();
@@ -67,40 +97,82 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID) {
+    public void registerBulkUser(
+            String xml,
+            String authorization,
+            String userName,
+            Integer serviceProviderID) {
+
+        EmployeeList employeeList;
+
         try {
             xml = escapeXmlSpecialChars(xml);
-
-            EmployeeList employeeList = employeeXmlService.parseXml(xml);
-            if (!employeeList.getEmployees().isEmpty()) {
-                logger.info("employee_list" + employeeList.getEmployees().toString());
-                totalEmployeeListSize = employeeList.getEmployees().size();
-                for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    saveUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
-
-
-                }
-            } else {
-                errorLogs.add("Data is invalid or empty");
-
-            }
-
-
+            employeeList = employeeXmlService.parseXml(xml);
         } catch (Exception e) {
-            logger.error("Exception:" + e.getMessage());
-            errorLogs.add("Data is invalid or empty");
-
+            logger.error("Bulk user XML parsing failed", e);
+            errorLogs.add("Unable to parse uploaded data: "
+                    + (e.getMessage() != null
+                    ? e.getMessage()
+                    : e.getClass().getSimpleName()));
+            return;
         }
 
+        if (employeeList == null
+                || employeeList.getEmployees() == null
+                || employeeList.getEmployees().isEmpty()) {
+            errorLogs.add("Data is invalid or empty");
+            return;
+        }
 
+        totalEmployeeListSize = employeeList.getEmployees().size();
+
+        for (int i = 0; i < totalEmployeeListSize; i++) {
+            Employee employee = employeeList.getEmployees().get(i);
+
+            try {
+                processUserUser(
+                        employee,
+                        i,
+                        authorization,
+                        userName,
+                        serviceProviderID);
+            } catch (Exception e) {
+                collectBulkException(i, employee, e);
+            }
+        }
     }
     public static String escapeXmlSpecialChars(String xml) {
         // Only escape & that are not already part of valid XML entities
         return xml.replaceAll("&(?!amp;|lt;|gt;|apos;|quot;|#\\d+;)", "&amp;");
     }
+    /**
+     * Common entry point — decides create vs update based on whether the user already exists,
+     * then delegates to the respective method.
+     */
+    private void processUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
 
+        if (employee.getUserName() == null || employee.getUserName().isEmpty()) {
+            List<String> validationErrors = new ArrayList<>();
+            BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
+            validationErrors.add("Please Enter UserName");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            return;
+        }
+
+        String checkUserIsExist = employeeMasterInter.FindEmployeeName(employee.getUserName());
+        logger.info("checkUserIsExist" + checkUserIsExist);
+
+        if (checkUserIsExist.equalsIgnoreCase("usernotexist")) {
+            // user not found → create flow
+            saveUserUser(employee, row, authorization, createdBy, serviceProviderID);
+        } else {
+            // user already exists → update flow
+            updateUserUser(employee, row, authorization, createdBy, serviceProviderID);
+        }
+    }
 
     private void saveUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
+        boolean isStopTB = providerServiceMappingRepo.existsByServiceProviderIDAndServiceID(serviceProviderID, STOP_TB_SERVICE_ID);
         List<String> validationErrors = new ArrayList<>();
         BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
         M_User1 mUser = new M_User1();
@@ -232,6 +304,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         validationErrors.add("Qualification is missing");
 
                     }
+                    if (!employee.getQualification().isEmpty()) {
+                        if (getQualificationId(employee.getQualification()) == 0) {
+                            validationErrors.add("Qualification is invalid.");
+
+                        }
+                    }
 
                     if (employee.getState().isEmpty()) {
                         validationErrors.add("Current State is missing.");
@@ -246,7 +324,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         validationErrors.add("Current District is missing.");
                     }
                     if (!employee.getDistrict().isEmpty()) {
-                        if (getDistrictId(employee.getDistrict()) == 0) {
+                        int districtId = isStopTB ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                                : getDistrictId(employee.getDistrict());
+                        if (districtId == 0) {
                             validationErrors.add("Current District is invalid.");
 
                         }
@@ -266,7 +346,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     }
 
                     if (!employee.getPermanentDistrict().isEmpty()) {
-                        if (getDistrictId(employee.getPermanentDistrict()) == 0) {
+                        int permDistrictId = isStopTB ? getNikshayDistrictId(employee.getPermanentState(), employee.getPermanentDistrict())
+                                : getDistrictId(employee.getPermanentDistrict());
+                        if (permDistrictId == 0) {
                             validationErrors.add("Permanent District is invalid.");
 
                         }
@@ -299,17 +381,20 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                     //  showLogger(employee);
 
-                    if (!employee.getTitle().isEmpty() && !employee.getFirstName().isEmpty() && !employee.getLastName().isEmpty() && !employee.getContactNo().isEmpty() && !employee.getEmergencyContactNo().isEmpty() && !employee.getDob().isEmpty() && !employee.getUserName().isEmpty() && !employee.getPassword().isEmpty() && !employee.getState().isEmpty() && !employee.getDistrict().isEmpty() && !employee.getPermanentState().isEmpty() && !employee.getPermanentDistrict().isEmpty() && !employee.getGender().isEmpty() && !employee.getQualification().isEmpty() && isValidDate(convertStringIntoDate(employee.getDob()).toString()) && isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString())) {
+                    if (validationErrors.isEmpty()) {
                         try {
 
                             mUser.setTitleID(getTitleId(employee.getTitle()));
                             mUser.setFirstName(employee.getFirstName());
                             mUser.setLastName(employee.getLastName());
-                            mUser.setUserName(employee.getContactNo());
+                            mUser.setUserName(employee.getUserName());
                             mUser.setdOB(convertStringIntoDate(employee.getDob()));
-                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
                             mUser.setContactNo(String.valueOf(employee.getContactNo()));
+                            if(!employee.getEmployeeId().isEmpty()){
+                                mUser.setEmployeeID(employee.getEmployeeId());
+
+                            }
                             if (!employee.getMiddleName().isEmpty()) {
                                 mUser.setMiddleName(employee.getMiddleName());
 
@@ -343,7 +428,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setModifiedBy(createdBy);
                             mUser.setStatusID(2);
                             mUser.setDeleted(false);
-                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setServiceProviderID(serviceProviderID);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
@@ -353,6 +437,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 //                            m_userServiceRoleMapping.setRoleID(122);
                             mUserDemographics.setUserID(bulkUserID.getUserID());
                             mUserDemographics.setCountryID(91);
+
                             if (!employee.getCommunity().isEmpty()) {
                                 mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
 
@@ -372,7 +457,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
                             }
                             if (!employee.getPermanentDistrict().isEmpty()) {
-                                mUserDemographics.setPermDistrictID(getDistrictId(employee.getPermanentDistrict()));
+                                mUserDemographics.setPermDistrictID(isStopTB
+                                        ? getNikshayDistrictId(employee.getPermanentState(), employee.getPermanentDistrict())
+                                        : getDistrictId(employee.getPermanentDistrict()));
 
                             }
                             mUserDemographics.setIsPermanent(false);
@@ -399,7 +486,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             }
                             mUserDemographics.setIsPresent(false);
                             if (!employee.getDistrict().isEmpty()) {
-                                mUserDemographics.setDistrictID(getDistrictId(employee.getDistrict()));
+                                mUserDemographics.setDistrictID(isStopTB
+                                        ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                                        : getDistrictId(employee.getDistrict()));
 
                             }
                             if (!employee.getPincode().isEmpty()) {
@@ -464,27 +553,340 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
 
+
     }
     /**
      * Validate employee details.
      */
 
+    private void collectBulkException(
+            Integer row, Employee employee, Exception exception) {
 
-    private boolean isValidDate(String dateStr) {
-        try {
-            String[] parts = dateStr.split("-");
-            int year = Integer.parseInt(parts[0]);
+        String message = exception.getMessage();
+        if (message == null || message.isBlank()) {
+            message = exception.getClass().getSimpleName();
+        }
 
-            if (year > 2025) {
-                return false; // Year should not be greater than 2025
+        List<String> errors = new ArrayList<>();
+        errors.add(message);
+
+        BulkRegistrationError error = new BulkRegistrationError();
+        error.setRowNumber(row + 1);
+        error.setUserName(employee != null ? employee.getUserName() : null);
+        error.setError(errors);
+
+        bulkRegistrationErrors.add(error);
+        errorLogs.add("Row " + (row + 1) + ": " + message);
+
+        logger.error("Bulk user processing failed at row " + (row + 1),
+                exception);
+    }
+
+    private void updateUserUser(Employee employee, Integer row, String authorization, String modifiedBy, Integer serviceProviderID) throws Exception {
+        boolean isStopTB = providerServiceMappingRepo.existsByServiceProviderIDAndServiceID(serviceProviderID, STOP_TB_SERVICE_ID);
+
+        List<String> validationErrors = new ArrayList<>();
+        BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
+
+        logger.info("employee_list update flow" + employee.toString());
+
+        // fetch existing user record to update
+        M_User1 existingUser = employeeMasterInter.FindEmployeeName1(employee.getUserName());
+        if (existingUser == null) {
+            validationErrors.add("User not found for update");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            return;
+        }
+        Integer userID = existingUser.getUserID();
+
+        // duplicate contact check excluding current user
+        String checkContactIsExist = employeeMasterInter.FindEmployeeContactForUpdate(employee.getContactNo(), userID);
+
+        if (checkContactIsExist.equalsIgnoreCase("contactnotexist")) {
+
+            if (employee.getTitle() == null || employee.getTitle().isEmpty()) {
+                validationErrors.add("Title is missing.");
+            }
+            if (!employee.getTitle().isEmpty() && getTitleId(employee.getTitle()) == 0) {
+                validationErrors.add("Title is invalid.");
             }
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(dateStr, formatter); // Validates if the full date is correct
+            if (employee.getFirstName() == null || employee.getFirstName().isEmpty()) {
+                validationErrors.add("First Name is missing.");
+            }
+            if (!employee.getFirstName().isEmpty()) {
+                if (employee.getFirstName().length() > 50) {
+                    validationErrors.add("First name is invalid.");
+                }
+                if (isNumeric(employee.getFirstName())) {
+                    validationErrors.add("First name is invalid.");
+                }
+            }
 
-            return true; // Valid date within range
-        } catch (Exception e) {
-            return false; // Invalid date format or parsing error
+            if (!employee.getMiddleName().isEmpty()) {
+                if (employee.getMiddleName().length() > 50) {
+                    validationErrors.add("Middle name is invalid.");
+                }
+                if (isNumeric(employee.getMiddleName())) {
+                    validationErrors.add("Middle name is invalid.");
+                }
+            }
+
+            if (employee.getLastName() == null || employee.getLastName().isEmpty()) {
+                validationErrors.add("Last Name is missing.");
+            }
+            if (!employee.getLastName().isEmpty()) {
+                if (employee.getLastName().length() > 50) {
+                    validationErrors.add("Last name is invalid.");
+                }
+                if (isNumeric(employee.getLastName())) {
+                    validationErrors.add("Last name is invalid.");
+                }
+            }
+
+            if (employee.getGender().isEmpty()) {
+                validationErrors.add("Gender is missing");
+            }
+            if (employee.getContactNo().isEmpty()) {
+                validationErrors.add("Contact number missing");
+            }
+            if (!employee.getContactNo().isEmpty() && !isValidPhoneNumber(String.valueOf(employee.getContactNo()))) {
+                validationErrors.add("Contact Number is invalid");
+            }
+
+            if (employee.getDesignation().isEmpty()) {
+                validationErrors.add("Designation is missing");
+            }
+
+            if (employee.getEmergencyContactNo().isEmpty()) {
+                validationErrors.add("Emergency contact number is missing");
+            }
+            if (!employee.getEmergencyContactNo().isEmpty() && !isValidPhoneNumber(String.valueOf(employee.getEmergencyContactNo()))) {
+                validationErrors.add("Emergency Contact Number is invalid.");
+            }
+
+            if (employee.getDob().isEmpty()) {
+                validationErrors.add("Date of Birth is missing.");
+            }
+            if (!employee.getDob().isEmpty() && !isValidDate(convertStringIntoDate(employee.getDob()).toString())) {
+                validationErrors.add("Date of Birth is invalid.");
+            }
+
+            if (employee.getEmail().isEmpty()) {
+                validationErrors.add("Email is missing.");
+            }
+            if (!employee.getEmail().isEmpty() && !employee.getEmail().matches(EMAIL_REGEX)) {
+                validationErrors.add("Invalid Email format.");
+            }
+
+            // password optional on update — only validated if provided
+            if (!employee.getPassword().isEmpty() && employee.getPassword().length() < 6) {
+                validationErrors.add("Please enter a valid password.");
+            }
+
+            if (!employee.getAadhaarNo().isEmpty()) {
+                String checkAadhaarIsExist = employeeMasterInter.FindEmployeeAadhaarForUpdate(employee.getAadhaarNo(), userID);
+                if (!checkAadhaarIsExist.equalsIgnoreCase("aadhaarnotexist")) {
+                    validationErrors.add("Duplicate aadhaar number found");
+                }
+                if (isValidAadhar(employee.getAadhaarNo())) {
+                    validationErrors.add("Aadhaar number is invalid");
+                }
+            }
+
+            if (employee.getQualification().isEmpty()) {
+                validationErrors.add("Qualification is missing");
+            }
+
+            if (employee.getState().isEmpty()) {
+                validationErrors.add("Current State is missing.");
+            }
+            if (!employee.getState().isEmpty() && getStateId(employee.getState()) == 0) {
+                validationErrors.add("Current State is invalid.");
+            }
+
+            if (employee.getDistrict().isEmpty()) {
+                validationErrors.add("Current District is missing.");
+            }
+            if (!employee.getDistrict().isEmpty() && getDistrictId(employee.getDistrict()) == 0) {
+                validationErrors.add("Current District is invalid.");
+            }
+
+            if (employee.getPermanentState().isEmpty()) {
+                validationErrors.add("Permanent State is missing.");
+            }
+            if (!employee.getPermanentState().isEmpty() && getStateId(employee.getPermanentState()) == 0) {
+                validationErrors.add("Permanent State is invalid.");
+            }
+
+            if (employee.getPermanentDistrict().isEmpty()) {
+                validationErrors.add("Permanent District is missing.");
+            }
+            if (!employee.getPermanentDistrict().isEmpty() && getDistrictId(employee.getPermanentDistrict()) == 0) {
+                validationErrors.add("Permanent District is invalid.");
+            }
+
+            if (employee.getDateOfJoining().isEmpty()) {
+                validationErrors.add("Date of Joining is missing.");
+            }
+            if (!employee.getDateOfJoining().isEmpty() && !isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString())) {
+                validationErrors.add("Date of Joining is invalid.");
+            }
+
+            if (!validationErrors.isEmpty()) {
+                logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+            }
+
+            boolean coreFieldsValid = !employee.getTitle().isEmpty() && !employee.getFirstName().isEmpty()
+                    && !employee.getLastName().isEmpty() && !employee.getContactNo().isEmpty()
+                    && !employee.getEmergencyContactNo().isEmpty() && !employee.getDob().isEmpty()
+                    && !employee.getUserName().isEmpty() && !employee.getState().isEmpty()
+                    && !employee.getDistrict().isEmpty() && !employee.getPermanentState().isEmpty()
+                    && !employee.getPermanentDistrict().isEmpty() && !employee.getGender().isEmpty()
+                    && !employee.getQualification().isEmpty()
+                    && isValidDate(convertStringIntoDate(employee.getDob()).toString())
+                    && isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString());
+
+            if (coreFieldsValid) {
+                try {
+                    M_User1 mUser = existingUser;
+                    mUser.setUserID(mUser.getUserID());
+                    mUser.setTitleID(getTitleId(employee.getTitle()));
+                    mUser.setFirstName(employee.getFirstName());
+                    mUser.setLastName(employee.getLastName());
+                    mUser.setdOB(convertStringIntoDate(employee.getDob()));
+                    mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
+                    mUser.setContactNo(String.valueOf(employee.getContactNo()));
+
+                    if(!employee.getEmployeeId().isEmpty()){
+                        mUser.setEmployeeID(employee.getEmployeeId());
+                    }
+
+                    if (!employee.getMiddleName().isEmpty()) {
+                        mUser.setMiddleName(employee.getMiddleName());
+                    }
+                    if (!employee.getDesignation().isEmpty()) {
+                        mUser.setDesignationID(getDesignationId(employee.getDesignation()));
+                        mUser.setDesignationName(employee.getDesignation());
+                    }
+                    if (!employee.getAadhaarNo().isEmpty() && isValidAadhar(employee.getAadhaarNo())) {
+                        mUser.setAadhaarNo(String.valueOf(employee.getAadhaarNo()));
+                    }
+                    if (!employee.getPan().isEmpty()) {
+                        mUser.setpAN(employee.getPan());
+                    }
+                    mUser.setEmailID(employee.getEmail());
+                    mUser.setGenderID(Short.parseShort(String.valueOf(getGenderId(employee.getGender()))));
+                    if (!employee.getQualification().isEmpty()) {
+                        mUser.setQualificationID(getQualificationId(employee.getQualification()));
+                    }
+                    mUser.setdOJ(convertStringIntoDate(employee.getDateOfJoining()));
+                    mUser.setModifiedBy(modifiedBy);
+                    mUser.setServiceProviderID(serviceProviderID);
+
+                    // password touched only if a new one was supplied
+                    if (!employee.getPassword().isEmpty()) {
+                        mUser.setPassword(generateStrongPassword(employee.getPassword()));
+                    }
+
+                    M_User1 updatedUser = employeeMasterInter.saveBulkUserEmployee(mUser);
+
+                    M_UserDemographics mUserDemographics = employeeMasterInter.getUserDemographicsByUserID(updatedUser.getUserID());
+                    if (mUserDemographics == null) {
+                        mUserDemographics = new M_UserDemographics();
+                        mUserDemographics.setUserID(updatedUser.getUserID());
+                        mUserDemographics.setCountryID(91);
+                    }
+
+                    if (!employee.getCommunity().isEmpty()) {
+                        mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
+                    }
+                    if (!employee.getReligion().isEmpty()) {
+                        mUserDemographics.setReligionID(getReligionStringId(employee.getReligion()));
+                    }
+                    mUserDemographics.setModifiedBy(modifiedBy);
+
+                    if (!employee.getPermanentAddressLine1().isEmpty()) {
+                        mUserDemographics.setPermAddressLine1(employee.getPermanentAddressLine1());
+                    }
+                    if (!employee.getPermanentState().isEmpty()) {
+                        mUserDemographics.setPermStateID(getStateId(employee.getPermanentState()));
+                    }
+                    if (!employee.getPermanentDistrict().isEmpty()) {
+                        mUserDemographics.setPermDistrictID(getDistrictId(employee.getPermanentDistrict()));
+                    }
+                    if (!employee.getPermanentPincode().isEmpty()) {
+                        mUserDemographics.setPermPinCode(Integer.valueOf(employee.getPermanentPincode()));
+                    }
+                    if (!employee.getMotherName().isEmpty()) {
+                        mUserDemographics.setMothersName(employee.getMotherName());
+                    }
+                    if (!employee.getFatherName().isEmpty()) {
+                        mUserDemographics.setFathersName(employee.getFatherName());
+                    }
+                    if (!employee.getAddressLine1().isEmpty()) {
+                        mUserDemographics.setAddressLine1(employee.getAddressLine1());
+                    }
+                    if (!employee.getState().isEmpty()) {
+                        mUserDemographics.setStateID(getStateId(employee.getState()));
+                    }
+                    if (!employee.getDistrict().isEmpty()) {
+                        int districtId = isStopTB ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                                : getDistrictId(employee.getDistrict());
+                        if (districtId == 0) {
+                            validationErrors.add("Current District is invalid.");
+
+                        }
+                    }
+                    if (!employee.getPincode().isEmpty()) {
+                        mUserDemographics.setPinCode(employee.getPincode().toString());
+                    }
+
+                    m_UserDemographicsRepo.save(mUserDemographics);
+
+                    m_bulkUser.add(mUser);
+                    m_UserDemographics.add(mUserDemographics);
+
+                } catch (Exception e) {
+                    errorLogs.add("Row :" + (row + 1) + e.getMessage());
+                    logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+                }
+            }
+
+        } else {
+            validationErrors.add("Contact No already belongs to another user");
+            logAndCollectError(row, employee, validationErrors, bulkRegistrationErrors_);
+        }
+    }
+
+    // shared helper — same duplicated block ko replace kar diya
+    private void logAndCollectError(Integer row, Employee employee, List<String> validationErrors,
+                                    BulkRegistrationError bulkRegistrationErrors_) {
+        if (!validationErrors.isEmpty()) {
+            errorLogs.add("Row " + (row + 1) + ": " + String.join(", ", validationErrors));
+            bulkRegistrationErrors_.setRowNumber((row + 1));
+            bulkRegistrationErrors_.setUserName(employee.getUserName());
+            bulkRegistrationErrors_.setError(validationErrors);
+            bulkRegistrationErrors.add(bulkRegistrationErrors_);
+        }
+    }
+
+    private boolean isValidDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return false;
+        }
+
+        try {
+            LocalDate date = LocalDate.parse(
+                    dateStr.trim(),
+                    DateTimeFormatter.ISO_LOCAL_DATE
+            );
+
+            return !date.isAfter(
+                    LocalDate.now(ZoneId.of("Asia/Kolkata"))
+            );
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
@@ -587,8 +989,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
 
     public int getDesignationId(String designationString) {
+         if(!m_DesignationRepo.findByDesignationName(designationString).isEmpty()){
+             return m_DesignationRepo.findByDesignationName(designationString).get(0).getDesignationID();
 
-        return 20;
+         }else {
+             return 0;
+         }
     }
 
 
@@ -645,6 +1051,33 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
     }
 
+    // Stop TB-only equivalent of getDistrictId(): resolves against Nikshay's own
+    // district master (m_nikshay_district) instead of AMRIT's m_District, since
+    // Nikshay's data reflects current district boundaries (e.g. post-2022 AP
+    // reorganization) while m_District does not. Not used for any other service
+    // line.
+    public int getNikshayDistrictId(String stateName, String districtName) {
+        if (stateName == null || stateName.isEmpty() || districtName == null || districtName.isEmpty()) {
+            return 0;
+        }
+
+        int nikshayStateId = nikshayStateRepo.findAllActive().stream()
+                .filter(s -> s.getStateName().equalsIgnoreCase(stateName))
+                .map(NikshayState::getNikshayStateID)
+                .findFirst()
+                .orElse(0);
+
+        if (nikshayStateId == 0) {
+            return 0;
+        }
+
+        return nikshayDistrictRepo.findByStateID(nikshayStateId).stream()
+                .filter(d -> d.getDistrictName().equalsIgnoreCase(districtName))
+                .map(NikshayDistrict::getNikshayDistrictID)
+                .findFirst()
+                .orElse(0);
+    }
+
 
     public ArrayList<StateMasterForRole> getAllState() {
         return roleMasterInter.getAllState();
@@ -693,18 +1126,42 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return headerMap;
     }
 
-
     public static Date convertStringIntoDate(String date) {
+        if (date == null || date.trim().isEmpty()) {
+            throw new IllegalArgumentException("Date cannot be null or empty");
+        }
 
-        final long MILLISECONDS_PER_DAY = 86400000L;
-        final long EPOCH_OFFSET = 2209161600000L;
+        String value = date.trim();
+        LocalDate parsedDate;
 
-        // Calculate milliseconds since epoch
-        long javaMillis = (long) (Double.parseDouble(date) * MILLISECONDS_PER_DAY - EPOCH_OFFSET);
+        try {
+            if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                // Example: 2009-10-20
+                parsedDate = LocalDate.parse(value);
+            } else {
+                // Excel 1900 date system.
+                // Fractional part represents time; ignored for DOB/joining date.
+                long serial = new BigDecimal(value).longValueExact();
 
-        return new Date(javaMillis);
+                if (serial < 1 || serial > 2958465 || serial == 60) {
+                    throw new IllegalArgumentException(
+                            "Invalid Excel date serial: " + value);
+                }
 
+                // Excel incorrectly treats 1900 as a leap year.
+                long days = serial < 60 ? serial : serial - 1;
+                parsedDate = LocalDate.of(1899, 12, 31).plusDays(days);
+            }
 
+            return java.sql.Date.valueOf(parsedDate);
+
+        } catch (NumberFormatException | ArithmeticException
+                 | DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Invalid date: " + value
+                            + ". Expected yyyy-MM-dd or a whole Excel serial number.",
+                    e);
+        }
     }
 
 

@@ -19,22 +19,11 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.repo.employeemaster;
+package com.iemr.admin.service.username;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.iemr.admin.model.username.UsernameRenameRequest;
+import com.iemr.admin.model.username.UsernameRenameResponse;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
-
-import com.iemr.admin.data.employeemaster.M_Designation;
-
-@Repository
-public interface M_DesignationRepo extends CrudRepository<M_Designation, Integer> {
-   
-	@Query("SELECT u FROM M_Designation u where deleted=false order by u.designationName")
-	ArrayList<M_Designation> getDesinationlist();
-
-    List<M_Designation> findByDesignationName(String designationString);
+public interface UsernameRenameService {
+	UsernameRenameResponse rename(UsernameRenameRequest request) throws Exception;
 }
