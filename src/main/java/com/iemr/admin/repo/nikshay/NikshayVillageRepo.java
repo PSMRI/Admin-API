@@ -1,8 +1,8 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology 
-* Integrated EHR (Electronic Health Records) Solution 
+* AMRIT – Accessible Medical Records via Integrated Technology
+* Integrated EHR (Electronic Health Records) Solution
 *
-* Copyright (C) "Piramal Swasthya Management and Research Institute" 
+* Copyright (C) "Piramal Swasthya Management and Research Institute"
 *
 * This file is part of AMRIT.
 *
@@ -19,22 +19,20 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see https://www.gnu.org/licenses/.
 */
-package com.iemr.admin.repo.employeemaster;
+package com.iemr.admin.repo.nikshay;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.iemr.admin.data.employeemaster.M_Designation;
+import com.iemr.admin.data.nikshay.NikshayVillage;
 
 @Repository
-public interface M_DesignationRepo extends CrudRepository<M_Designation, Integer> {
-   
-	@Query("SELECT u FROM M_Designation u where deleted=false order by u.designationName")
-	ArrayList<M_Designation> getDesinationlist();
+public interface NikshayVillageRepo extends CrudRepository<NikshayVillage, Integer> {
 
-    List<M_Designation> findByDesignationName(String designationString);
+	@Query("select v from NikshayVillage v where v.nikshayFacilityID in (:facilityIDs) and v.deleted = false order by v.villageName")
+	List<NikshayVillage> findByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
 }

@@ -423,6 +423,18 @@ public class M_UserServiceRoleMapping2 {
 	@Column(name = "isOutbound")
 	private Boolean outbound;
 
+	// Stop TB / Nikshay location scope — populated only when serviceName = "Stop TB".
+	// Comma-joined list of Nikshay TU/Facility IDs (e.g. "12,45,78") — a user
+	// can be mapped to several TUs/Facilities in one row, same idea as
+	// Villageid.
+	@Expose
+	@Column(name = "NikshayTUID")
+	private String nikshayTUID;
+
+	@Expose
+	@Column(name = "NikshayFacilityID")
+	private String nikshayFacilityID;
+
 	public M_UserServiceRoleMapping2() {
 	}
 

@@ -166,6 +166,9 @@ public interface EmployeeMasterInter {
 	// Fix 2: cascade soft-delete asha_supervisor_mapping rows when a user is deactivated
 	void cascadeDeleteAshaMappingsForUser(Integer userID);
 
+	// Soft-delete other active mappings for same user+service, excluding the row being updated
+	int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer excludeUSRMappingID);
+
 	// Fix 2: smart cascade — for supervisor with multiple facilities, only delete mappings for this facility
 	void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole);
 
@@ -198,4 +201,10 @@ public interface EmployeeMasterInter {
 	M_UserServiceRoleMapping2 deleteuserrolemapTM(M_UserServiceRoleMapping2 pre) throws Exception;
 
     M_User1 saveBulkUserEmployee(M_User1 mUser);
+
+	String FindEmployeeContactForUpdate(String contactNo, Integer userID);
+
+	String FindEmployeeAadhaarForUpdate(String aadhaarNo, Integer userID);
+
+	M_UserDemographics getUserDemographicsByUserID(Integer userID);
 }

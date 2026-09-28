@@ -1025,6 +1025,11 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
+	public int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer excludeUSRMappingID) {
+		return employeeMasterRepo.softDeleteOldMappings(userID, providerServiceMapID, excludeUSRMappingID);
+	}
+
+	@Override
 	public void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole) {
 		Integer userID = usrRole.getUserID();
 		M_Role role = usrRole.getRoleID() != null ? roleRepo.findByRoleID(usrRole.getRoleID()) : null;
@@ -1218,8 +1223,17 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 					Object[] row = stateDistrictMap.get(mapping.getuSRMappingID());
 					if (mapping.getStateID() == null && row[1] != null) mapping.setStateID((Integer) row[1]);
 					if (mapping.getStateName() == null && row[2] != null) mapping.setStateName((String) row[2]);
-					if (mapping.getWorkingDistrictID() == null && row[3] != null) mapping.setWorkingDistrictID(String.valueOf(row[3]));
-					if (mapping.getWorkingDistrictName() == null && row[4] != null) mapping.setWorkingDistrictName((String) row[4]);
+					// Stop TB's DistrictID column holds a Nikshay district ID, not an
+					// AMRIT one - getDirectStateDistrictByMappingIDs joins it against
+					// AMRIT's m_district, which for Stop TB resolves to whatever AMRIT
+					// district happens to share that same numeric ID (a coincidence,
+					// not real data - e.g. Nikshay's Angul (292) resolving to AMRIT's
+					// Uttar Kannad, ID 292). Skip the district patch for Stop TB only.
+					boolean isStopTB = "Stop TB".equals(mapping.getServiceName());
+					if (!isStopTB) {
+						if (mapping.getWorkingDistrictID() == null && row[3] != null) mapping.setWorkingDistrictID(String.valueOf(row[3]));
+						if (mapping.getWorkingDistrictName() == null && row[4] != null) mapping.setWorkingDistrictName((String) row[4]);
+					}
 					if (mapping.getBlockID() == null && row[5] != null) mapping.setBlockID((Integer) row[5]);
 					if (mapping.getBlockName() == null && row[6] != null) mapping.setBlockName((String) row[6]);
 				}
@@ -1494,4 +1508,39 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 		return data;
 	}
 
+	@Override
+	public String FindEmployeeContactForUpdate(String contactNo, Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeContactForUpdate - start");
+		M_User1 data = employeeMasterRepo11.findEmployeeByContactForUpdate(contactNo, userID);
+		String result;
+		if (data == null) {
+			result = "contactnotexist";
+		} else {
+			result = "contactexist";
+		}
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeContactForUpdate - finish");
+		return result;
+	}
+
+	@Override
+	public String FindEmployeeAadhaarForUpdate(String aadhaarNo, Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeAadhaarForUpdate - start");
+		M_User1 data = employeeMasterRepo11.findEmployeeAadhaarNoForUpdate(aadhaarNo, userID);
+		String result;
+		if (data == null) {
+			result = "aadhaarnotexist";
+		} else {
+			result = "aadhaarexist";
+		}
+		logger.info("EmployeeMasterServiceImpl.FindEmployeeAadhaarForUpdate - finish");
+		return result;
+	}
+
+	@Override
+	public M_UserDemographics getUserDemographicsByUserID(Integer userID) {
+		logger.info("EmployeeMasterServiceImpl.getUserDemographicsByUserID - start");
+		M_UserDemographics data = m_UserDemographicsRepo.findByUserID(userID);
+		logger.info("EmployeeMasterServiceImpl.getUserDemographicsByUserID - finish");
+		return data;
+	}
 }

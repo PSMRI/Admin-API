@@ -1,533 +1,423 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology 
-* Integrated EHR (Electronic Health Records) Solution 
-*
-* Copyright (C) "Piramal Swasthya Management and Research Institute" 
-*
-* This file is part of AMRIT.
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see https://www.gnu.org/licenses/.
-*/
-
+ * AMRIT – Accessible Medical Records via Integrated Technology
+ * Integrated EHR (Electronic Health Records) Solution
+ *
+ * Copyright (C) "Piramal Swasthya Management and Research Institute"
+ *
+ * This file is part of AMRIT.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
 package com.iemr.admin.service.health;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PreDestroy;
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
-import jakarta.annotation.PreDestroy;
-import javax.sql.DataSource;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.HikariPoolMXBean;
-import java.lang.management.ManagementFactory;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class HealthService {
 
     private static final Logger logger = LoggerFactory.getLogger(HealthService.class);
 
-    private static final String STATUS_KEY = "status";
-    private static final String STATUS_UP = "UP";
-    private static final String STATUS_DOWN = "DOWN";
-    private static final String STATUS_DEGRADED = "DEGRADED";
-    private static final String SEVERITY_KEY = "severity";
-    private static final String SEVERITY_OK = "OK";
-    private static final String SEVERITY_WARNING = "WARNING";
+    // Event log constants
+    private static final String LOG_EVENT_STUCK_PROCESS  = "MYSQL_STUCK_PROCESS";
+    private static final String LOG_EVENT_LOCK_WAIT      = "MYSQL_LOCK_WAIT";
+    private static final String LOG_EVENT_DEADLOCK       = "MYSQL_DEADLOCK";
+    private static final String LOG_EVENT_SLOW_QUERIES   = "MYSQL_SLOW_QUERIES";
+    private static final String LOG_EVENT_CONN_USAGE     = "MYSQL_CONNECTION_USAGE";
+    private static final String LOG_EVENT_POOL_EXHAUSTED = "MYSQL_POOL_EXHAUSTED";
+
+    // Response field constants
+    private static final String FIELD_STATUS   = "status";
+    private static final String FIELD_SEVERITY = "severity";
+    private static final String FIELD_MYSQL    = "mysql";
+    private static final String FIELD_REDIS    = "redis";
+    private static final String FIELD_CHECKED_AT = "checkedAt";
+
+    // Severity constants
     private static final String SEVERITY_CRITICAL = "CRITICAL";
-    private static final String ERROR_KEY = "error";
-    private static final String MESSAGE_KEY = "message";
-    private static final String RESPONSE_TIME_KEY = "responseTimeMs";
-    private static final long MYSQL_TIMEOUT_SECONDS = 3;
-    private static final long REDIS_TIMEOUT_SECONDS = 3;
-    
-    private static final long ADVANCED_CHECKS_THROTTLE_SECONDS = 30;
-    private static final long RESPONSE_TIME_THRESHOLD_MS = 2000;
-    
-    private static final String DIAGNOSTIC_LOCK_WAIT = "MYSQL_LOCK_WAIT";
-    private static final String DIAGNOSTIC_SLOW_QUERIES = "MYSQL_SLOW_QUERIES";
-    private static final String DIAGNOSTIC_POOL_EXHAUSTED = "MYSQL_POOL_EXHAUSTED";
-    private static final String DIAGNOSTIC_LOG_TEMPLATE = "Diagnostic: {}";
+    private static final String SEVERITY_WARNING  = "WARNING";
+    private static final String SEVERITY_OK       = "OK";
+    private static final String SEVERITY_INFO     = "INFO";
 
+    // Database query constants
+    private static final String STATUS_VALUE = "Value";
+    private static final String STATUS_UP     = "UP";
+    private static final String STATUS_DOWN   = "DOWN";
+    private static final String STATUS_DEGRADED = "DEGRADED";
+    private static final String STATUS_NOT_CONFIGURED = "NOT_CONFIGURED";
+
+    // Thresholds
+    private static final long RESPONSE_TIME_SLOW_MS    = 2000; // > 2s → SLOW
+    private static final int  STUCK_PROCESS_THRESHOLD  = 5;    // > 5 stuck → WARNING
+    private static final int  STUCK_PROCESS_SECONDS    = 30;   // process age in seconds
+    private static final int  LONG_TXN_WARNING_THRESHOLD  = 1;  // ≥1 long txn → WARNING
+    private static final int  LONG_TXN_CRITICAL_THRESHOLD = 5;  // ≥5 long txns → CRITICAL
+    private static final int  LONG_TXN_SECONDS         = 60;   // transaction age threshold
+    private static final int  CONNECTION_USAGE_WARNING = 80;   // > 80% → WARNING
+    private static final int  CONNECTION_USAGE_CRITICAL= 95;   // > 95% → CRITICAL
+    private static final long DIAGNOSTIC_INTERVAL_SEC  = 30;   // background run interval
+    private static final long DIAGNOSTIC_GUARD_SEC     = 25;   // safety dedup guard
     private final DataSource dataSource;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ExecutorService executorService;
-    
-    private volatile long lastAdvancedCheckTime = 0;
-    private volatile AdvancedCheckResult cachedAdvancedCheckResult = null;
-    private final ReentrantReadWriteLock advancedCheckLock = new ReentrantReadWriteLock();
-    private final AtomicBoolean advancedCheckInProgress = new AtomicBoolean(false);
-    
-    @Value("${health.advanced.checks.enabled:true}")
-    private boolean advancedHealthChecksEnabled;
+    private final RedisConnectionFactory redisConnectionFactory;
 
-    public HealthService(DataSource dataSource,
-                        @Autowired(required = false) RedisTemplate<String, Object> redisTemplate) {
-        this.dataSource = dataSource;
-        this.redisTemplate = redisTemplate;
-        this.executorService = Executors.newFixedThreadPool(2, new java.util.concurrent.ThreadFactory() {
-            private final AtomicInteger threadCounter = new AtomicInteger(0);
-            
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, "health-check-" + threadCounter.incrementAndGet());
-                t.setDaemon(true);
-                return t;
-            }
+    private final ScheduledExecutorService diagnosticScheduler =
+        Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "mysql-diagnostic-thread");
+            t.setDaemon(true);
+            return t;
         });
+
+    private final AtomicLong lastDiagnosticRunAt = new AtomicLong(0);
+    private final AtomicReference<String> cachedDbSeverity =
+        new AtomicReference<>(SEVERITY_OK);
+    private final AtomicLong previousDeadlockCount = new AtomicLong(0);
+    private final AtomicLong previousSlowQueryCount = new AtomicLong(0);
+    public HealthService(ObjectProvider<DataSource> dataSourceProvider,
+                         ObjectProvider<RedisConnectionFactory> redisProvider) {
+        this.dataSource = dataSourceProvider.getIfAvailable();
+        this.redisConnectionFactory = redisProvider.getIfAvailable();
+
+        // Start background diagnostics only if DB is configured.
+        // Initial delay = 0 so the first run happens at startup.
+        if (this.dataSource != null) {
+            diagnosticScheduler.scheduleAtFixedRate(
+                this::runAdvancedMySQLDiagnostics,
+                0,
+                DIAGNOSTIC_INTERVAL_SEC,
+                TimeUnit.SECONDS
+            );
+        }
     }
 
     @PreDestroy
-    public void shutdown() {
-        if (executorService != null && !executorService.isShutdown()) {
-            try {
-                executorService.shutdown();
-                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                    executorService.shutdownNow();
-                    logger.warn("ExecutorService did not terminate gracefully");
-                }
-            } catch (InterruptedException e) {
-                executorService.shutdownNow();
-                Thread.currentThread().interrupt();
-                logger.warn("ExecutorService shutdown interrupted", e);
+    public void shutdownDiagnostics() {
+        logger.info("[HEALTH_SERVICE_SHUTDOWN] Shutting down diagnostic scheduler...");
+        diagnosticScheduler.shutdown();
+        try {
+            if (!diagnosticScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                logger.warn("[HEALTH_SERVICE_SHUTDOWN] Diagnostic scheduler did not terminate gracefully");
+                diagnosticScheduler.shutdownNow();
             }
+            logger.info("[HEALTH_SERVICE_SHUTDOWN] Diagnostic scheduler shut down successfully");
+        } catch (InterruptedException e) {
+            logger.error("[HEALTH_SERVICE_SHUTDOWN] Interrupted while shutting down scheduler", e);
+            diagnosticScheduler.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
-
+    
+    // PUBLIC — Called by the /health controller
     public Map<String, Object> checkHealth() {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("timestamp", Instant.now().toString());
+
+        Map<String, Object> mysqlResult = checkDatabaseConnectivity();
+        Map<String, Object> redisResult = checkRedisConnectivity();
+
+        String mysqlStatus = (String) mysqlResult.get(FIELD_STATUS);
+        String redisStatus = (String) redisResult.get(FIELD_STATUS);
+
+        boolean overallUp = !STATUS_DOWN.equals(mysqlStatus) && !STATUS_DOWN.equals(redisStatus);
+
+        response.put(FIELD_STATUS,     overallUp ? STATUS_UP : STATUS_DOWN);
+        response.put(FIELD_CHECKED_AT, Instant.now().toString());
         
-        Map<String, Object> mysqlStatus = new ConcurrentHashMap<>();
-        Map<String, Object> redisStatus = new ConcurrentHashMap<>();
+        // Expose only status and severity, keep diagnostics internal
+        Map<String, Object> mysqlSummary = new LinkedHashMap<>();
+        mysqlSummary.put(FIELD_STATUS, mysqlResult.get(FIELD_STATUS));
+        mysqlSummary.put(FIELD_SEVERITY, mysqlResult.get(FIELD_SEVERITY));
         
-        if (!executorService.isShutdown()) {
-            performHealthChecks(mysqlStatus, redisStatus);
-        }
+        Map<String, Object> redisSummary = new LinkedHashMap<>();
+        redisSummary.put(FIELD_STATUS, redisResult.get(FIELD_STATUS));
+        redisSummary.put(FIELD_SEVERITY, redisResult.get(FIELD_SEVERITY));
         
-        ensurePopulated(mysqlStatus, "MySQL");
-        ensurePopulated(redisStatus, "Redis");
-        
-        Map<String, Map<String, Object>> components = new LinkedHashMap<>();
-        components.put("mysql", mysqlStatus);
-        components.put("redis", redisStatus);
-        
-        response.put("components", components);
-        response.put(STATUS_KEY, computeOverallStatus(components));
-        
+        response.put(FIELD_MYSQL,     mysqlSummary);
+        response.put(FIELD_REDIS,     redisSummary);
+
         return response;
     }
+    // Runs only SELECT 1 with a hard 3-second timeout on query execution.
+    // NOTE: getConnection() is NOT bounded by this timeout — it respects the pool's
+    // connectionTimeout (default 30s in HikariCP). For true 3-second /health guarantees,
+    // configure the DataSource connectionTimeout ≤ 3 seconds or wrap in an ExecutorService timeout.
+    private Map<String, Object> checkDatabaseConnectivity() {
+        Map<String, Object> result = new LinkedHashMap<>();
 
-    private void performHealthChecks(Map<String, Object> mysqlStatus, Map<String, Object> redisStatus) {
-        Future<?> mysqlFuture = null;
-        Future<?> redisFuture = null;
-        try {
-            mysqlFuture = executorService.submit(
-                () -> performHealthCheck("MySQL", mysqlStatus, this::checkMySQLHealthSync));
-            redisFuture = executorService.submit(
-                () -> performHealthCheck("Redis", redisStatus, this::checkRedisHealthSync));
-            
-            awaitHealthChecks(mysqlFuture, redisFuture);
-        } catch (TimeoutException e) {
-            logger.warn("Health check aggregate timeout after {} seconds", getMaxTimeout());
-            cancelFutures(mysqlFuture, redisFuture);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.warn("Health check was interrupted");
-            cancelFutures(mysqlFuture, redisFuture);
+        if (dataSource == null) {
+            result.put(FIELD_STATUS,   STATUS_NOT_CONFIGURED);
+            result.put(FIELD_SEVERITY, SEVERITY_INFO);
+            return result;
+        }
+
+        try (Connection conn = dataSource.getConnection();
+             Statement  stmt = conn.createStatement()) {
+
+            stmt.setQueryTimeout(3); // Bounds only the SELECT 1 execution
+            stmt.execute("SELECT 1");
+
+            // If SELECT 1 succeeds, use cached severity from background diagnostics
+            String severity = cachedDbSeverity.get();
+            result.put(FIELD_STATUS,   resolveDatabaseStatus(severity));
+            result.put(FIELD_SEVERITY, severity);
+
         } catch (Exception e) {
-            logger.warn("Health check execution error: {}", e.getMessage());
-            cancelFutures(mysqlFuture, redisFuture);
+            // Log connection failure as a structured event
+            logger.error(
+                "[MYSQL_CONNECT_FAILED] MySQL connectivity check failed | error=\"{}\"",
+                e.getMessage()
+            );
+
+            result.put(FIELD_STATUS,   STATUS_DOWN);
+            result.put(FIELD_SEVERITY, SEVERITY_CRITICAL);
         }
+
+        return result;
     }
 
-    private void awaitHealthChecks(Future<?> mysqlFuture, Future<?> redisFuture) throws TimeoutException, InterruptedException, ExecutionException {
-        long maxTimeout = getMaxTimeout();
-        long deadlineNs = System.nanoTime() + TimeUnit.SECONDS.toNanos(maxTimeout);
-        
-        mysqlFuture.get(maxTimeout, TimeUnit.SECONDS);
-        long remainingNs = deadlineNs - System.nanoTime();
-        
-        if (remainingNs > 0) {
-            redisFuture.get(remainingNs, TimeUnit.NANOSECONDS);
-        } else {
-            redisFuture.cancel(true);
+    private Map<String, Object> checkRedisConnectivity() {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (redisConnectionFactory == null) {
+            result.put(FIELD_STATUS,   STATUS_NOT_CONFIGURED);
+            result.put(FIELD_SEVERITY, SEVERITY_INFO);
+            return result;
         }
+
+        try (RedisConnection conn = redisConnectionFactory.getConnection()) {
+            conn.ping();
+            result.put(FIELD_STATUS,   STATUS_UP);
+            result.put(FIELD_SEVERITY, SEVERITY_OK);
+
+        } catch (Exception e) {
+            logger.error(
+                "[REDIS_CONNECT_FAILED] Redis connectivity check failed | error=\"{}\"",
+                e.getMessage()
+            );
+
+            result.put(FIELD_STATUS,   STATUS_DOWN);
+            result.put(FIELD_SEVERITY, SEVERITY_CRITICAL);
+        }
+
+        return result;
     }
 
-    private long getMaxTimeout() {
-        return Math.max(MYSQL_TIMEOUT_SECONDS, REDIS_TIMEOUT_SECONDS) + 1;
+    private void runAdvancedMySQLDiagnostics() {
+        // Dedup guard: skip if last run was within the past 25 seconds
+        long now = System.currentTimeMillis();
+        if (now - lastDiagnosticRunAt.get() < TimeUnit.SECONDS.toMillis(DIAGNOSTIC_GUARD_SEC)) {
+            return;
+        }
+        lastDiagnosticRunAt.set(now);
+
+        String worstSeverity = SEVERITY_OK;
+
+        try (Connection conn = dataSource.getConnection()) {
+            worstSeverity = escalate(worstSeverity, performStuckProcessCheck(conn));
+            worstSeverity = escalate(worstSeverity, performLongTransactionCheck(conn));
+            worstSeverity = escalate(worstSeverity, performDeadlockCheck(conn));
+            worstSeverity = escalate(worstSeverity, performSlowQueryCheck(conn));
+            worstSeverity = escalate(worstSeverity, performConnectionUsageCheck(conn));
+
+        } catch (Exception e) {
+            logger.error(
+                "[MYSQL_DIAGNOSTIC_ERROR] Could not open connection for diagnostics | error=\"{}\"",
+                e.getMessage()
+            );
+            worstSeverity = SEVERITY_CRITICAL;
+        }
+
+        cachedDbSeverity.set(worstSeverity);
+        logger.debug(
+            "[MYSQL_DIAGNOSTIC_COMPLETE] Background diagnostic cycle complete | severity={}",
+            worstSeverity
+        );
     }
 
-    private void cancelFutures(Future<?> mysqlFuture, Future<?> redisFuture) {
-        if (mysqlFuture != null) mysqlFuture.cancel(true);
-        if (redisFuture != null) redisFuture.cancel(true);
-    }
-
-    private void ensurePopulated(Map<String, Object> status, String componentName) {
-
-        status.putIfAbsent(STATUS_KEY, STATUS_DOWN);
-        status.putIfAbsent(SEVERITY_KEY, SEVERITY_CRITICAL);
-        status.putIfAbsent(ERROR_KEY, componentName + " health check did not complete in time");
-    }
-
-    private HealthCheckResult checkMySQLHealthSync() {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement("SELECT 1 as health_check")) {
+    private String performStuckProcessCheck(Connection conn) {
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                "SELECT COUNT(*) AS cnt FROM information_schema.PROCESSLIST " +
+                "WHERE TIME > " + STUCK_PROCESS_SECONDS + " AND COMMAND != 'Sleep'")) {
             
-            stmt.setQueryTimeout((int) MYSQL_TIMEOUT_SECONDS);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    // Connection is auto-closed by try-with-resources here
-                    // Advanced checks will open a separate connection if needed
+            if (rs.next()) {
+                int stuckCount = rs.getInt("cnt");
+                if (stuckCount > 0) {
+                    if (stuckCount > STUCK_PROCESS_THRESHOLD) {
+                        logger.warn(
+                            "[{}] Stuck MySQL processes detected above threshold | count={} | threshold={} | thresholdSeconds={}",
+                            LOG_EVENT_STUCK_PROCESS, stuckCount, STUCK_PROCESS_THRESHOLD, STUCK_PROCESS_SECONDS
+                        );
+                        return SEVERITY_WARNING;
+                    } else {
+                        logger.info(
+                            "[{}] Stuck MySQL processes below threshold | count={} | threshold={} | thresholdSeconds={}",
+                            LOG_EVENT_STUCK_PROCESS, stuckCount, STUCK_PROCESS_THRESHOLD, STUCK_PROCESS_SECONDS
+                        );
+                    }
                 }
             }
-            
         } catch (Exception e) {
-            logger.warn("MySQL health check failed: {}", e.getMessage(), e);
-            return new HealthCheckResult(false, "MySQL connection failed", false);
+            logger.error("[MYSQL_DIAGNOSTIC_ERROR] Stuck process check failed | error=\"{}\"",
+                e.getMessage());
         }
-        
-
-        boolean isDegraded = performAdvancedMySQLChecksWithThrottle();
-        return new HealthCheckResult(true, null, isDegraded);
-    }
-
-    private HealthCheckResult checkRedisHealthSync() {
-        if (redisTemplate == null) {
-            return new HealthCheckResult(true, "Redis not configured — skipped", false);
-        }
-        
-        try {
-            String pong = redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<String>) (connection) -> connection.ping());
-            
-            if ("PONG".equals(pong)) {
-                return new HealthCheckResult(true, null, false);
-            }
-            
-            return new HealthCheckResult(false, "Redis PING failed", false);
-            
-        } catch (Exception e) {
-            logger.warn("Redis health check failed: {}", e.getMessage(), e);
-            return new HealthCheckResult(false, "Redis connection failed", false);
-        }
-    }
-
-    private Map<String, Object> performHealthCheck(String componentName,
-                                                    Map<String, Object> status,
-                                                    Supplier<HealthCheckResult> checker) {
-        long startTime = System.currentTimeMillis();
-        
-        try {
-            HealthCheckResult result = checker.get();
-            long responseTime = System.currentTimeMillis() - startTime;
-            
-            String componentStatus;
-            if (!result.isHealthy) {
-                componentStatus = STATUS_DOWN;
-            } else if (result.isDegraded) {
-                componentStatus = STATUS_DEGRADED;
-            } else {
-                componentStatus = STATUS_UP;
-            }
-            status.put(STATUS_KEY, componentStatus);
-            
-            status.put(RESPONSE_TIME_KEY, responseTime);
-            
-            String severity = determineSeverity(result.isHealthy, responseTime, result.isDegraded);
-            status.put(SEVERITY_KEY, severity);
-            
-            if (result.error != null) {
-                String fieldKey = result.isHealthy ? MESSAGE_KEY : ERROR_KEY;
-                status.put(fieldKey, result.error);
-            }
-            
-            return status;
-            
-        } catch (Exception e) {
-            long responseTime = System.currentTimeMillis() - startTime;
-            logger.error("{} health check failed with exception: {}", componentName, e.getMessage(), e);
-            
-            status.put(STATUS_KEY, STATUS_DOWN);
-            status.put(RESPONSE_TIME_KEY, responseTime);
-            status.put(SEVERITY_KEY, SEVERITY_CRITICAL);
-            status.put(ERROR_KEY, "Health check failed with an unexpected error");
-            
-            return status;
-        }
-    }
-
-    private String determineSeverity(boolean isHealthy, long responseTimeMs, boolean isDegraded) {
-        if (!isHealthy) {
-            return SEVERITY_CRITICAL;
-        }
-        
-        if (isDegraded) {
-            return SEVERITY_WARNING;
-        }
-        
-        if (responseTimeMs > RESPONSE_TIME_THRESHOLD_MS) {
-            return SEVERITY_WARNING;
-        }
-        
         return SEVERITY_OK;
     }
 
-    private String computeOverallStatus(Map<String, Map<String, Object>> components) {
-        boolean hasCritical = false;
-        boolean hasDegraded = false;
-        
-        for (Map<String, Object> componentStatus : components.values()) {
-            String status = (String) componentStatus.get(STATUS_KEY);
-            String severity = (String) componentStatus.get(SEVERITY_KEY);
+    private String performLongTransactionCheck(Connection conn) {
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(
+                "SELECT COUNT(*) AS cnt FROM information_schema.INNODB_TRX " +
+                "WHERE TIME_TO_SEC(TIMEDIFF(NOW(), trx_started)) > " + LONG_TXN_SECONDS)) {
             
-            if (STATUS_DOWN.equals(status) || SEVERITY_CRITICAL.equals(severity)) {
-                hasCritical = true;
-            }
-            
-            if (STATUS_DEGRADED.equals(status)) {
-                hasDegraded = true;
-            }
-            
-            if (SEVERITY_WARNING.equals(severity)) {
-                hasDegraded = true;
-            }
-        }
-        
-        if (hasCritical) {
-            return STATUS_DOWN;
-        }
-        
-        if (hasDegraded) {
-            return STATUS_DEGRADED;
-        }
-        
-        return STATUS_UP;
-    }
-
-    private boolean performAdvancedMySQLChecksWithThrottle() {
-        if (!advancedHealthChecksEnabled) {
-            return false;
-        }
-        
-        long currentTime = System.currentTimeMillis();
-        
-        advancedCheckLock.readLock().lock();
-        try {
-            if (cachedAdvancedCheckResult != null && 
-                (currentTime - lastAdvancedCheckTime) < ADVANCED_CHECKS_THROTTLE_SECONDS * 1000) {
-                return cachedAdvancedCheckResult.isDegraded;
-            }
-        } finally {
-            advancedCheckLock.readLock().unlock();
-        }
-        
-        // Only one thread may submit; others fall back to the (stale) cache
-        if (!advancedCheckInProgress.compareAndSet(false, true)) {
-            advancedCheckLock.readLock().lock();
-            try {
-                return cachedAdvancedCheckResult != null && cachedAdvancedCheckResult.isDegraded;
-            } finally {
-                advancedCheckLock.readLock().unlock();
-            }
-        }
-        
-        try {
-            // Perform DB I/O outside the write lock to avoid lock contention
-            AdvancedCheckResult result;
-            try (Connection connection = dataSource.getConnection()) {
-                result = performAdvancedMySQLChecks(connection);
-            } catch (Exception e) {
-                if (e.getCause() instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-                logger.debug("Failed to get connection for advanced checks: {}", e.getMessage());
-                result = new AdvancedCheckResult(false);
-            }
-            
-            // Re-acquire write lock only to update the cache atomically
-            advancedCheckLock.writeLock().lock();
-            try {
-                lastAdvancedCheckTime = currentTime;
-                cachedAdvancedCheckResult = result;
-                return result.isDegraded;
-            } finally {
-                advancedCheckLock.writeLock().unlock();
-            }
-        } finally {
-            advancedCheckInProgress.set(false);
-        }
-    }
-
-    private AdvancedCheckResult performAdvancedMySQLChecks(Connection connection) {
-        try {
-            boolean hasIssues = false;
-            
-            if (hasLockWaits(connection)) {
-                logger.warn(DIAGNOSTIC_LOG_TEMPLATE, DIAGNOSTIC_LOCK_WAIT);
-                hasIssues = true;
-            }
-            
-            
-            if (hasSlowQueries(connection)) {
-                logger.warn(DIAGNOSTIC_LOG_TEMPLATE, DIAGNOSTIC_SLOW_QUERIES);
-                hasIssues = true;
-            }
-            
-            if (hasConnectionPoolExhaustion()) {
-                logger.warn(DIAGNOSTIC_LOG_TEMPLATE, DIAGNOSTIC_POOL_EXHAUSTED);
-                hasIssues = true;
-            }
-            
-            return new AdvancedCheckResult(hasIssues);
-        } catch (Exception e) {
-            logger.debug("Advanced MySQL checks encountered exception, marking degraded");
-            return new AdvancedCheckResult(true);
-        }
-    }
-
-    private boolean hasLockWaits(Connection connection) {
-        try (PreparedStatement stmt = connection.prepareStatement(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.PROCESSLIST " +
-                "WHERE (state = 'Waiting for table metadata lock' " +
-                "   OR state = 'Waiting for row lock' " +
-                "   OR state = 'Waiting for lock') " +
-                "AND user = SUBSTRING_INDEX(USER(), '@', 1)")) {
-            stmt.setQueryTimeout(2);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int lockCount = rs.getInt(1);
-                    return lockCount > 0;
+            if (rs.next()) {
+                int lockCount = rs.getInt("cnt");
+                if (lockCount >= LONG_TXN_WARNING_THRESHOLD) {
+                    logger.warn(
+                        "[{}] InnoDB long-running transaction(s) detected | count={} | thresholdSeconds={}",
+                        LOG_EVENT_LOCK_WAIT, lockCount, LONG_TXN_SECONDS
+                    );
+                    // Graduated escalation: WARNING for 1-4, CRITICAL for 5+
+                    return lockCount >= LONG_TXN_CRITICAL_THRESHOLD
+                        ? SEVERITY_CRITICAL : SEVERITY_WARNING;
                 }
             }
         } catch (Exception e) {
-            logger.debug("Could not check for lock waits");
+            logger.error("[MYSQL_DIAGNOSTIC_ERROR] Long transaction check failed | error=\"{}\"",
+                e.getMessage());
         }
-        return false;
+        return SEVERITY_OK;
     }
 
-    private boolean hasSlowQueries(Connection connection) {
-        try (PreparedStatement stmt = connection.prepareStatement(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.PROCESSLIST " +
-                "WHERE command != 'Sleep' AND time > ? AND user = SUBSTRING_INDEX(USER(), '@', 1)")) {
-            stmt.setQueryTimeout(2);
-            stmt.setInt(1, 10);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int slowQueryCount = rs.getInt(1);
-                    return slowQueryCount > 3;
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Could not check for slow queries");
-        }
-        return false;
-    }
-
-    private boolean hasConnectionPoolExhaustion() {
-        if (dataSource instanceof HikariDataSource hikariDataSource) {
-            try {
-                HikariPoolMXBean poolMXBean = hikariDataSource.getHikariPoolMXBean();
+    private String performDeadlockCheck(Connection conn) {
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SHOW STATUS LIKE 'Innodb_deadlocks'")) {
+            
+            if (rs.next()) {
+                long currentDeadlocks = rs.getLong(STATUS_VALUE);
+                long previousDeadlocks = previousDeadlockCount.getAndSet(currentDeadlocks);
                 
-                if (poolMXBean != null) {
-                    int activeConnections = poolMXBean.getActiveConnections();
-                    int maxPoolSize = hikariDataSource.getMaximumPoolSize();
-                    
-                    int threshold = (int) (maxPoolSize * 0.8);
-                    return activeConnections > threshold;
-                }
-            } catch (Exception e) {
-                logger.debug("Could not retrieve HikariCP pool metrics");
-            }
-        }
-        
-        return checkPoolMetricsViaJMX();
-    }
-
-    private boolean checkPoolMetricsViaJMX() {
-        try {
-            MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-            ObjectName objectName = new ObjectName("com.zaxxer.hikari:type=Pool (*)");
-            var mBeans = mBeanServer.queryMBeans(objectName, null);
-            
-            for (var mBean : mBeans) {
-                if (evaluatePoolMetrics(mBeanServer, mBean.getObjectName())) {
-                    return true;
+                if (currentDeadlocks > previousDeadlocks) {
+                    long deltaDeadlocks = currentDeadlocks - previousDeadlocks;
+                    logger.warn(
+                        "[{}] InnoDB deadlocks detected since last run | deltaCount={} | cumulativeCount={}",
+                        LOG_EVENT_DEADLOCK, deltaDeadlocks, currentDeadlocks
+                    );
+                    return SEVERITY_WARNING;
                 }
             }
         } catch (Exception e) {
-            logger.debug("Could not access HikariCP pool metrics via JMX");
+            logger.error("[MYSQL_DIAGNOSTIC_ERROR] Deadlock check failed | error=\"{}\"",
+                e.getMessage());
         }
-        
-        logger.debug("Pool exhaustion check disabled: HikariCP metrics unavailable");
-        return false;
+        return SEVERITY_OK;
     }
 
-    private boolean evaluatePoolMetrics(MBeanServer mBeanServer, ObjectName objectName) {
-        try {
-            Integer activeConnections = (Integer) mBeanServer.getAttribute(objectName, "ActiveConnections");
-            Integer maximumPoolSize = (Integer) mBeanServer.getAttribute(objectName, "MaximumPoolSize");
+    private String performSlowQueryCheck(Connection conn) {
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SHOW STATUS LIKE 'Slow_queries'")) {
             
-            if (activeConnections != null && maximumPoolSize != null) {
-                int threshold = (int) (maximumPoolSize * 0.8);
-                return activeConnections > threshold;
+            if (rs.next()) {
+                long slowQueries = rs.getLong(STATUS_VALUE);
+                long previousSlow = previousSlowQueryCount.getAndSet(slowQueries);
+                
+                // Only warn if slow queries have *increased* since last run
+                if (slowQueries > previousSlow) {
+                    long delta = slowQueries - previousSlow;
+                    logger.warn(
+                        "[{}] New slow queries detected since last run | deltaCount={} | cumulativeCount={}",
+                        LOG_EVENT_SLOW_QUERIES, delta, slowQueries
+                    );
+                    return SEVERITY_WARNING;
+                }
             }
         } catch (Exception e) {
-            // Continue to next MBean
+            logger.error("[MYSQL_DIAGNOSTIC_ERROR] Slow query check failed | error=\"{}\"",
+                e.getMessage());
         }
-        return false;
+        return SEVERITY_OK;
     }
 
-    private static class AdvancedCheckResult {
-        final boolean isDegraded;
+    private String performConnectionUsageCheck(Connection conn) {
+        try (Statement stmt = conn.createStatement()) {
+            int threadsConnected = 0;
+            int maxConnections   = 0;
 
-        AdvancedCheckResult(boolean isDegraded) {
-            this.isDegraded = isDegraded;
+            try (ResultSet rs = stmt.executeQuery("SHOW STATUS LIKE 'Threads_connected'")) {
+                if (rs.next()) threadsConnected = rs.getInt(STATUS_VALUE);
+            }
+
+            try (ResultSet rs = stmt.executeQuery("SHOW VARIABLES LIKE 'max_connections'")) {
+                if (rs.next()) maxConnections = rs.getInt(STATUS_VALUE);
+            }
+
+            if (maxConnections > 0) {
+                int usagePct = (int) ((threadsConnected * 100.0) / maxConnections);
+
+                if (usagePct >= CONNECTION_USAGE_CRITICAL) {
+                    logger.error(
+                        "[{}] MySQL connection pool near exhaustion | threadsConnected={} | maxConnections={} | usagePercent={}",
+                        LOG_EVENT_POOL_EXHAUSTED, threadsConnected, maxConnections, usagePct
+                    );
+                    return SEVERITY_CRITICAL;
+
+                } else if (usagePct > CONNECTION_USAGE_WARNING) {
+                    logger.warn(
+                        "[{}] MySQL connection usage is high | threadsConnected={} | maxConnections={} | usagePercent={}",
+                        LOG_EVENT_CONN_USAGE, threadsConnected, maxConnections, usagePct
+                    );
+                    return SEVERITY_WARNING;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("[MYSQL_DIAGNOSTIC_ERROR] Connection usage check failed | error=\"{}\"",
+                e.getMessage());
         }
+        return SEVERITY_OK;
+    }
+    private String resolveDatabaseStatus(String severity) {
+        return switch (severity) {
+            case SEVERITY_CRITICAL -> STATUS_DOWN;
+            case SEVERITY_WARNING  -> STATUS_DEGRADED;
+            default                -> STATUS_UP;
+        };
+    }
+    private String escalate(String current, String candidate) {
+        return severityRank(candidate) > severityRank(current) ? candidate : current;
     }
 
-    private static class HealthCheckResult {
-        final boolean isHealthy;
-        final String error;
-        final boolean isDegraded;
-
-        HealthCheckResult(boolean isHealthy, String error, boolean isDegraded) {
-            this.isHealthy = isHealthy;
-            this.error = error;
-            this.isDegraded = isDegraded;
-        }
+    private int severityRank(String severity) {
+        return switch (severity) {
+            case SEVERITY_CRITICAL -> 2;
+            case SEVERITY_WARNING  -> 1;
+            default                -> 0;
+        };
     }
 }

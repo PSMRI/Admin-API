@@ -98,5 +98,8 @@ public class Employee {
     @JacksonXmlProperty(localName = "Password")
     private String Password="";
 
+    @JacksonXmlProperty(localName = "EmployeeId")
+    private String EmployeeId="";
+
 
 }
