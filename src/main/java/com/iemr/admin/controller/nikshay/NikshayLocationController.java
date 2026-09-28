@@ -23,6 +23,7 @@ package com.iemr.admin.controller.nikshay;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -121,7 +122,7 @@ public class NikshayLocationController {
 		OutputResponse response = new OutputResponse();
 		try {
 			List<NikshayTU> tus = nikshayTURepo.findByDistrictID(districtID);
-			response.setResponse(tus.toString());
+			response.setResponse(new Gson().toJson(tus.stream().map(this::toLite).collect(Collectors.toList())));
 		} catch (Exception e) {
 			logger.error("Error fetching Nikshay TUs for districtID " + districtID + ": " + e.getMessage(), e);
 			response.setError(e);
@@ -136,7 +137,7 @@ public class NikshayLocationController {
 		try {
 			List<Integer> ids = parseIntCsv(tuIDs);
 			List<NikshayFacility> facilities = nikshayFacilityRepo.findByTUIDs(ids);
-			response.setResponse(facilities.toString());
+			response.setResponse(new Gson().toJson(facilities.stream().map(this::toLite).collect(Collectors.toList())));
 		} catch (Exception e) {
 			logger.error("Error fetching Nikshay facilities for tuIDs " + tuIDs + ": " + e.getMessage(), e);
 			response.setError(e);
@@ -151,7 +152,7 @@ public class NikshayLocationController {
 		try {
 			List<Integer> ids = parseIntCsv(facilityIDs);
 			List<NikshayVillage> villages = nikshayVillageRepo.findByFacilityIDs(ids);
-			response.setResponse(villages.toString());
+			response.setResponse(new Gson().toJson(villages.stream().map(this::toLite).collect(Collectors.toList())));
 		} catch (Exception e) {
 			logger.error("Error fetching villages for facilityIDs " + facilityIDs + ": " + e.getMessage(), e);
 			response.setError(e);
@@ -181,6 +182,35 @@ public class NikshayLocationController {
 			response.setError(e);
 		}
 		return response.toString();
+	}
+
+	// TU/Facility/Village lists can run into thousands of rows for a single
+	// district (e.g. Pune MC: 5,327 facilities), and the full entities carry
+	// audit fields (createdBy/createdDate/modifiedBy/lastModDate/codes) the
+	// Admin UI never reads. Send only the ID, name and parent ID each dropdown
+	// needs — same field names as before, so older UI builds keep working.
+	private Map<String, Object> toLite(NikshayTU t) {
+		Map<String, Object> m = new LinkedHashMap<>();
+		m.put("nikshayTUID", t.getNikshayTUID());
+		m.put("tUName", t.getTUName());
+		m.put("nikshayDistrictID", t.getNikshayDistrictID());
+		return m;
+	}
+
+	private Map<String, Object> toLite(NikshayFacility f) {
+		Map<String, Object> m = new LinkedHashMap<>();
+		m.put("nikshayFacilityID", f.getNikshayFacilityID());
+		m.put("facilityName", f.getFacilityName());
+		m.put("nikshayTUID", f.getNikshayTUID());
+		return m;
+	}
+
+	private Map<String, Object> toLite(NikshayVillage v) {
+		Map<String, Object> m = new LinkedHashMap<>();
+		m.put("nikshayVillageID", v.getNikshayVillageID());
+		m.put("villageName", v.getVillageName());
+		m.put("nikshayFacilityID", v.getNikshayFacilityID());
+		return m;
 	}
 
 	private List<Integer> parseIntCsv(String csv) {
