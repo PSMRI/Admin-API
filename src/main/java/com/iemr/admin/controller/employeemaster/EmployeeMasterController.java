@@ -1791,6 +1791,12 @@ public class EmployeeMasterController {
 				Previleges1097_3[] predata1 = pre.get(x).getPrevileges();
 				for (Previleges1097_3 previl : predata1) {
 
+					// Each role in the ID array must become its own saved row. This used to
+					// build a single M_UserServiceRoleMapping2 across all iterations of this
+					// loop and only add it to resList1 once, after the loop — so a batched
+					// request carrying multiple roles (e.g. Nurse + Counsellor) silently
+					// discarded every role but the last one. Moving the object creation and
+					// the add() call inside the loop saves one row per role, as intended.
 					Priveleges1097_2[] predata2 = previl.getID();
 					for (Priveleges1097_2 previl1 : predata2) {
 						resDataMap1 = new M_UserServiceRoleMapping2();
@@ -1800,22 +1806,22 @@ public class EmployeeMasterController {
 						if (previl1.getTeleConsultation() != null) {
 							resDataMap1.setTeleConsultation(previl1.getTeleConsultation());
 						}
+						resDataMap1.setUserID(employeeMaster.get(x).getUserID());
+						resDataMap1.setProviderServiceMapID(previl.getProviderServiceMapID());
+						resDataMap1.setWorkingLocationID(previl.getWorkingLocationID());
+						resDataMap1.setStateID(previl.getStateID());
+						resDataMap1.setDistrictID(previl.getDistrictID());
+						resDataMap1.setCreatedBy(employeeMaster.get(x).getCreatedBy());
+						resDataMap1.setServiceProviderID(employeeMaster.get(x).getServiceProviderID());
+						resDataMap1.setBlockID(previl.getBlockID());
+						resDataMap1.setBlockName(previl.getBlockName());
+						resDataMap1.setVillageID(previl.getVillageID());
+						resDataMap1.setVillageName(previl.getVillageName());
+						resDataMap1.setFacilityID(previl.getFacilityID());
+						resDataMap1.setNikshayTUID(previl.getNikshayTUID());
+						resDataMap1.setNikshayFacilityID(previl.getNikshayFacilityID());
+						resList1.add(resDataMap1);
 					}
-					resDataMap1.setUserID(employeeMaster.get(x).getUserID());
-					resDataMap1.setProviderServiceMapID(previl.getProviderServiceMapID());
-					resDataMap1.setWorkingLocationID(previl.getWorkingLocationID());
-					resDataMap1.setStateID(previl.getStateID());
-					resDataMap1.setDistrictID(previl.getDistrictID());
-					resDataMap1.setCreatedBy(employeeMaster.get(x).getCreatedBy());
-					resDataMap1.setServiceProviderID(employeeMaster.get(x).getServiceProviderID());
-					resDataMap1.setBlockID(previl.getBlockID());
-					resDataMap1.setBlockName(previl.getBlockName());
-					resDataMap1.setVillageID(previl.getVillageID());
-					resDataMap1.setVillageName(previl.getVillageName());
-					resDataMap1.setFacilityID(previl.getFacilityID());
-					resDataMap1.setNikshayTUID(previl.getNikshayTUID());
-					resDataMap1.setNikshayFacilityID(previl.getNikshayFacilityID());
-					resList1.add(resDataMap1);
 
 				}
 				x++;
@@ -1863,11 +1869,15 @@ public class EmployeeMasterController {
 				}
 			}
 
-			// Soft-delete other active mappings for same user+service to prevent duplicates
-			// (e.g. old roleID 122 rows left over when new roleID 128 mapping was created)
-			if (pre.getUserID() != null && pre.getProviderServiceMapID() != null && pre.getuSRMappingID() != null) {
+			// Soft-delete other active mappings for same user+service+role to prevent
+			// duplicates (e.g. a stale leftover row still claiming this same role).
+			// Scoped by roleID as well as user+service — otherwise this deletes every
+			// OTHER role the user holds under this service line too, not just true
+			// duplicates of the role being saved here.
+			if (pre.getUserID() != null && pre.getProviderServiceMapID() != null && pre.getRoleID() != null
+					&& pre.getuSRMappingID() != null) {
 				employeeMasterInter.softDeleteOldMappings(
-						pre.getUserID(), pre.getProviderServiceMapID(), pre.getuSRMappingID());
+						pre.getUserID(), pre.getProviderServiceMapID(), pre.getRoleID(), pre.getuSRMappingID());
 			}
 
 			usrRole.setUserID(pre.getUserID());

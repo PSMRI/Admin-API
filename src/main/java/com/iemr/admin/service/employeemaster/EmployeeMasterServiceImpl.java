@@ -1025,8 +1025,8 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	}
 
 	@Override
-	public int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer excludeUSRMappingID) {
-		return employeeMasterRepo.softDeleteOldMappings(userID, providerServiceMapID, excludeUSRMappingID);
+	public int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer roleID, Integer excludeUSRMappingID) {
+		return employeeMasterRepo.softDeleteOldMappings(userID, providerServiceMapID, roleID, excludeUSRMappingID);
 	}
 
 	@Override
