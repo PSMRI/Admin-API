@@ -47,8 +47,8 @@ public class VillageUpdateServiceImpl implements VillageUpdateService {
 
 	/**
 	 * Replaces one village on a work location mapping and moves the beneficiary
-	 * addresses that user registered under the old village to the new one, in
-	 * a single transaction.
+	 * addresses that user registered (i_beneficiaryaddress.CreatedBy) to the new
+	 * village, in a single transaction.
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -108,13 +108,26 @@ public class VillageUpdateServiceImpl implements VillageUpdateService {
 
 		String modifiedBy = trimToNull(request.getModifiedBy());
 		villageUpdateRepository.updateMappingVillages(request.getuSRMappingID(), joinedIDs, joinedNames, modifiedBy);
-		long permanent = villageUpdateRepository.updatePermanentVillage(userName, request.getOldVillageID(),
-				request.getNewVillageID(), newVillageName, modifiedBy);
-		long current = villageUpdateRepository.updateCurrentVillage(userName, request.getOldVillageID(),
-				request.getNewVillageID(), newVillageName, modifiedBy);
 
-		logger.info("Village update complete: uSRMappingID {}, village {} -> {}, addresses perm {} curr {}",
-				request.getuSRMappingID(), oldVillageID, newVillageID, permanent, current);
+		// A single-village user registered every beneficiary under that village,
+		// so all of their addresses move. With several villages, only addresses on
+		// the replaced village move, so the other villages are left as they are.
+		long permanent;
+		long current;
+		boolean allAddresses = villageIDs.size() == 1;
+		if (allAddresses) {
+			permanent = villageUpdateRepository.updateAllAddressVillages(userName, request.getNewVillageID(),
+					newVillageName, modifiedBy);
+			current = permanent;
+		} else {
+			permanent = villageUpdateRepository.updatePermanentVillage(userName, request.getOldVillageID(),
+					request.getNewVillageID(), newVillageName, modifiedBy);
+			current = villageUpdateRepository.updateCurrentVillage(userName, request.getOldVillageID(),
+					request.getNewVillageID(), newVillageName, modifiedBy);
+		}
+
+		logger.info("Village update complete: uSRMappingID {}, village {} -> {}, allAddresses {}, perm {} curr {}",
+				request.getuSRMappingID(), oldVillageID, newVillageID, allAddresses, permanent, current);
 
 		VillageUpdateResponse response = new VillageUpdateResponse();
 		response.setuSRMappingID(request.getuSRMappingID());
@@ -125,6 +138,7 @@ public class VillageUpdateServiceImpl implements VillageUpdateService {
 		response.setNewVillageName(newVillageName);
 		response.setPermanentAddressesUpdated(permanent);
 		response.setCurrentAddressesUpdated(current);
+		response.setAllAddressesUpdated(allAddresses);
 		return response;
 	}
 

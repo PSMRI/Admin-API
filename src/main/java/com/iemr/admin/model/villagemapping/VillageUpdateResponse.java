@@ -32,6 +32,7 @@ public class VillageUpdateResponse {
 
 	private long permanentAddressesUpdated;
 	private long currentAddressesUpdated;
+	private boolean allAddressesUpdated;
 
 	public Integer getuSRMappingID() {
 		return uSRMappingID;
@@ -95,5 +96,13 @@ public class VillageUpdateResponse {
 
 	public void setCurrentAddressesUpdated(long currentAddressesUpdated) {
 		this.currentAddressesUpdated = currentAddressesUpdated;
+	}
+
+	public boolean isAllAddressesUpdated() {
+		return allAddressesUpdated;
+	}
+
+	public void setAllAddressesUpdated(boolean allAddressesUpdated) {
+		this.allAddressesUpdated = allAddressesUpdated;
 	}
 }

@@ -54,6 +54,11 @@ public class VillageUpdateRepository {
 			"UPDATE db_identity.i_beneficiaryaddress SET CurrVillageId = :newVillageID, CurrVillage = :newVillageName,"
 					+ " ModifiedBy = :modifiedBy WHERE CreatedBy = :userName AND CurrVillageId = :oldVillageID";
 
+	private static final String SET_ALL_ADDRESS_VILLAGES =
+			"UPDATE db_identity.i_beneficiaryaddress SET PermVillageId = :newVillageID, PermVillage = :newVillageName,"
+					+ " CurrVillageId = :newVillageID, CurrVillage = :newVillageName, ModifiedBy = :modifiedBy"
+					+ " WHERE CreatedBy = :userName";
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -103,6 +108,16 @@ public class VillageUpdateRepository {
 			String newVillageName, String modifiedBy) {
 		return updateAddressVillage(SET_CURRENT_VILLAGE, userName, oldVillageID, newVillageID, newVillageName,
 				modifiedBy);
+	}
+
+	public long updateAllAddressVillages(String userName, Integer newVillageID, String newVillageName,
+			String modifiedBy) {
+		Query query = entityManager.createNativeQuery(SET_ALL_ADDRESS_VILLAGES);
+		query.setParameter("newVillageID", newVillageID);
+		query.setParameter("newVillageName", newVillageName);
+		query.setParameter("modifiedBy", modifiedBy);
+		query.setParameter("userName", userName);
+		return query.executeUpdate();
 	}
 
 	private long updateAddressVillage(String sql, String userName, Integer oldVillageID, Integer newVillageID,
