@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -38,6 +39,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.Date;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,32 +97,49 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     private List<M_District> m_districts;
 
     @Override
-    public void registerBulkUser(String xml, String authorization,String userName,Integer serviceProviderID) {
+    public void registerBulkUser(
+            String xml,
+            String authorization,
+            String userName,
+            Integer serviceProviderID) {
+
+        EmployeeList employeeList;
+
         try {
             xml = escapeXmlSpecialChars(xml);
-
-            EmployeeList employeeList = employeeXmlService.parseXml(xml);
-            if (!employeeList.getEmployees().isEmpty()) {
-                logger.info("employee_list" + employeeList.getEmployees().toString());
-                totalEmployeeListSize = employeeList.getEmployees().size();
-                for (int i = 0; i < employeeList.getEmployees().size(); i++) {
-                    processUserUser(employeeList.getEmployees().get(i), i, authorization,userName,serviceProviderID);
-
-
-                }
-            } else {
-                errorLogs.add("Data is invalid or empty");
-
-            }
-
-
+            employeeList = employeeXmlService.parseXml(xml);
         } catch (Exception e) {
-            logger.error("Exception:" + e.getMessage());
-            errorLogs.add("Data is invalid or empty");
-
+            logger.error("Bulk user XML parsing failed", e);
+            errorLogs.add("Unable to parse uploaded data: "
+                    + (e.getMessage() != null
+                    ? e.getMessage()
+                    : e.getClass().getSimpleName()));
+            return;
         }
 
+        if (employeeList == null
+                || employeeList.getEmployees() == null
+                || employeeList.getEmployees().isEmpty()) {
+            errorLogs.add("Data is invalid or empty");
+            return;
+        }
 
+        totalEmployeeListSize = employeeList.getEmployees().size();
+
+        for (int i = 0; i < totalEmployeeListSize; i++) {
+            Employee employee = employeeList.getEmployees().get(i);
+
+            try {
+                processUserUser(
+                        employee,
+                        i,
+                        authorization,
+                        userName,
+                        serviceProviderID);
+            } catch (Exception e) {
+                collectBulkException(i, employee, e);
+            }
+        }
     }
     public static String escapeXmlSpecialChars(String xml) {
         // Only escape & that are not already part of valid XML entities
@@ -370,9 +389,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setLastName(employee.getLastName());
                             mUser.setUserName(employee.getUserName());
                             mUser.setdOB(convertStringIntoDate(employee.getDob()));
-                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
                             mUser.setContactNo(String.valueOf(employee.getContactNo()));
+                            if(!employee.getEmployeeId().isEmpty()){
+                                mUser.setEmployeeID(employee.getEmployeeId());
+
+                            }
                             if (!employee.getMiddleName().isEmpty()) {
                                 mUser.setMiddleName(employee.getMiddleName());
 
@@ -406,7 +428,6 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                             mUser.setModifiedBy(createdBy);
                             mUser.setStatusID(2);
                             mUser.setDeleted(false);
-                            mUser.setEmployeeID(employee.getUserName());
                             mUser.setServiceProviderID(serviceProviderID);
                             mUser.setPassword(generateStrongPassword(employee.getPassword()));
                             M_User1 bulkUserID = employeeMasterInter.saveBulkUserEmployee(mUser);
@@ -416,6 +437,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 //                            m_userServiceRoleMapping.setRoleID(122);
                             mUserDemographics.setUserID(bulkUserID.getUserID());
                             mUserDemographics.setCountryID(91);
+
                             if (!employee.getCommunity().isEmpty()) {
                                 mUserDemographics.setCommunityID(getCommunityId(employee.getCommunity()));
 
@@ -531,11 +553,34 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
 
+
     }
     /**
      * Validate employee details.
      */
 
+    private void collectBulkException(
+            Integer row, Employee employee, Exception exception) {
+
+        String message = exception.getMessage();
+        if (message == null || message.isBlank()) {
+            message = exception.getClass().getSimpleName();
+        }
+
+        List<String> errors = new ArrayList<>();
+        errors.add(message);
+
+        BulkRegistrationError error = new BulkRegistrationError();
+        error.setRowNumber(row + 1);
+        error.setUserName(employee != null ? employee.getUserName() : null);
+        error.setError(errors);
+
+        bulkRegistrationErrors.add(error);
+        errorLogs.add("Row " + (row + 1) + ": " + message);
+
+        logger.error("Bulk user processing failed at row " + (row + 1),
+                exception);
+    }
 
     private void updateUserUser(Employee employee, Integer row, String authorization, String modifiedBy, Integer serviceProviderID) throws Exception {
         boolean isStopTB = providerServiceMappingRepo.existsByServiceProviderIDAndServiceID(serviceProviderID, STOP_TB_SERVICE_ID);
@@ -713,6 +758,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     mUser.setEmergencyContactNo(String.valueOf(employee.getEmergencyContactNo()));
                     mUser.setContactNo(String.valueOf(employee.getContactNo()));
 
+                    if(!employee.getEmployeeId().isEmpty()){
+                        mUser.setEmployeeID(employee.getEmployeeId());
+                    }
+
                     if (!employee.getMiddleName().isEmpty()) {
                         mUser.setMiddleName(employee.getMiddleName());
                     }
@@ -823,20 +872,21 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
     }
 
     private boolean isValidDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return false;
+        }
+
         try {
-            String[] parts = dateStr.split("-");
-            int year = Integer.parseInt(parts[0]);
+            LocalDate date = LocalDate.parse(
+                    dateStr.trim(),
+                    DateTimeFormatter.ISO_LOCAL_DATE
+            );
 
-            if (year > 2025) {
-                return false; // Year should not be greater than 2025
-            }
-
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(dateStr, formatter); // Validates if the full date is correct
-
-            return true; // Valid date within range
-        } catch (Exception e) {
-            return false; // Invalid date format or parsing error
+            return !date.isAfter(
+                    LocalDate.now(ZoneId.of("Asia/Kolkata"))
+            );
+        } catch (DateTimeParseException e) {
+            return false;
         }
     }
 
@@ -1076,18 +1126,42 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return headerMap;
     }
 
-
     public static Date convertStringIntoDate(String date) {
+        if (date == null || date.trim().isEmpty()) {
+            throw new IllegalArgumentException("Date cannot be null or empty");
+        }
 
-        final long MILLISECONDS_PER_DAY = 86400000L;
-        final long EPOCH_OFFSET = 2209161600000L;
+        String value = date.trim();
+        LocalDate parsedDate;
 
-        // Calculate milliseconds since epoch
-        long javaMillis = (long) (Double.parseDouble(date) * MILLISECONDS_PER_DAY - EPOCH_OFFSET);
+        try {
+            if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                // Example: 2009-10-20
+                parsedDate = LocalDate.parse(value);
+            } else {
+                // Excel 1900 date system.
+                // Fractional part represents time; ignored for DOB/joining date.
+                long serial = new BigDecimal(value).longValueExact();
 
-        return new Date(javaMillis);
+                if (serial < 1 || serial > 2958465 || serial == 60) {
+                    throw new IllegalArgumentException(
+                            "Invalid Excel date serial: " + value);
+                }
 
+                // Excel incorrectly treats 1900 as a leap year.
+                long days = serial < 60 ? serial : serial - 1;
+                parsedDate = LocalDate.of(1899, 12, 31).plusDays(days);
+            }
 
+            return java.sql.Date.valueOf(parsedDate);
+
+        } catch (NumberFormatException | ArithmeticException
+                 | DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Invalid date: " + value
+                            + ". Expected yyyy-MM-dd or a whole Excel serial number.",
+                    e);
+        }
     }
 
 
