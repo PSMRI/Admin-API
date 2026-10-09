@@ -35,4 +35,12 @@ public interface NikshayVillageRepo extends CrudRepository<NikshayVillage, Integ
 
 	@Query("select v from NikshayVillage v where v.nikshayFacilityID in (:facilityIDs) and v.deleted = false order by v.villageName")
 	List<NikshayVillage> findByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
+
+	// Only the three columns the village dropdown uses, as [nikshayVillageID,
+	// villageName, nikshayFacilityID]. A district can have 1 lakh+ village rows
+	// (the same village repeated under each facility); loading full entities
+	// for that was most of the response time.
+	@Query("select v.nikshayVillageID, v.villageName, v.nikshayFacilityID from NikshayVillage v "
+			+ "where v.nikshayFacilityID in (:facilityIDs) and v.deleted = false order by v.villageName, v.nikshayVillageID")
+	List<Object[]> findLiteByFacilityIDs(@Param("facilityIDs") List<Integer> facilityIDs);
 }

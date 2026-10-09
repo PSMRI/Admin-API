@@ -41,7 +41,6 @@ import com.iemr.admin.data.nikshay.NikshayDistrict;
 import com.iemr.admin.data.nikshay.NikshayFacility;
 import com.iemr.admin.data.nikshay.NikshayState;
 import com.iemr.admin.data.nikshay.NikshayTU;
-import com.iemr.admin.data.nikshay.NikshayVillage;
 import com.iemr.admin.repo.employeemaster.EmployeeMasterRepo;
 import com.iemr.admin.repo.nikshay.NikshayDistrictRepo;
 import com.iemr.admin.repo.nikshay.NikshayFacilityRepo;
@@ -151,8 +150,8 @@ public class NikshayLocationController {
 		OutputResponse response = new OutputResponse();
 		try {
 			List<Integer> ids = parseIntCsv(facilityIDs);
-			List<NikshayVillage> villages = nikshayVillageRepo.findByFacilityIDs(ids);
-			response.setResponse(new Gson().toJson(villages.stream().map(this::toLite).collect(Collectors.toList())));
+			List<Object[]> villages = nikshayVillageRepo.findLiteByFacilityIDs(ids);
+			response.setResponse(new Gson().toJson(villages.stream().map(this::toLiteVillage).collect(Collectors.toList())));
 		} catch (Exception e) {
 			logger.error("Error fetching villages for facilityIDs " + facilityIDs + ": " + e.getMessage(), e);
 			response.setError(e);
@@ -205,11 +204,13 @@ public class NikshayLocationController {
 		return m;
 	}
 
-	private Map<String, Object> toLite(NikshayVillage v) {
+	// row = [nikshayVillageID, villageName, nikshayFacilityID], see
+	// NikshayVillageRepo.findLiteByFacilityIDs
+	private Map<String, Object> toLiteVillage(Object[] row) {
 		Map<String, Object> m = new LinkedHashMap<>();
-		m.put("nikshayVillageID", v.getNikshayVillageID());
-		m.put("villageName", v.getVillageName());
-		m.put("nikshayFacilityID", v.getNikshayFacilityID());
+		m.put("nikshayVillageID", row[0]);
+		m.put("villageName", row[1]);
+		m.put("nikshayFacilityID", row[2]);
 		return m;
 	}
 
