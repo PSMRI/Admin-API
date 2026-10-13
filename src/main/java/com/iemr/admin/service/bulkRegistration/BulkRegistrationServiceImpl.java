@@ -8,6 +8,7 @@ import com.iemr.admin.data.locationmaster.M_District;
 import com.iemr.admin.data.nikshay.NikshayDistrict;
 import com.iemr.admin.data.nikshay.NikshayState;
 import com.iemr.admin.data.rolemaster.StateMasterForRole;
+import com.iemr.admin.repo.employeemaster.EmployeeMasterRepoo;
 import com.iemr.admin.repo.employeemaster.M_DesignationRepo;
 import com.iemr.admin.repo.employeemaster.M_UserDemographicsRepo;
 import com.iemr.admin.repo.employeemaster.V_ShowuserRepo;
@@ -64,6 +65,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
     @Autowired
     private M_DesignationRepo m_DesignationRepo;
+
+    @Autowired
+    private EmployeeMasterRepoo employeeMasterRepoo;
 
     @Autowired
     private Role_MasterInter roleMasterInter;
@@ -125,9 +129,47 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         }
 
         totalEmployeeListSize = employeeList.getEmployees().size();
+        // usernames are unique across the server, so every row whose username appears more than once
+        // in the file is rejected (none of them is saved) and the uploader has to fix the file
+        // the same applies to employee ids
+        Set<String> uploadedUserNames = new HashSet<>();
+        Set<String> duplicateUserNames = new HashSet<>();
+        Set<String> uploadedEmployeeIds = new HashSet<>();
+        Set<String> duplicateEmployeeIds = new HashSet<>();
+        for (Employee employee : employeeList.getEmployees()) {
+            // normalise the username and employee id once so the duplicate checks, the DB lookups and the saved values all agree
+            if (employee.getUserName() != null) {
+                employee.setUserName(employee.getUserName().trim());
+            }
+            if (employee.getEmployeeId() != null) {
+                employee.setEmployeeId(employee.getEmployeeId().trim());
+            }
+            if (employee.getUserName() != null && !employee.getUserName().isBlank()
+                    && !uploadedUserNames.add(employee.getUserName().trim().toLowerCase())) {
+                duplicateUserNames.add(employee.getUserName().trim().toLowerCase());
+            }
+            if (employee.getEmployeeId() != null && !employee.getEmployeeId().isBlank()
+                    && !uploadedEmployeeIds.add(employee.getEmployeeId().trim().toLowerCase())) {
+                duplicateEmployeeIds.add(employee.getEmployeeId().trim().toLowerCase());
+            }
+        }
 
         for (int i = 0; i < totalEmployeeListSize; i++) {
             Employee employee = employeeList.getEmployees().get(i);
+
+            List<String> duplicateErrors = new ArrayList<>();
+            if (employee.getUserName() != null
+                    && duplicateUserNames.contains(employee.getUserName().trim().toLowerCase())) {
+                duplicateErrors.add("Duplicate UserName in uploaded file : " + employee.getUserName());
+            }
+            if (employee.getEmployeeId() != null
+                    && duplicateEmployeeIds.contains(employee.getEmployeeId().trim().toLowerCase())) {
+                duplicateErrors.add("Duplicate Employee Id in uploaded file : " + employee.getEmployeeId());
+            }
+            if (!duplicateErrors.isEmpty()) {
+                logAndCollectError(i, employee, duplicateErrors, new BulkRegistrationError());
+                continue;
+            }
 
             try {
                 processUserUser(
@@ -151,7 +193,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
      */
     private void processUserUser(Employee employee, Integer row, String authorization, String createdBy, Integer serviceProviderID) throws Exception {
 
-        if (employee.getUserName() == null || employee.getUserName().isEmpty()) {
+        if (employee.getUserName() == null || employee.getUserName().isBlank()) {
             List<String> validationErrors = new ArrayList<>();
             BulkRegistrationError bulkRegistrationErrors_ = new BulkRegistrationError();
             validationErrors.add("Please Enter UserName");
@@ -166,8 +208,10 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
             // user not found → create flow
             saveUserUser(employee, row, authorization, createdBy, serviceProviderID);
         } else {
-            // user already exists → update flow
-            updateUserUser(employee, row, authorization, createdBy, serviceProviderID);
+//          bulk upload only creates new users; usernames are unique across the server
+            List<String> validationErrors = new ArrayList<>();
+            validationErrors.add("User already exists with username : " + employee.getUserName());
+            logAndCollectError(row, employee, validationErrors, new BulkRegistrationError());
         }
     }
 
@@ -180,12 +224,17 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         M_UserServiceRoleMapping2 m_userServiceRoleMapping = new M_UserServiceRoleMapping2();
 
         logger.info("employee_list after for loop" + employee.toString());
-        if (!employee.getUserName().isEmpty()) {
+        if (!employee.getUserName().isBlank()) {
             String checkUserIsExist = employeeMasterInter.FindEmployeeName(employee.getUserName());
             String checkContactIsExist = employeeMasterInter.FindEmployeeContact(employee.getContactNo());
             logger.info("checkAAdharIsExist" + checkUserIsExist);
             if (checkUserIsExist.equalsIgnoreCase("usernotexist")) {
                 if (checkContactIsExist.equalsIgnoreCase("contactnotexist")) {
+                    if (employee.getEmployeeId() == null || employee.getEmployeeId().isBlank()) {
+                        validationErrors.add("Employee Id is missing.");
+                    } else if (employeeMasterRepoo.countEmployeeByEmployeeID(employee.getEmployeeId().trim()) > 0) {
+                        validationErrors.add("User already exists with Employee Id : " + employee.getEmployeeId());
+                    }
                     if (employee.getTitle() == null || employee.getTitle().isEmpty()) {
                         validationErrors.add("Title is missing.");
                     }
@@ -251,6 +300,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     if (employee.getDesignation().isEmpty()) {
                         validationErrors.add("Designation is missing");
 
+                    } else if (getDesignationByDesignationName(employee.getDesignation()) == 0) {
+                        validationErrors.add("Designation is invalid.");
                     }
                     if (employee.getEmergencyContactNo().isEmpty()) {
                         validationErrors.add("Emergency contact number is missing");
@@ -604,6 +655,9 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
         if (checkContactIsExist.equalsIgnoreCase("contactnotexist")) {
 
+            if (employee.getEmployeeId() == null || employee.getEmployeeId().isBlank()) {
+                validationErrors.add("Employee Id is missing.");
+            }
             if (employee.getTitle() == null || employee.getTitle().isEmpty()) {
                 validationErrors.add("Title is missing.");
             }
@@ -656,6 +710,8 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
 
             if (employee.getDesignation().isEmpty()) {
                 validationErrors.add("Designation is missing");
+            } else if (getDesignationByDesignationName(employee.getDesignation()) == 0) {
+                validationErrors.add("Designation is invalid.");
             }
 
             if (employee.getEmergencyContactNo().isEmpty()) {
@@ -705,10 +761,18 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 validationErrors.add("Current State is invalid.");
             }
 
+            // district ids are looked up once here and reused for the save, so a district
+            // that is not found in the master is reported and the row is not saved.
+            // getDistrictId() searches the districts of the state last passed to getStateId(),
+            // so each district is looked up right after its own state
+            int districtId = employee.getDistrict().isEmpty() ? 0
+                    : isStopTB ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
+                    : getDistrictId(employee.getDistrict());
+
             if (employee.getDistrict().isEmpty()) {
                 validationErrors.add("Current District is missing.");
             }
-            if (!employee.getDistrict().isEmpty() && getDistrictId(employee.getDistrict()) == 0) {
+            if (!employee.getDistrict().isEmpty() && districtId == 0) {
                 validationErrors.add("Current District is invalid.");
             }
 
@@ -719,10 +783,14 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                 validationErrors.add("Permanent State is invalid.");
             }
 
+            int permDistrictId = employee.getPermanentDistrict().isEmpty() ? 0
+                    : isStopTB ? getNikshayDistrictId(employee.getPermanentState(), employee.getPermanentDistrict())
+                    : getDistrictId(employee.getPermanentDistrict());
+
             if (employee.getPermanentDistrict().isEmpty()) {
                 validationErrors.add("Permanent District is missing.");
             }
-            if (!employee.getPermanentDistrict().isEmpty() && getDistrictId(employee.getPermanentDistrict()) == 0) {
+            if (!employee.getPermanentDistrict().isEmpty() && permDistrictId == 0) {
                 validationErrors.add("Permanent District is invalid.");
             }
 
@@ -747,7 +815,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                     && isValidDate(convertStringIntoDate(employee.getDob()).toString())
                     && isValidDate(convertStringIntoDate(employee.getDateOfJoining()).toString());
 
-            if (coreFieldsValid) {
+            if (coreFieldsValid && districtId != 0 && permDistrictId != 0) {
                 try {
                     M_User1 mUser = existingUser;
                     mUser.setUserID(mUser.getUserID());
@@ -796,6 +864,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         mUserDemographics = new M_UserDemographics();
                         mUserDemographics.setUserID(updatedUser.getUserID());
                         mUserDemographics.setCountryID(91);
+                        mUserDemographics.setCreatedBy(modifiedBy);
                     }
 
                     if (!employee.getCommunity().isEmpty()) {
@@ -813,7 +882,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         mUserDemographics.setPermStateID(getStateId(employee.getPermanentState()));
                     }
                     if (!employee.getPermanentDistrict().isEmpty()) {
-                        mUserDemographics.setPermDistrictID(getDistrictId(employee.getPermanentDistrict()));
+                        mUserDemographics.setPermDistrictID(permDistrictId);
                     }
                     if (!employee.getPermanentPincode().isEmpty()) {
                         mUserDemographics.setPermPinCode(Integer.valueOf(employee.getPermanentPincode()));
@@ -831,12 +900,7 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
                         mUserDemographics.setStateID(getStateId(employee.getState()));
                     }
                     if (!employee.getDistrict().isEmpty()) {
-                        int districtId = isStopTB ? getNikshayDistrictId(employee.getState(), employee.getDistrict())
-                                : getDistrictId(employee.getDistrict());
-                        if (districtId == 0) {
-                            validationErrors.add("Current District is invalid.");
-
-                        }
+                        mUserDemographics.setDistrictID(districtId);
                     }
                     if (!employee.getPincode().isEmpty()) {
                         mUserDemographics.setPinCode(employee.getPincode().toString());
@@ -987,6 +1051,13 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         return titleId;
     }
 
+    public int getDesignationByDesignationName(String designationString) {
+        if (designationString == null || designationString.isBlank()) {
+            return 0;
+        }
+        List<M_Designation> designations = m_DesignationRepo.findByDesignationName(designationString.trim());
+        return designations.isEmpty() ? 0 : designations.get(0).getDesignationID();
+    }
 
     public int getDesignationId(String designationString) {
          if(!m_DesignationRepo.findByDesignationName(designationString).isEmpty()){
