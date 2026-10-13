@@ -137,9 +137,12 @@ public class BulkRegistrationServiceImpl implements BulkRegistrationService {
         Set<String> uploadedEmployeeIds = new HashSet<>();
         Set<String> duplicateEmployeeIds = new HashSet<>();
         for (Employee employee : employeeList.getEmployees()) {
-            // normalise the username once so the duplicate checks, the DB lookups and the saved value all agree
+            // normalise the username and employee id once so the duplicate checks, the DB lookups and the saved values all agree
             if (employee.getUserName() != null) {
                 employee.setUserName(employee.getUserName().trim());
+            }
+            if (employee.getEmployeeId() != null) {
+                employee.setEmployeeId(employee.getEmployeeId().trim());
             }
             if (employee.getUserName() != null && !employee.getUserName().isBlank()
                     && !uploadedUserNames.add(employee.getUserName().trim().toLowerCase())) {

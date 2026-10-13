@@ -48,7 +48,7 @@ public interface EmployeeMasterRepoo extends CrudRepository<M_User1, Integer>
 	M_User1 findEmployeeByName(@Param("userName") String userName);
 
 
-	@Query("SELECT COUNT(u) FROM M_User1 u WHERE u.employeeID=:employeeID AND deleted=false ")
+	@Query("SELECT COUNT(u) FROM M_User1 u WHERE LOWER(TRIM(u.employeeID)) = LOWER(TRIM(:employeeID)) AND deleted=false ")
 	Long countEmployeeByEmployeeID(@Param("employeeID") String employeeID);
 
 	@Query("SELECT u FROM M_User1 u WHERE u.contactNo=:contactNo AND deleted=false ")
