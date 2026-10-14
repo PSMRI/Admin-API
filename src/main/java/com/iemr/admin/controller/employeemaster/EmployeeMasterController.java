@@ -1820,6 +1820,7 @@ public class EmployeeMasterController {
 						resDataMap1.setFacilityID(previl.getFacilityID());
 						resDataMap1.setNikshayTUID(previl.getNikshayTUID());
 						resDataMap1.setNikshayFacilityID(previl.getNikshayFacilityID());
+						resDataMap1.setVanID(previl.getVanID());
 						resList1.add(resDataMap1);
 					}
 
@@ -1895,6 +1896,7 @@ public class EmployeeMasterController {
 			usrRole.setFacilityID(pre.getFacilityID());
 			usrRole.setNikshayTUID(pre.getNikshayTUID());
 			usrRole.setNikshayFacilityID(pre.getNikshayFacilityID());
+			usrRole.setVanID(pre.getVanID());
 
 			if (pre.getTeleConsultation() != null) {
 				usrRole.setTeleConsultation(pre.getTeleConsultation());

@@ -174,6 +174,7 @@ public class NikshayLocationController {
 				result.put("districtID", row.getDistrictID());
 				result.put("nikshayTUID", row.getNikshayTUID());
 				result.put("nikshayFacilityID", row.getNikshayFacilityID());
+				result.put("vanID", row.getVanID());
 			}
 			response.setResponse(new Gson().toJson(result));
 		} catch (Exception e) {

@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -60,6 +61,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
+import com.iemr.admin.service.stoptbteam.StopTBTeamService;
 import com.iemr.admin.data.blocking.M_Providerservicemapping_Blocking;
 import com.iemr.admin.data.employeemaster.EmployeeSignature;
 import com.iemr.admin.data.employeemaster.M_Community;
@@ -129,6 +131,9 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	private static final Boolean ENABLE_CTI_USER_CREATION = ConfigProperties.getBoolean("enableCTIUserCreation");
 	@Autowired
 	private M_CommunityRepo m_CommunityRepo;
+
+	@Autowired
+	private StopTBTeamService stopTBTeamService;
 
 	@Autowired
 	private M_ReligionRepo m_ReligionRepo;
@@ -348,6 +353,7 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 	public ArrayList<M_UserServiceRoleMapping2> mapRole(List<M_UserServiceRoleMapping2> resList1, String authToken) throws JsonMappingException, JsonProcessingException {
 		// Fix 4 + Fix 16 + Fix 17: validate each mapping before any save
 		for (M_UserServiceRoleMapping2 mapping : resList1) {
+			stopTBTeamService.validateTeam(mapping.getProviderServiceMapID(), mapping.getVanID());
 			M_Role role = null;
 			if (mapping.getRoleID() != null) {
 				role = roleRepo.findByRoleID(mapping.getRoleID());
@@ -430,6 +436,21 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 				employeeMasterRepo.save(mapping);
 			}
 
+		}
+		// Stop TB team (AMM-2496): one team per user across all their role rows. A
+		// new role without a team takes the team the user already has.
+		Map<String, M_UserServiceRoleMapping2> teamRows = new LinkedHashMap<>();
+		for (M_UserServiceRoleMapping2 mapping : resList1) {
+			teamRows.putIfAbsent(mapping.getUserID() + "-" + mapping.getProviderServiceMapID(), mapping);
+		}
+		for (M_UserServiceRoleMapping2 mapping : teamRows.values()) {
+			Integer vanID = mapping.getVanID();
+			if (vanID == null) {
+				Object current = stopTBTeamService.userTeam(mapping.getUserID(), mapping.getProviderServiceMapID())
+						.get("vanID");
+				vanID = (Integer) current;
+			}
+			stopTBTeamService.applyTeam(mapping.getUserID(), mapping.getProviderServiceMapID(), vanID);
 		}
 		return reslist;
 	}
@@ -1125,6 +1146,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 			}
 		}
 
+		boolean activeRow = !Boolean.TRUE.equals(usrRole.getDeleted());
+		if (activeRow) {
+			stopTBTeamService.validateTeam(usrRole.getProviderServiceMapID(), usrRole.getVanID());
+		}
 		M_UserServiceRoleMapping2 data = employeeMasterRepo.save(usrRole);
 		if (ENABLE_CTI_USER_CREATION) {
 			List<M_UserServiceRoleMapping2> list = new ArrayList<M_UserServiceRoleMapping2>();
@@ -1156,6 +1181,10 @@ public class EmployeeMasterServiceImpl implements EmployeeMasterInter {
 
 					M_UserServiceRoleMapping2 savedData = employeeMasterRepo.save(usrRole);
 				}
+		// Stop TB team (AMM-2496): the same team on all of the user's role rows.
+		if (activeRow) {
+			stopTBTeamService.applyTeam(usrRole.getUserID(), usrRole.getProviderServiceMapID(), usrRole.getVanID());
+		}
 		return data;
 	}
 

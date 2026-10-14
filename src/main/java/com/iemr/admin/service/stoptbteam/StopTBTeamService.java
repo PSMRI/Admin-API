@@ -25,35 +25,37 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.iemr.admin.model.stoptbteam.TeamAssignRequest;
 import com.iemr.admin.repository.stoptbteam.StopTBTeamRepository;
 
 /**
- * Stop TB team (MMU van) membership for Work Location Mapping. A team has many
- * users; a user is in at most one team per Stop TB service line, so assigning a
- * new team moves the user.
+ * Stop TB teams for Work Location Mapping (AMM-2496). A team is a van (the
+ * camp laptop's STOPTB_VAN_ID). A team has many users; a user is in one team,
+ * stored as VanID on all of their active Stop TB m_userservicerolemapping rows.
  */
 @Service
 public class StopTBTeamService {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-
 	@Autowired
 	private StopTBTeamRepository teamRepository;
 
-	/** The MMU vans of the state, for the Team dropdown. */
+	// Service line whose vans are the teams: MMU today, the Stop TB service
+	// once it has its own vans.
+	@Value("${stoptb.team.van-service:MMU}")
+	private String vanService;
+
+	/** The state's team vans, for the Team dropdown. */
 	public List<Map<String, Object>> stateTeams(Integer stateID, Integer serviceProviderID) {
 		if (stateID == null || serviceProviderID == null) {
 			throw new IllegalArgumentException("State and service provider are required");
 		}
 		List<Map<String, Object>> teams = new ArrayList<>();
-		for (Object[] row : teamRepository.stateVans(stateID, serviceProviderID)) {
+		for (Object[] row : teamRepository.stateVans(vanService, stateID, serviceProviderID)) {
 			Map<String, Object> team = new LinkedHashMap<>();
 			team.put("vanID", toInt(row[0]));
 			team.put("vanName", row[1]);
@@ -65,7 +67,7 @@ public class StopTBTeamService {
 		return teams;
 	}
 
-	/** The user's current team ({vanID, vanName}), or an empty map. */
+	/** The user's team ({vanID, vanName}), or an empty map. */
 	public Map<String, Object> userTeam(Integer userID, Integer providerServiceMapID) {
 		if (userID == null || providerServiceMapID == null) {
 			throw new IllegalArgumentException("User and service line are required");
@@ -97,54 +99,37 @@ public class StopTBTeamService {
 	}
 
 	/**
-	 * Moves the user into the requested team, or out of any team when vanID is
-	 * null. Old and new links change in one transaction.
+	 * Checks a mapping's team before it is saved: a team is only allowed on a
+	 * Stop TB service line, and must be a van of that service line's state.
+	 */
+	public void validateTeam(Integer providerServiceMapID, Integer vanID) {
+		if (vanID == null) {
+			return;
+		}
+		Object[] stopTB = providerServiceMapID == null ? null : teamRepository.stopTBService(providerServiceMapID);
+		if (stopTB == null) {
+			throw new IllegalArgumentException("A team can only be set on a Stop TB mapping");
+		}
+		Object[] van = teamRepository.van(vanService, vanID);
+		if (van == null) {
+			throw new IllegalArgumentException("Team " + vanID + " is not an active " + vanService + " van");
+		}
+		if (!Objects.equals(toInt(van[1]), toInt(stopTB[0])) || !Objects.equals(toInt(van[2]), toInt(stopTB[1]))) {
+			throw new IllegalArgumentException("Team " + vanID + " is not in this user's state");
+		}
+	}
+
+	/**
+	 * After a Stop TB mapping is saved, gives all of the user's active Stop TB
+	 * rows the same team, so one user is never in two teams. No-op for other
+	 * service lines.
 	 */
 	@Transactional(rollbackFor = Exception.class)
-	public Map<String, Object> assignTeam(TeamAssignRequest request) {
-		if (request == null || request.getUserID() == null || request.getProviderServiceMapID() == null) {
-			throw new IllegalArgumentException("User and service line are required");
+	public void applyTeam(Integer userID, Integer providerServiceMapID, Integer vanID) {
+		if (userID == null || providerServiceMapID == null) {
+			return;
 		}
-		String modifiedBy = request.getModifiedBy() == null ? "" : request.getModifiedBy().trim();
-		if (modifiedBy.isEmpty()) {
-			throw new IllegalArgumentException("Modified by is required");
-		}
-		Object[] stopTB = teamRepository.stopTBService(request.getProviderServiceMapID());
-		if (stopTB == null) {
-			throw new IllegalArgumentException("Teams can only be assigned on a Stop TB service line");
-		}
-		Integer stateID = toInt(stopTB[0]);
-		Integer serviceProviderID = toInt(stopTB[1]);
-
-		Object[] current = teamRepository.userTeam(request.getUserID(), request.getProviderServiceMapID());
-		Integer currentVanID = current == null ? null : toInt(current[0]);
-		if (java.util.Objects.equals(currentVanID, request.getVanID())) {
-			return userTeam(request.getUserID(), request.getProviderServiceMapID());
-		}
-
-		Object[] van = null;
-		if (request.getVanID() != null) {
-			van = teamRepository.van(request.getVanID());
-			if (van == null) {
-				throw new IllegalArgumentException("Team " + request.getVanID() + " is not an active MMU van");
-			}
-			if (!java.util.Objects.equals(toInt(van[2]), stateID)
-					|| !java.util.Objects.equals(toInt(van[3]), serviceProviderID)) {
-				throw new IllegalArgumentException("Team " + request.getVanID() + " is not in this user's state");
-			}
-			if (van[1] == null) {
-				throw new IllegalArgumentException("Team " + request.getVanID() + " has no parking place");
-			}
-		}
-
-		teamRepository.removeUserFromTeams(request.getUserID(), request.getProviderServiceMapID(), modifiedBy);
-		if (van != null) {
-			teamRepository.addUserToTeam(request.getUserID(), request.getVanID(), toInt(van[1]), stateID,
-					request.getProviderServiceMapID(), modifiedBy);
-		}
-		logger.info("Stop TB team for user {} on service line {}: {} -> {}", request.getUserID(),
-				request.getProviderServiceMapID(), currentVanID, request.getVanID());
-		return userTeam(request.getUserID(), request.getProviderServiceMapID());
+		teamRepository.setUserTeam(userID, providerServiceMapID, vanID);
 	}
 
 	private static Integer toInt(Object value) {

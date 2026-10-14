@@ -30,17 +30,19 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 /**
- * Stop TB teams are MMU vans. A user's team is stored the way AMRIT already
- * links users to vans (m_userparkingplacemap -> m_uservanmapping), under the
- * user's Stop TB ProviderServiceMapID, so van-based logins see the same team.
+ * Stop TB teams (AMM-2496). A team is a van; the user's team is the VanID
+ * on their m_userservicerolemapping rows. Team vans come from one service
+ * line's vans (MMU today, see stoptb.team.van-service).
  */
 @Repository
 public class StopTBTeamRepository {
-	private static final String NOT_DELETED = "(%s IS NULL OR %s = b'0')";
-
 	private static String notDeleted(String column) {
-		return String.format(NOT_DELETED, column, column);
+		return "(" + column + " IS NULL OR " + column + " = b'0')";
 	}
+
+	private static final String STOPTB_SERVICE_LINES =
+			"SELECT p.ProviderServiceMapID FROM m_providerservicemapping p"
+					+ " JOIN m_servicemaster s ON s.ServiceID = p.ServiceID WHERE s.ServiceName = 'Stop TB'";
 
 	private static final String SELECT_STATE_VANS =
 			"SELECT v.VanID, v.VanName, v.VehicalNo, v.ParkingPlaceID, pp.ParkingPlaceName"
@@ -48,83 +50,68 @@ public class StopTBTeamRepository {
 					+ " JOIN m_providerservicemapping p ON p.ProviderServiceMapID = v.ProviderServiceMapID"
 					+ " JOIN m_servicemaster s ON s.ServiceID = p.ServiceID"
 					+ " LEFT JOIN m_parkingplace pp ON pp.ParkingPlaceID = v.ParkingPlaceID"
-					+ " WHERE s.ServiceName = 'MMU' AND p.StateID = :stateID"
+					+ " WHERE s.ServiceName = :vanService AND p.StateID = :stateID"
 					+ " AND p.ServiceProviderID = :serviceProviderID"
 					+ " AND " + notDeleted("p.Deleted") + " AND " + notDeleted("v.Deleted")
 					+ " ORDER BY v.VanName, v.VanID";
 
 	private static final String SELECT_VAN =
-			"SELECT v.VanID, v.ParkingPlaceID, p.StateID, p.ServiceProviderID"
-					+ " FROM m_van v"
+			"SELECT v.VanID, p.StateID, p.ServiceProviderID FROM m_van v"
 					+ " JOIN m_providerservicemapping p ON p.ProviderServiceMapID = v.ProviderServiceMapID"
 					+ " JOIN m_servicemaster s ON s.ServiceID = p.ServiceID"
-					+ " WHERE v.VanID = :vanID AND s.ServiceName = 'MMU'"
+					+ " WHERE v.VanID = :vanID AND s.ServiceName = :vanService"
 					+ " AND " + notDeleted("p.Deleted") + " AND " + notDeleted("v.Deleted");
 
 	private static final String SELECT_STOPTB_SERVICE =
 			"SELECT p.StateID, p.ServiceProviderID FROM m_providerservicemapping p"
-					+ " JOIN m_servicemaster s ON s.ServiceID = p.ServiceID"
-					+ " WHERE p.ProviderServiceMapID = :providerServiceMapID AND s.ServiceName = 'Stop TB'";
+					+ " WHERE p.ProviderServiceMapID = :providerServiceMapID"
+					+ " AND p.ProviderServiceMapID IN (" + STOPTB_SERVICE_LINES + ")";
 
 	private static final String SELECT_USER_TEAM =
-			"SELECT uv.VanID, v.VanName FROM m_userparkingplacemap up"
-					+ " JOIN m_uservanmapping uv ON uv.UserParkingPlaceMapID = up.UserParkingPlaceMapID"
-					+ " JOIN m_van v ON v.VanID = uv.VanID"
-					+ " WHERE up.UserID = :userID AND up.ProviderServiceMapID = :providerServiceMapID"
-					+ " AND " + notDeleted("up.Deleted") + " AND " + notDeleted("uv.Deleted")
-					+ " ORDER BY uv.UserVanMapID DESC";
+			"SELECT m.VanID, v.VanName FROM m_userservicerolemapping m"
+					+ " JOIN m_van v ON v.VanID = m.VanID"
+					+ " WHERE m.UserID = :userID AND m.ProviderServiceMapID = :providerServiceMapID"
+					+ " AND " + notDeleted("m.Deleted")
+					+ " ORDER BY m.LastModDate DESC, m.USRMappingID DESC";
 
 	private static final String SELECT_TEAM_MEMBERS =
-			"SELECT DISTINCT u.UserID, u.UserName, u.FirstName, u.LastName FROM m_userparkingplacemap up"
-					+ " JOIN m_uservanmapping uv ON uv.UserParkingPlaceMapID = up.UserParkingPlaceMapID"
-					+ " JOIN m_user u ON u.UserID = up.UserID"
-					+ " WHERE uv.VanID = :vanID AND up.ProviderServiceMapID = :providerServiceMapID"
-					+ " AND " + notDeleted("up.Deleted") + " AND " + notDeleted("uv.Deleted")
-					+ " AND " + notDeleted("u.Deleted")
+			"SELECT DISTINCT u.UserID, u.UserName, u.FirstName, u.LastName FROM m_userservicerolemapping m"
+					+ " JOIN m_user u ON u.UserID = m.UserID"
+					+ " WHERE m.VanID = :vanID AND m.ProviderServiceMapID = :providerServiceMapID"
+					+ " AND " + notDeleted("m.Deleted") + " AND " + notDeleted("u.Deleted")
 					+ " ORDER BY u.UserName";
 
-	private static final String REMOVE_USER_VANS =
-			"UPDATE m_uservanmapping uv"
-					+ " JOIN m_userparkingplacemap up ON up.UserParkingPlaceMapID = uv.UserParkingPlaceMapID"
-					+ " SET uv.Deleted = b'1', uv.ModifiedBy = :modifiedBy"
-					+ " WHERE up.UserID = :userID AND up.ProviderServiceMapID = :providerServiceMapID"
-					+ " AND " + notDeleted("uv.Deleted");
-
-	private static final String REMOVE_USER_PARKING_PLACES =
-			"UPDATE m_userparkingplacemap SET Deleted = b'1', ModifiedBy = :modifiedBy"
+	// One team per user: every active Stop TB row of the user gets the same VanID.
+	private static final String SET_USER_TEAM =
+			"UPDATE m_userservicerolemapping SET VanID = :vanID"
 					+ " WHERE UserID = :userID AND ProviderServiceMapID = :providerServiceMapID"
-					+ " AND " + notDeleted("Deleted");
-
-	private static final String INSERT_USER_PARKING_PLACE =
-			"INSERT INTO m_userparkingplacemap (UserID, ParkingPlaceID, StateID, ProviderServiceMapID, CreatedBy)"
-					+ " VALUES (:userID, :parkingPlaceID, :stateID, :providerServiceMapID, :createdBy)";
-
-	private static final String INSERT_USER_VAN =
-			"INSERT INTO m_uservanmapping (UserParkingPlaceMapID, VanID, ProviderServiceMapID, CreatedBy)"
-					+ " VALUES (:userParkingPlaceMapID, :vanID, :providerServiceMapID, :createdBy)";
+					+ " AND " + notDeleted("Deleted")
+					+ " AND ProviderServiceMapID IN (" + STOPTB_SERVICE_LINES + ")";
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	/** {VanID, VanName, VehicalNo, ParkingPlaceID, ParkingPlaceName} of the state's MMU vans. */
+	/** {VanID, VanName, VehicalNo, ParkingPlaceID, ParkingPlaceName} of the state's team vans. */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> stateVans(Integer stateID, Integer serviceProviderID) {
-		return entityManager.createNativeQuery(SELECT_STATE_VANS).setParameter("stateID", stateID)
-				.setParameter("serviceProviderID", serviceProviderID).getResultList();
+	public List<Object[]> stateVans(String vanService, Integer stateID, Integer serviceProviderID) {
+		return entityManager.createNativeQuery(SELECT_STATE_VANS).setParameter("vanService", vanService)
+				.setParameter("stateID", stateID).setParameter("serviceProviderID", serviceProviderID)
+				.getResultList();
 	}
 
-	/** {VanID, ParkingPlaceID, StateID, ServiceProviderID} of an active MMU van, or null. */
-	public Object[] van(Integer vanID) {
-		return first(entityManager.createNativeQuery(SELECT_VAN).setParameter("vanID", vanID));
+	/** {VanID, StateID, ServiceProviderID} of an active team van, or null. */
+	public Object[] van(String vanService, Integer vanID) {
+		return first(entityManager.createNativeQuery(SELECT_VAN).setParameter("vanService", vanService)
+				.setParameter("vanID", vanID));
 	}
 
-	/** {StateID, ServiceProviderID} when the ID is a Stop TB service line mapping, else null. */
+	/** {StateID, ServiceProviderID} when the ID is a Stop TB service line, else null. */
 	public Object[] stopTBService(Integer providerServiceMapID) {
 		return first(entityManager.createNativeQuery(SELECT_STOPTB_SERVICE)
 				.setParameter("providerServiceMapID", providerServiceMapID));
 	}
 
-	/** {VanID, VanName} of the user's current team, or null. */
+	/** {VanID, VanName} of the user's team, or null. */
 	public Object[] userTeam(Integer userID, Integer providerServiceMapID) {
 		return first(entityManager.createNativeQuery(SELECT_USER_TEAM).setParameter("userID", userID)
 				.setParameter("providerServiceMapID", providerServiceMapID));
@@ -137,28 +124,10 @@ public class StopTBTeamRepository {
 				.setParameter("providerServiceMapID", providerServiceMapID).getResultList();
 	}
 
-	/** Soft-deletes every team link the user has under this Stop TB service line. */
-	public void removeUserFromTeams(Integer userID, Integer providerServiceMapID, String modifiedBy) {
-		entityManager.createNativeQuery(REMOVE_USER_VANS).setParameter("userID", userID)
-				.setParameter("providerServiceMapID", providerServiceMapID).setParameter("modifiedBy", modifiedBy)
-				.executeUpdate();
-		entityManager.createNativeQuery(REMOVE_USER_PARKING_PLACES).setParameter("userID", userID)
-				.setParameter("providerServiceMapID", providerServiceMapID).setParameter("modifiedBy", modifiedBy)
-				.executeUpdate();
-	}
-
-	/** Links the user to the van through the van's parking place. */
-	public void addUserToTeam(Integer userID, Integer vanID, Integer parkingPlaceID, Integer stateID,
-			Integer providerServiceMapID, String createdBy) {
-		entityManager.createNativeQuery(INSERT_USER_PARKING_PLACE).setParameter("userID", userID)
-				.setParameter("parkingPlaceID", parkingPlaceID).setParameter("stateID", stateID)
-				.setParameter("providerServiceMapID", providerServiceMapID).setParameter("createdBy", createdBy)
-				.executeUpdate();
-		Number userParkingPlaceMapID = (Number) entityManager.createNativeQuery("SELECT LAST_INSERT_ID()")
-				.getSingleResult();
-		entityManager.createNativeQuery(INSERT_USER_VAN)
-				.setParameter("userParkingPlaceMapID", userParkingPlaceMapID.intValue()).setParameter("vanID", vanID)
-				.setParameter("providerServiceMapID", providerServiceMapID).setParameter("createdBy", createdBy)
+	/** Puts the user in the team (or none) on all their active Stop TB rows. */
+	public int setUserTeam(Integer userID, Integer providerServiceMapID, Integer vanID) {
+		return entityManager.createNativeQuery(SET_USER_TEAM).setParameter("vanID", vanID)
+				.setParameter("userID", userID).setParameter("providerServiceMapID", providerServiceMapID)
 				.executeUpdate();
 	}
 

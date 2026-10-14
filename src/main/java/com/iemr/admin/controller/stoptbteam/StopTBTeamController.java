@@ -27,13 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.iemr.admin.model.stoptbteam.TeamAssignRequest;
 import com.iemr.admin.service.stoptbteam.StopTBTeamService;
 import com.iemr.admin.utils.mapper.OutputMapper;
 import com.iemr.admin.utils.response.OutputResponse;
@@ -86,19 +83,6 @@ public class StopTBTeamController {
 			response.setResponse(OutputMapper.gsonWithoutExpose().toJson(teamService.teamMembers(vanID, providerServiceMapID)));
 		} catch (Exception e) {
 			logger.error("Stop TB team {} members failed", vanID, e);
-			response.setError(e);
-		}
-		return response.toString();
-	}
-
-	@Operation(summary = "Move a Stop TB user into a team, or out of their team when vanID is null")
-	@PostMapping(value = "/assign", produces = MediaType.APPLICATION_JSON, headers = "Authorization")
-	public String assignTeam(@RequestBody TeamAssignRequest request) {
-		OutputResponse response = new OutputResponse();
-		try {
-			response.setResponse(OutputMapper.gsonWithoutExpose().toJson(teamService.assignTeam(request)));
-		} catch (Exception e) {
-			logger.error("Stop TB team assignment failed", e);
 			response.setError(e);
 		}
 		return response.toString();
