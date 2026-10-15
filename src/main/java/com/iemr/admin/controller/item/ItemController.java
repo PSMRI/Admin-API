@@ -234,8 +234,11 @@ public class ItemController {
 			saveData.setItemDesc(item.getItemDesc());
 			saveData.setSctCode(item.getSctCode());
 			saveData.setSctTerm(item.getSctTerm());
-			saveData.setMinStock(item.getMinStock());
-			saveData.setMaxStock(item.getMaxStock());
+			// Only when sent, so screens that don't show these fields can't wipe them (0 clears the threshold)
+			if (item.getMinStock() != null)
+				saveData.setMinStock(item.getMinStock());
+			if (item.getMaxStock() != null)
+				saveData.setMaxStock(item.getMaxStock());
 			saveData.setModifiedBy(item.getModifiedBy());
 			saveData = itemService.createItemMaster(saveData);
 			response.setResponse(saveData.toString());
