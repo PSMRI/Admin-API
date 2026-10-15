@@ -234,6 +234,8 @@ public class ItemController {
 			saveData.setItemDesc(item.getItemDesc());
 			saveData.setSctCode(item.getSctCode());
 			saveData.setSctTerm(item.getSctTerm());
+			saveData.setMinStock(item.getMinStock());
+			saveData.setMaxStock(item.getMaxStock());
 			saveData.setModifiedBy(item.getModifiedBy());
 			saveData = itemService.createItemMaster(saveData);
 			response.setResponse(saveData.toString());
