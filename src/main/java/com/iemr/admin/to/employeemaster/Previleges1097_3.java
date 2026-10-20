@@ -38,6 +38,16 @@ public class Previleges1097_3 {
 	// M_UserServiceRoleMapping2's NikshayTUID/NikshayFacilityID columns.
 	private String nikshayTUID;
 	private String nikshayFacilityID;
+	// Stop TB team (van), AMM-2496
+	private Integer vanID;
+
+	public Integer getVanID() {
+		return vanID;
+	}
+
+	public void setVanID(Integer vanID) {
+		this.vanID = vanID;
+	}
 
 	public Integer getProviderServiceMapID() {
 		return providerServiceMapID;
