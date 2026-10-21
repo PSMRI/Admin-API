@@ -435,6 +435,12 @@ public class M_UserServiceRoleMapping2 {
 	@Column(name = "NikshayFacilityID")
 	private String nikshayFacilityID;
 
+	// Stop TB team (AMM-2496): the van (camp laptop) the user works with. Same
+	// value on all of the user's active Stop TB rows; null when not in a team.
+	@Expose
+	@Column(name = "VanID")
+	private Integer vanID;
+
 	public M_UserServiceRoleMapping2() {
 	}
 
