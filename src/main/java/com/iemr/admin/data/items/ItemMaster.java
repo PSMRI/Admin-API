@@ -113,7 +113,16 @@ public class ItemMaster {
 	@Expose
 	@Column(name="Strength")
 	private String strength;
-	
+
+	// Stock threshold: at or below this quantity a store's Low Stock report lists the item
+	@Expose
+	@Column(name="Min_Stock")
+	private Integer minStock;
+
+	@Expose
+	@Column(name="Max_Stock")
+	private Integer maxStock;
+
 	@Expose
 	@Column(name="UOMID")
 	private Integer uomID;
