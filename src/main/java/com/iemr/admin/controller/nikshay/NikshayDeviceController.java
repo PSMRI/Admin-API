@@ -54,7 +54,8 @@ public class NikshayDeviceController {
 		return respond("setDeviceActive", () -> nikshayDeviceService.setDeviceActive(request));
 	}
 
-	@Operation(summary = "List devices (without password), optionally by device name (NAAT / XRAY) and active flag")
+	@Operation(summary = "List devices (without password), each with its active villages, "
+			+ "optionally by device name (NAAT / XRAY) and active flag")
 	@GetMapping(value = "/list", produces = "application/json", headers = "Authorization")
 	public String listDevices(@RequestParam(value = "deviceName", required = false) String deviceName,
 			@RequestParam(value = "isActive", required = false) Boolean isActive) {

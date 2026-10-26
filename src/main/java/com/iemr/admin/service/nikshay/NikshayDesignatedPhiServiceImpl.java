@@ -153,8 +153,8 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 		if (villageId == null && tbuId == null && districtId == null) {
 			throw new IllegalArgumentException("Village, TBU or district is required");
 		}
-		List<Map<String, Object>> result = new ArrayList<>();
 		if (Boolean.TRUE.equals(unmappedOnly)) {
+			List<Map<String, Object>> result = new ArrayList<>();
 			// row layout: see NikshayTransferOutPhiRepo.findVillagesWithoutDesignatedPhi
 			for (Object[] row : transferOutPhiRepo.findVillagesWithoutDesignatedPhi(villageId, tbuId, districtId)) {
 				Map<String, Object> m = new LinkedHashMap<>();
@@ -168,8 +168,19 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 			}
 			return result;
 		}
-		// row layout: see NikshayTransferOutPhiRepo.search
-		for (Object[] row : transferOutPhiRepo.search(villageId, tbuId, districtId, !Boolean.FALSE.equals(activeOnly))) {
+		return toSearchRows(transferOutPhiRepo.search(villageId, tbuId, districtId, !Boolean.FALSE.equals(activeOnly)));
+	}
+
+	// Every designated PHI mapping, with no village / TBU / district filter
+	@Override
+	public List<Map<String, Object>> getAllDesignatedPhi(Boolean activeOnly) throws Exception {
+		return toSearchRows(transferOutPhiRepo.search(null, null, null, Boolean.TRUE.equals(activeOnly)));
+	}
+
+	// row layout: see NikshayTransferOutPhiRepo.search
+	private List<Map<String, Object>> toSearchRows(List<Object[]> rows) {
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (Object[] row : rows) {
 			Map<String, Object> m = new LinkedHashMap<>();
 			m.put("id", toInt(row[0]));
 			m.put("villageId", toInt(row[1]));

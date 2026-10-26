@@ -104,4 +104,18 @@ public class NikshayDesignatedPhiController {
 		}
 		return response.toStringWithSerialization();
 	}
+
+	@Operation(summary = "Get all designated PHI mappings; activeOnly=true leaves out inactive rows")
+	@GetMapping(value = "/getAll", produces = "application/json", headers = "Authorization")
+	public String getAllDesignatedPhi(
+			@RequestParam(value = "activeOnly", required = false, defaultValue = "false") Boolean activeOnly) {
+		OutputResponse response = new OutputResponse();
+		try {
+			response.setResponse(GSON.toJson(nikshayDesignatedPhiService.getAllDesignatedPhi(activeOnly)));
+		} catch (Exception e) {
+			logger.error("getAllDesignatedPhi failed: " + e.getMessage(), e);
+			response.setError(e);
+		}
+		return response.toStringWithSerialization();
+	}
 }
