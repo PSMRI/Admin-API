@@ -145,7 +145,9 @@ public class NikshayDeviceServiceImpl implements NikshayDeviceService {
 		NikshayDeviceName name = trimToNull(deviceName) == null ? null : NikshayDeviceName.from(deviceName);
 		List<NikshayDeviceResponse> result = new ArrayList<>();
 		for (NikshayDeviceConfiguration device : deviceRepo.search(name, isActive)) {
-			result.add(toResponse(device));
+			NikshayDeviceResponse response = toResponse(device);
+			response.setVillages(getVillagesOfDevice(device.getId(), true));
+			result.add(response);
 		}
 		return result;
 	}

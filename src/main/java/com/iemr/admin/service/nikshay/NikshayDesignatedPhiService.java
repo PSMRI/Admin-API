@@ -18,4 +18,6 @@ public interface NikshayDesignatedPhiService {
 
 	List<Map<String, Object>> getDesignatedPhi(Integer villageId, Integer tbuId, Integer districtId,
 			Boolean activeOnly, Boolean unmappedOnly) throws Exception;
+
+	List<Map<String, Object>> getAllDesignatedPhi(Boolean activeOnly) throws Exception;
 }
