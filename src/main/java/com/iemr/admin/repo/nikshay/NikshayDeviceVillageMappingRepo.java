@@ -43,12 +43,13 @@ public interface NikshayDeviceVillageMappingRepo extends CrudRepository<NikshayD
 
 	// Active mappings of active devices for a location. row = [mapping id, village_id,
 	// VillageName, facility_id, tbu_id, district_id, state_id, device pk id,
-	// device_id, device_name, phi_user_id]. Never selects the password.
+	// device_serial_number, device_name, phi_user_id, TUName]. Never selects the password.
 	@Query(value = "select m.id, m.village_id, v.VillageName, m.facility_id, m.tbu_id, m.district_id, m.state_id, "
-			+ "d.id as device_detail_id, d.device_id, d.device_name, d.phi_user_id "
+			+ "d.id as device_detail_id, d.device_serial_number, d.device_name, d.phi_user_id, t.TUName "
 			+ "from m_nikshay_device_village_mapping m "
 			+ "join m_nikshay_device_configuration d on d.id = m.device_detail_id "
 			+ "left join m_nikshay_village v on v.NikshayVillageID = m.village_id "
+			+ "left join m_nikshay_tu t on t.NikshayTUID = m.tbu_id "
 			+ "where m.is_active = true and d.is_active = true "
 			+ "and (:stateId is null or m.state_id = :stateId) "
 			+ "and (:districtId is null or m.district_id = :districtId) "

@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iemr.admin.data.nikshay.NikshayTU;
 import com.iemr.admin.data.nikshay.NikshayTransferOutPhiVillageMapping;
 import com.iemr.admin.model.nikshay.NikshayActivateRequest;
 import com.iemr.admin.model.nikshay.NikshayDesignatedPhiRequest;
+import com.iemr.admin.repo.nikshay.NikshayTURepo;
 import com.iemr.admin.repo.nikshay.NikshayTransferOutPhiRepo;
 import com.iemr.admin.repo.nikshay.NikshayVillageRepo;
 
@@ -36,6 +38,9 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 
 	@Autowired
 	private NikshayVillageRepo nikshayVillageRepo;
+
+	@Autowired
+	private NikshayTURepo nikshayTURepo;
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -221,6 +226,8 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 		m.put("id", p.getId());
 		m.put("villageId", p.getVillageId());
 		m.put("tbuId", p.getTbuId());
+		m.put("tbuName", p.getTbuId() == null ? null
+				: nikshayTURepo.findById(p.getTbuId()).map(NikshayTU::getTUName).orElse(null));
 		m.put("designatedPhiId", p.getDesignatedPhiId());
 		m.put("designationHierarchyId", p.getDesignationHierarchyId());
 		m.put("status", p.getStatus());

@@ -1,5 +1,6 @@
 package com.iemr.admin.service.nikshay;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,10 @@ public interface NikshayDeviceService {
 
 	NikshayDeviceResponse createDevice(NikshayDeviceRequest request) throws Exception;
 
+	byte[] getUploadTemplate() throws Exception;
+
+	Map<String, Object> uploadDevices(InputStream excel, String createdBy) throws Exception;
+
 	NikshayDeviceResponse updateDevice(NikshayDeviceRequest request) throws Exception;
 
 	NikshayDeviceResponse setDeviceActive(NikshayActivateRequest request) throws Exception;
@@ -21,7 +26,7 @@ public interface NikshayDeviceService {
 
 	NikshayDeviceResponse getDevice(Integer id) throws Exception;
 
-	List<NikshayDeviceResponse> searchByDeviceId(String deviceId) throws Exception;
+	List<NikshayDeviceResponse> searchByDeviceSerialNumber(String deviceSerialNumber) throws Exception;
 
 	Map<String, Object> enrollVillages(NikshayVillageEnrollRequest request) throws Exception;
 

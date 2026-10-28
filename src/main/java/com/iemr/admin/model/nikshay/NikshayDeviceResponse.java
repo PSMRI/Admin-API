@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class NikshayDeviceResponse {
 	private Integer id;
-	private String deviceId;
+	private String deviceSerialNumber;
 	private NikshayDeviceName deviceName;
 	private String phiUserId;
 	private Boolean isActive;

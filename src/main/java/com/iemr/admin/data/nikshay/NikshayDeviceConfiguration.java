@@ -37,8 +37,8 @@ public class NikshayDeviceConfiguration {
 	private Integer id;
 
 	@Expose
-	@Column(name = "device_id", unique = true)
-	private String deviceId;
+	@Column(name = "device_serial_number", unique = true)
+	private String deviceSerialNumber;
 
 	@Expose
 	@Enumerated(EnumType.STRING)

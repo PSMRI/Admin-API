@@ -12,7 +12,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NikshayDeviceRequest {
 	private Integer id;
-	private String deviceId;
+	private String deviceSerialNumber;
 	private String deviceName;
 	private String phiUserId;
 	private String password;
@@ -22,6 +22,6 @@ public class NikshayDeviceRequest {
 
 	@Override
 	public String toString() {
-		return "NikshayDeviceRequest(id=" + id + ", deviceId=" + deviceId + ", deviceName=" + deviceName + ")";
+		return "NikshayDeviceRequest(id=" + id + ", deviceSerialNumber=" + deviceSerialNumber + ", deviceName=" + deviceName + ")";
 	}
 }

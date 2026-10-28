@@ -3,12 +3,17 @@ package com.iemr.admin.controller.nikshay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,6 +38,9 @@ public class NikshayDeviceController {
 
 	private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
+	private static final String UPLOAD_TEMPLATE_NAME = "Nikshay_Device_Upload_Template.xlsx";
+	private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
 	@Autowired
 	private NikshayDeviceService nikshayDeviceService;
 
@@ -40,6 +48,33 @@ public class NikshayDeviceController {
 	@PostMapping(value = "/create", produces = "application/json", headers = "Authorization")
 	public String createDevice(@RequestBody NikshayDeviceRequest request) {
 		return respond("createDevice", () -> nikshayDeviceService.createDevice(request));
+	}
+
+	@Operation(summary = "Download the Excel template for the bulk device upload")
+	@GetMapping(value = "/upload/template", headers = "Authorization")
+	public ResponseEntity<byte[]> downloadUploadTemplate() {
+		try {
+			return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_DISPOSITION,
+							ContentDisposition.attachment().filename(UPLOAD_TEMPLATE_NAME).build().toString())
+					.contentType(MediaType.parseMediaType(XLSX))
+					.body(nikshayDeviceService.getUploadTemplate());
+		} catch (Exception e) {
+			logger.error("downloadUploadTemplate failed: " + e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
+	}
+
+	@Operation(summary = "Create devices from the filled Excel template; nothing is created if any row is invalid")
+	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json",
+			headers = "Authorization")
+	public String uploadDevices(@RequestParam("file") MultipartFile file, @RequestParam("createdBy") String createdBy) {
+		return respond("uploadDevices", () -> {
+			if (file == null || file.isEmpty()) {
+				throw new IllegalArgumentException("Excel file is required");
+			}
+			return nikshayDeviceService.uploadDevices(file.getInputStream(), createdBy);
+		});
 	}
 
 	@Operation(summary = "Update a device; the password changes only when a new one is sent")
@@ -62,11 +97,11 @@ public class NikshayDeviceController {
 		return respond("listDevices", () -> nikshayDeviceService.listDevices(deviceName, isActive));
 	}
 
-	@Operation(summary = "Search devices by device ID (partial, case-insensitive; exact match first), "
+	@Operation(summary = "Search devices by serial number (partial, case-insensitive; exact match first), "
 			+ "without password, each with its active villages")
 	@GetMapping(value = "/search", produces = "application/json", headers = "Authorization")
-	public String searchByDeviceId(@RequestParam("deviceId") String deviceId) {
-		return respond("searchByDeviceId", () -> nikshayDeviceService.searchByDeviceId(deviceId));
+	public String searchByDeviceSerialNumber(@RequestParam("deviceSerialNumber") String deviceSerialNumber) {
+		return respond("searchByDeviceSerialNumber", () -> nikshayDeviceService.searchByDeviceSerialNumber(deviceSerialNumber));
 	}
 
 	@Operation(summary = "Get one device (without password) with its active villages")
@@ -75,7 +110,8 @@ public class NikshayDeviceController {
 		return respond("getDevice", () -> nikshayDeviceService.getDevice(id));
 	}
 
-	@Operation(summary = "Enroll a device for one or more Ni-kshay villages. A village can have one active NAAT and one active XRAY device")
+	@Operation(summary = "Enroll a device for villages picked from one or more facilities of a TBU (facilityIds, villageIds). "
+			+ "A village can have one active NAAT and one active XRAY device")
 	@PostMapping(value = "/village/enroll", produces = "application/json", headers = "Authorization")
 	public String enrollVillages(@RequestBody NikshayVillageEnrollRequest request) {
 		return respond("enrollVillages", () -> nikshayDeviceService.enrollVillages(request));
