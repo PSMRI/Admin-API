@@ -166,8 +166,8 @@ public interface EmployeeMasterInter {
 	// Fix 2: cascade soft-delete asha_supervisor_mapping rows when a user is deactivated
 	void cascadeDeleteAshaMappingsForUser(Integer userID);
 
-	// Soft-delete other active mappings for same user+service, excluding the row being updated
-	int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer excludeUSRMappingID);
+	// Soft-delete other active mappings for same user+service+role, excluding the row being updated
+	int softDeleteOldMappings(Integer userID, Integer providerServiceMapID, Integer roleID, Integer excludeUSRMappingID);
 
 	// Fix 2: smart cascade — for supervisor with multiple facilities, only delete mappings for this facility
 	void cascadeDeleteAshaMappingsForDeactivation(M_UserServiceRoleMapping2 usrRole);
