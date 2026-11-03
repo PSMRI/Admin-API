@@ -21,14 +21,11 @@
 */
 package com.iemr.admin.config;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -37,42 +34,45 @@ import org.springframework.scheduling.support.CronExpression;
 import com.iemr.admin.service.nikshayphasestatus.NikshayPhaseJob;
 
 /**
- * One cron task for the whole Ni-kshay flow (NikshayPhaseJob). It wakes about once a
- * minute and reads nikshay_job_schedule again, so turning it off or changing the cron
- * applies without a restart. The phases run only when the row is on and the cron matches
- * the current minute. There is no separate cron per phase.
+ * Schedules the one Ni-kshay job (NikshayPhaseJob) with the cron expression in
+ * nikshay.job.cron (env NIKSHAY_JOB_CRON; Spring format: second minute hour day month
+ * weekday, e.g. 0 0 2 * * * for 02:00 every day). The application does not start when the
+ * value is missing, blank or not a valid cron expression. "-" turns the job off. A change
+ * needs a restart. Runs on one thread, so a run never overlaps the previous one.
  */
 @Configuration
 @EnableScheduling
 public class NikshayJobSchedulingConfig implements SchedulingConfigurer {
 	private static final Logger logger = LoggerFactory.getLogger(NikshayJobSchedulingConfig.class);
 
-	// How often the row is read again. On, off, and a new cron are noticed within this time.
-	private static final long RECHECK_SECONDS = 60;
+	static final String CRON_PROPERTY = "nikshay.job.cron";
+
+	// Spring's value for "no schedule"
+	private static final String CRON_DISABLED = "-";
+
+	// No default: a missing NIKSHAY_JOB_CRON stops the application at startup
+	@Value("${" + CRON_PROPERTY + "}")
+	private String cron;
 
 	@Autowired
 	private NikshayPhaseJob nikshayPhaseJob;
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		taskRegistrar.addTriggerTask(nikshayPhaseJob::runAutomaticPhases, this::nextRun);
-		logger.info("Ni-kshay job uses nikshay_job_schedule for on/off and cron");
-	}
-
-	private Instant nextRun(TriggerContext triggerContext) {
-		if (triggerContext.lastCompletion() == null) {
-			return Instant.now();
+		String expression = cron == null ? "" : cron.trim();
+		if (expression.isEmpty()) {
+			throw new IllegalStateException(CRON_PROPERTY + " (env NIKSHAY_JOB_CRON) is not set. Set a cron expression, "
+					+ "e.g. 0 0 2 * * *, or - to turn the Ni-kshay job off");
 		}
-		return Instant.now().plusSeconds(RECHECK_SECONDS);
-	}
-
-	/** True when this minute is one the cron expression names. The second field is not waited for. */
-	public static boolean isDue(String cron, ZonedDateTime now) {
-		if (cron == null || !CronExpression.isValidExpression(cron.trim())) {
-			return false;
+		if (CRON_DISABLED.equals(expression)) {
+			logger.info("{} is '-': the automatic Ni-kshay job is off", CRON_PROPERTY);
+			return;
 		}
-		ZonedDateTime minute = now.withSecond(0).withNano(0);
-		ZonedDateTime next = CronExpression.parse(cron.trim()).next(minute.minusSeconds(1));
-		return next != null && next.withSecond(0).withNano(0).equals(minute);
+		if (!CronExpression.isValidExpression(expression)) {
+			throw new IllegalStateException(CRON_PROPERTY + " (env NIKSHAY_JOB_CRON) '" + expression
+					+ "' is not a valid cron expression (second minute hour day month weekday)");
+		}
+		taskRegistrar.addCronTask(nikshayPhaseJob::runAutomaticPhases, expression);
+		logger.info("Automatic Ni-kshay job scheduled with {} '{}'", CRON_PROPERTY, expression);
 	}
 }

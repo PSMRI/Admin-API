@@ -21,7 +21,6 @@
 */
 package com.iemr.admin.service.nikshayphasestatus;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
-import com.iemr.admin.config.NikshayJobSchedulingConfig;
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
-import com.iemr.admin.data.nikshayphasestatus.NikshayJobScheduleDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobHistoryLogService;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobRunContext;
@@ -41,7 +38,7 @@ import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
 
 /**
  * The one automatic Ni-kshay job (BRD FR-19, section 11.2). NikshayJobSchedulingConfig
- * fires it from nikshay_job_schedule (one on/off and one cron for every phase). Each run
+ * fires it with the cron in nikshay.job.cron (one cron for every phase). Each run
  * goes through the phases in order. A phase that is already running (a manual push) is
  * skipped until the next run; a phase that fails does not stop the others. One summary
  * row is written to nikshay_worker_job_history_log.
@@ -69,21 +66,9 @@ public class NikshayPhaseJob {
 	private NikshayPhaseRunService phaseRunService;
 
 	@Autowired
-	private NikshayPhaseRunSettingService settingService;
-
-	@Autowired
 	private NikshayJobHistoryLogService logService;
 
 	public void runAutomaticPhases() {
-		NikshayJobScheduleDTO schedule = settingService.findSchedule();
-		if (!schedule.isEnabled()) {
-			logger.debug("Ni-kshay job is off in nikshay_job_schedule");
-			return;
-		}
-		if (!NikshayJobSchedulingConfig.isDue(schedule.getCronExpression(), ZonedDateTime.now())) {
-			logger.debug("Ni-kshay job is on, cron '{}' is not due this minute", schedule.getCronExpression());
-			return;
-		}
 		NikshayJobRunContext context = new NikshayJobRunContext(NikshayTriggerType.JOB, TRIGGERED_BY);
 		logger.info("Ni-kshay job {} started", context.getJobRunId());
 		List<String> ran = new ArrayList<>();
