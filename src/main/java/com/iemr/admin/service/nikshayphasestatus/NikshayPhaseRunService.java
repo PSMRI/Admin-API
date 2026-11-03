@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -76,6 +76,15 @@ public class NikshayPhaseRunService {
 	 */
 	public List<NikshayErroredBeneficiaryDTO> run(NikshayPhase phase, List<Long> benRegIds,
 			NikshayJobRunContext context) {
+		return run(phase, benRegIds, batchSize, null, context);
+	}
+
+	/**
+	 * Same as run(phase, benRegIds, context). limit replaces the batch size. beneficiaryType
+	 * (INDEX, CONTACT, ALL_NEGATIVE), when set, limits a waiting upload query to that type.
+	 */
+	public List<NikshayErroredBeneficiaryDTO> run(NikshayPhase phase, List<Long> benRegIds, int limit,
+			String beneficiaryType, NikshayJobRunContext context) {
 		synchronized (running) {
 			if (!running.add(phase)) {
 				throw new IllegalStateException(phase + " is already running");
@@ -87,17 +96,17 @@ public class NikshayPhaseRunService {
 		try {
 			switch (phase) {
 				case ENROLMENT:
-					idGenerateService.runEnrolment(benRegIds, batchSize, run);
+					idGenerateService.runEnrolment(benRegIds, limit, run);
 					break;
 				case NAAT_UPLOAD:
 				case XRAY_UPLOAD:
-					uploadService.runPhase(phase, benRegIds, batchSize, run);
+					uploadService.runPhase(phase, benRegIds, limit, beneficiaryType, run);
 					break;
 				case CONTACTS:
-					idGenerateService.runContacts(benRegIds, batchSize, run);
+					idGenerateService.runContacts(benRegIds, limit, run);
 					break;
 				case TRANSFER_OUT:
-					transferOutService.runTransferOut(benRegIds, batchSize, run);
+					transferOutService.runTransferOut(benRegIds, limit, run);
 					break;
 				default:
 					break;

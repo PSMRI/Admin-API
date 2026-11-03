@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -109,6 +109,16 @@ public class NikshayPhaseStatusRepository {
 			 AND enrolment.phase = 'ENROLMENT'
 			 AND enrolment.status = 'DONE'
 			WHERE ps.phase = 'CONTACTS'
+			  AND EXISTS (SELECT 1
+			              FROM db_iemr.nikshay_beneficiary_phase_status xray
+			              WHERE xray.ben_reg_id = ps.ben_reg_id
+			                AND xray.phase = 'XRAY_UPLOAD'
+			                AND xray.status IN ('DONE', 'NOT_APPLICABLE'))
+			  AND EXISTS (SELECT 1
+			              FROM db_iemr.nikshay_beneficiary_phase_status naat
+			              WHERE naat.ben_reg_id = ps.ben_reg_id
+			                AND naat.phase = 'NAAT_UPLOAD'
+			                AND naat.status IN ('DONE', 'NOT_APPLICABLE'))
 			  AND (ps.status IN ('PENDING', 'IN_PROGRESS')
 			       OR (ps.status = 'FAILED'
 			           AND (ps.failure_reason IN ('MANDATORY_FIELD_MISSING', 'TEST_RESULT_INVALID')
@@ -140,14 +150,24 @@ public class NikshayPhaseStatusRepository {
 			          AND (ps.failure_reason IN ('MANDATORY_FIELD_MISSING', 'TEST_RESULT_INVALID')
 			               OR (ps.failure_reason IN ('NIKSHAY_UNAVAILABLE', 'LOGIN_REJECTED')
 			                   AND ps.attempts < :maxAttempts))))
-			     AND EXISTS (SELECT 1
+			     AND (EXISTS (SELECT 1
 			                 FROM db_iemr.tb_diagnostic_order o
 			                 JOIN db_iemr.tb_diagnostic_result r
 			                   ON r.external_order_id = o.external_order_id AND r.deleted = 0
 			                 WHERE o.beneficiary_id = ps.beneficiary_id
 			                   AND o.order_type = 'XRAY_CHEST'
 			                   AND o.status = 'COMPLETED' AND o.deleted = 0
-			                   AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL))
+			                   AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL)
+			          OR EXISTS (SELECT 1
+			                     FROM db_iemr.tb_diagnostic_order o
+			                     WHERE o.beneficiary_id = ps.beneficiary_id
+			                       AND o.order_type = 'XRAY_CHEST'
+			                       AND o.deleted = 0
+			                       AND o.status <> 'COMPLETED'
+			                       AND (o.status IN ('CLOSED', 'REFUSED')
+			                            OR LOWER(IFNULL(o.reason_to_close, '')) LIKE '%pregnan%'
+			                            OR LOWER(IFNULL(o.reason_to_close, '')) LIKE '%child%'
+			                            OR LOWER(TRIM(IFNULL(o.reason_to_close, ''))) = 'kid'))))
 			    OR
 			    (ps.status = 'DONE'
 			     AND EXISTS (SELECT 1
@@ -192,14 +212,20 @@ public class NikshayPhaseStatusRepository {
 			          AND (ps.failure_reason IN ('MANDATORY_FIELD_MISSING', 'TEST_RESULT_INVALID')
 			               OR (ps.failure_reason IN ('NIKSHAY_UNAVAILABLE', 'LOGIN_REJECTED')
 			                   AND ps.attempts < :maxAttempts))))
-			     AND EXISTS (SELECT 1
+			     AND (EXISTS (SELECT 1
 			                 FROM db_iemr.tb_diagnostic_order o
 			                 JOIN db_iemr.tb_diagnostic_result r
 			                   ON r.external_order_id = o.external_order_id AND r.deleted = 0
 			                 WHERE o.beneficiary_id = ps.beneficiary_id
 			                   AND o.order_type IN ('MTB', 'MDR_RIF')
 			                   AND o.status = 'COMPLETED' AND o.deleted = 0
-			                   AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL))
+			                   AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL)
+			          OR EXISTS (SELECT 1
+			                     FROM db_iemr.tb_diagnostic_order o
+			                     WHERE o.beneficiary_id = ps.beneficiary_id
+			                       AND o.order_type IN ('MTB', 'MDR_RIF')
+			                       AND o.deleted = 0
+			                       AND o.status IN ('CLOSED', 'REFUSED'))))
 			    OR
 			    (ps.status = 'DONE'
 			     AND EXISTS (SELECT 1
@@ -446,12 +472,26 @@ public class NikshayPhaseStatusRepository {
 
 	/** Up to limit beneficiaries waiting in XRAY_UPLOAD (see WAITING_FOR_XRAY_UPLOAD_SQL). */
 	public List<NikshayPhaseCandidate> findWaitingForXrayUpload(int maxAttempts, int limit) {
-		return findWaiting(WAITING_FOR_XRAY_UPLOAD_SQL, maxAttempts, limit);
+		return findWaiting(WAITING_FOR_XRAY_UPLOAD_SQL, maxAttempts, limit, null);
+	}
+
+	/**
+	 * Waiting XRAY_UPLOAD rows of one beneficiary type (INDEX, CONTACT, ALL_NEGATIVE), up to limit.
+	 */
+	public List<NikshayPhaseCandidate> findWaitingForXrayUpload(int maxAttempts, int limit, String beneficiaryType) {
+		return findWaiting(WAITING_FOR_XRAY_UPLOAD_SQL, maxAttempts, limit, beneficiaryType);
 	}
 
 	/** Up to limit beneficiaries waiting in NAAT_UPLOAD (see WAITING_FOR_NAAT_UPLOAD_SQL). */
 	public List<NikshayPhaseCandidate> findWaitingForNaatUpload(int maxAttempts, int limit) {
-		return findWaiting(WAITING_FOR_NAAT_UPLOAD_SQL, maxAttempts, limit);
+		return findWaiting(WAITING_FOR_NAAT_UPLOAD_SQL, maxAttempts, limit, null);
+	}
+
+	/**
+	 * Waiting NAAT_UPLOAD rows of one beneficiary type (INDEX, CONTACT, ALL_NEGATIVE), up to limit.
+	 */
+	public List<NikshayPhaseCandidate> findWaitingForNaatUpload(int maxAttempts, int limit, String beneficiaryType) {
+		return findWaiting(WAITING_FOR_NAAT_UPLOAD_SQL, maxAttempts, limit, beneficiaryType);
 	}
 
 	/** Up to limit beneficiaries waiting in TRANSFER_OUT (see WAITING_FOR_TRANSFER_OUT_SQL). */
@@ -471,6 +511,19 @@ public class NikshayPhaseStatusRepository {
 		Integer count = new NamedParameterJdbcTemplate(dataSource).queryForObject(HAS_NAAT_ORDER_SQL,
 				new MapSqlParameterSource("beneficiaryId", beneficiaryId), Integer.class);
 		return count != null && count > 0;
+	}
+
+	/** BenRegIds enrolled as contacts of this index patient. */
+	public List<Long> findContactBenRegIds(Long indexBenRegId) {
+		String sql = """
+				SELECT DISTINCT ben_reg_id
+				FROM db_iemr.nikshay_beneficiary_phase_status
+				WHERE index_ben_reg_id = :indexBenRegId
+				  AND phase = 'ENROLMENT'
+				  AND beneficiary_type = 'CONTACT'
+				""";
+		return new NamedParameterJdbcTemplate(dataSource).queryForList(sql,
+				new MapSqlParameterSource("indexBenRegId", indexBenRegId), Long.class);
 	}
 
 	/** The given beneficiaries' rows for the phase; a beneficiary with no row is left out. */
@@ -497,9 +550,20 @@ public class NikshayPhaseStatusRepository {
 	}
 
 	private List<NikshayPhaseCandidate> findWaiting(String sql, int maxAttempts, int limit) {
+		return findWaiting(sql, maxAttempts, limit, null);
+	}
+
+	// beneficiaryType null keeps every type. Otherwise only that phase-status type is returned,
+	// so a contact follow-up can take every waiting contact without also taking more indexes.
+	private List<NikshayPhaseCandidate> findWaiting(String sql, int maxAttempts, int limit, String beneficiaryType) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("maxAttempts", maxAttempts);
 		params.addValue("limit", limit);
+		if (beneficiaryType != null) {
+			sql = sql.replace("ORDER BY ps.updated_at",
+					"AND ps.beneficiary_type = :beneficiaryType ORDER BY ps.updated_at");
+			params.addValue("beneficiaryType", beneficiaryType);
+		}
 		return new NamedParameterJdbcTemplate(dataSource).query(sql, params, (rs, rowNum) -> mapCandidate(rs));
 	}
 

@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -77,7 +77,17 @@ public class NikshayPhaseStatusService {
 	/** The phase was tried and failed, with the reason and the error message. */
 	public void markFailed(Long benRegId, NikshayBeneficiaryType type, Long indexBenRegId, NikshayPhase phase,
 			NikshayFailureReason reason, String errorDetail) {
-		save(benRegId, type, indexBenRegId, phase, NikshayPhaseStatus.FAILED, reason, errorDetail, true, null, null);
+		markFailed(benRegId, type, indexBenRegId, phase, reason, errorDetail, null, null);
+	}
+
+	/**
+	 * Same as {@link #markFailed}, and keeps the Ni-kshay ID when one test in the phase
+	 * was already posted. A null id does not clear an id already stored.
+	 */
+	public void markFailed(Long benRegId, NikshayBeneficiaryType type, Long indexBenRegId, NikshayPhase phase,
+			NikshayFailureReason reason, String errorDetail, String nikshayId, String episodeId) {
+		save(benRegId, type, indexBenRegId, phase, NikshayPhaseStatus.FAILED, reason, errorDetail, true, nikshayId,
+				episodeId);
 	}
 
 	/** The phase is due but was not tried; note says why (e.g. household not screened yet). */
@@ -126,22 +136,30 @@ public class NikshayPhaseStatusService {
 	/**
 	 * Records TRANSFER_OUT as PENDING once both test uploads are DONE or NOT_APPLICABLE and
 	 * the beneficiary has no TRANSFER_OUT row yet (a later test upload, e.g. a Rif result,
-	 * leaves it as it is). The transfer out run decides whether the beneficiary is actually
-	 * transferred.
+	 * leaves it as it is). An index patient also waits until contacts are added and each
+	 * contact's own X-ray and sputum uploads are finished. The transfer out run decides
+	 * whether the beneficiary is actually transferred. A contact's completion also retries
+	 * the index patient.
 	 */
 	public void markTransferOutIfTestsDone(Long benRegId, NikshayBeneficiaryType type, Long indexBenRegId) {
+		openTransferIfReady(benRegId, type, indexBenRegId);
+		if (type == NikshayBeneficiaryType.CONTACT && indexBenRegId != null) {
+			openTransferIfReady(indexBenRegId, NikshayBeneficiaryType.INDEX, null);
+		}
+	}
+
+	private void openTransferIfReady(Long benRegId, NikshayBeneficiaryType type, Long indexBenRegId) {
 		try {
 			List<Long> ids = new ArrayList<>();
 			ids.add(benRegId);
 			if (!phaseStatusRepository.findRows(NikshayPhase.TRANSFER_OUT.name(), ids).isEmpty()) {
 				return;
 			}
-			for (NikshayPhase testPhase : new NikshayPhase[] { NikshayPhase.NAAT_UPLOAD, NikshayPhase.XRAY_UPLOAD }) {
-				List<NikshayPhaseCandidate> rows = phaseStatusRepository.findRows(testPhase.name(), ids);
-				if (rows.isEmpty() || !(NikshayPhaseStatus.DONE.name().equals(rows.get(0).getStatus())
-						|| NikshayPhaseStatus.NOT_APPLICABLE.name().equals(rows.get(0).getStatus()))) {
-					return;
-				}
+			if (!testsSettled(benRegId)) {
+				return;
+			}
+			if (type == NikshayBeneficiaryType.INDEX && !contactsSettled(benRegId)) {
+				return;
 			}
 		} catch (Exception e) {
 			logger.error("Beneficiary {}: could not read the test upload statuses", benRegId, e);
@@ -149,6 +167,36 @@ public class NikshayPhaseStatusService {
 		}
 		markPending(benRegId, type, indexBenRegId, NikshayPhase.TRANSFER_OUT,
 				"Tests uploaded; waits for the transfer out run");
+	}
+
+	private boolean testsSettled(Long benRegId) {
+		List<Long> ids = new ArrayList<>();
+		ids.add(benRegId);
+		for (NikshayPhase testPhase : new NikshayPhase[] { NikshayPhase.NAAT_UPLOAD, NikshayPhase.XRAY_UPLOAD }) {
+			List<NikshayPhaseCandidate> rows = phaseStatusRepository.findRows(testPhase.name(), ids);
+			if (rows.isEmpty() || !(NikshayPhaseStatus.DONE.name().equals(rows.get(0).getStatus())
+					|| NikshayPhaseStatus.NOT_APPLICABLE.name().equals(rows.get(0).getStatus()))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// Contacts added, and every contact's X-ray and sputum uploads finished
+	private boolean contactsSettled(Long indexBenRegId) {
+		List<Long> ids = new ArrayList<>();
+		ids.add(indexBenRegId);
+		List<NikshayPhaseCandidate> contacts = phaseStatusRepository.findRows(NikshayPhase.CONTACTS.name(), ids);
+		if (contacts.isEmpty() || !(NikshayPhaseStatus.DONE.name().equals(contacts.get(0).getStatus())
+				|| NikshayPhaseStatus.NOT_APPLICABLE.name().equals(contacts.get(0).getStatus()))) {
+			return false;
+		}
+		for (Long contactId : phaseStatusRepository.findContactBenRegIds(indexBenRegId)) {
+			if (!testsSettled(contactId)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -162,13 +210,25 @@ public class NikshayPhaseStatusService {
 	 * Each phase's query is in NikshayPhaseStatusRepository. ENROLMENT is not picked here.
 	 */
 	public List<NikshayPhaseCandidate> findWaiting(NikshayPhase phase, int limit) {
+		return findWaiting(phase, limit, null);
+	}
+
+	/**
+	 * Same as findWaiting(phase, limit). When beneficiaryType is set, only that type is
+	 * returned (used so the contact follow-up uploads every waiting contact).
+	 */
+	public List<NikshayPhaseCandidate> findWaiting(NikshayPhase phase, int limit, String beneficiaryType) {
 		switch (phase) {
 			case CONTACTS:
 				return phaseStatusRepository.findWaitingForContacts(MAX_AUTO_ATTEMPTS, limit);
 			case XRAY_UPLOAD:
-				return phaseStatusRepository.findWaitingForXrayUpload(MAX_AUTO_ATTEMPTS, limit);
+				return beneficiaryType == null
+						? phaseStatusRepository.findWaitingForXrayUpload(MAX_AUTO_ATTEMPTS, limit)
+						: phaseStatusRepository.findWaitingForXrayUpload(MAX_AUTO_ATTEMPTS, limit, beneficiaryType);
 			case NAAT_UPLOAD:
-				return phaseStatusRepository.findWaitingForNaatUpload(MAX_AUTO_ATTEMPTS, limit);
+				return beneficiaryType == null
+						? phaseStatusRepository.findWaitingForNaatUpload(MAX_AUTO_ATTEMPTS, limit)
+						: phaseStatusRepository.findWaitingForNaatUpload(MAX_AUTO_ATTEMPTS, limit, beneficiaryType);
 			case TRANSFER_OUT:
 				return phaseStatusRepository.findWaitingForTransferOut(MAX_AUTO_ATTEMPTS, limit);
 			default:

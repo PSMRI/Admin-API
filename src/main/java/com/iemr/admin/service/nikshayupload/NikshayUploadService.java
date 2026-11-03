@@ -22,6 +22,7 @@ import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseCandidate;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseStatus;
 import com.iemr.admin.data.nikshayupload.NikshayDeviceCredentialDTO;
+import com.iemr.admin.data.nikshayupload.NikshayOrderRow;
 import com.iemr.admin.data.nikshayupload.NikshayTestResult;
 import com.iemr.admin.data.nikshayupload.NikshayVillageBatch;
 import com.iemr.admin.repo.nikshayidgenerate.NikshayIdGenerateRepository;
@@ -82,6 +83,15 @@ public class NikshayUploadService {
 	 * error. Failures are added to the run; reason for testing is always "TB Screening".
 	 */
 	public void runPhase(NikshayPhase phase, List<Long> benRegIds, int limit, NikshayPhaseRun run) {
+		runPhase(phase, benRegIds, limit, null, run);
+	}
+
+	/**
+	 * Same as runPhase(phase, benRegIds, limit, run). beneficiaryType limits the waiting
+	 * query (null = every type). Ignored when benRegIds is set.
+	 */
+	public void runPhase(NikshayPhase phase, List<Long> benRegIds, int limit, String beneficiaryType,
+			NikshayPhaseRun run) {
 		List<NikshayTestType> testTypes = new ArrayList<>();
 		if (phase == NikshayPhase.XRAY_UPLOAD) {
 			testTypes.add(NikshayTestType.XRAY);
@@ -93,7 +103,7 @@ public class NikshayUploadService {
 
 		List<NikshayPhaseCandidate> candidates = new ArrayList<>();
 		if (benRegIds == null) {
-			candidates.addAll(phaseStatusService.findWaiting(phase, limit));
+			candidates.addAll(phaseStatusService.findWaiting(phase, limit, beneficiaryType));
 		} else {
 			List<Long> enrolledIds = new ArrayList<>();
 			for (NikshayPhaseCandidate row : phaseStatusService.findRows(NikshayPhase.ENROLMENT, benRegIds)) {
@@ -158,14 +168,35 @@ public class NikshayUploadService {
 		}
 
 		// The results to send, by test type; error / invalid runs are not sent (no Ni-kshay
-		// option, the test is redone), nor results not entered yet
+		// option, the test is redone), nor results not entered yet. An order already posted
+		// (SUCCESS in the job history) is not sent again. CLOSED and REFUSED orders are not
+		// pushed; the phase is marked DONE. A chest X-ray whose reason says pregnancy or
+		// child, and that is not a completed result, is not pushed.
+		List<Long> beneficiaryIds = new ArrayList<>(toUpload.keySet());
+		Map<Long, List<NikshayOrderRow>> ordersByBeneficiary = new HashMap<>();
+		for (NikshayOrderRow order : diagnosticOrderRepo.findOrders(beneficiaryIds)) {
+			ordersByBeneficiary.computeIfAbsent(order.getBeneficiaryId(), id -> new ArrayList<>()).add(order);
+		}
 		Map<NikshayTestType, List<NikshayTestResult>> toSendByType = new LinkedHashMap<>();
 		Map<Long, Integer> resultCounts = new HashMap<>();
 		Map<Long, String> invalidResults = new HashMap<>();
+		Set<Long> alreadyUploaded = new HashSet<>();
 		for (NikshayTestType testType : testTypes) {
+			List<NikshayTestResult> found = findResults(testType, beneficiaryIds);
+			List<String> orderIds = new ArrayList<>();
+			for (NikshayTestResult result : found) {
+				if (result.getExternalOrderId() != null && !result.getExternalOrderId().isBlank()) {
+					orderIds.add(result.getExternalOrderId());
+				}
+			}
+			Set<String> uploaded = logService.uploadedReferenceIds(testType.getPhase(), orderIds);
 			List<NikshayTestResult> toSend = new ArrayList<>();
-			for (NikshayTestResult result : findResults(testType, new ArrayList<>(toUpload.keySet()))) {
+			for (NikshayTestResult result : found) {
 				NikshayPhaseCandidate candidate = toUpload.get(result.getBeneficiaryId());
+				if (result.getExternalOrderId() != null && uploaded.contains(result.getExternalOrderId())) {
+					alreadyUploaded.add(candidate.getBenRegId());
+					continue;
+				}
 				String summary = result.getResult() == null ? "" : result.getResult().trim();
 				if (summary.isEmpty()) {
 					continue;
@@ -182,6 +213,20 @@ public class NikshayUploadService {
 			}
 			toSendByType.put(testType, toSend);
 		}
+		Map<Long, String> closedNotes = new HashMap<>();
+		Map<Long, String> skipNotes = new HashMap<>();
+		for (NikshayPhaseCandidate candidate : toUpload.values()) {
+			String closed = closedOrRefusedNote(ordersByBeneficiary.get(candidate.getBeneficiaryId()), testTypes);
+			if (closed != null) {
+				closedNotes.put(candidate.getBenRegId(), closed);
+			}
+			if (phase == NikshayPhase.XRAY_UPLOAD) {
+				String skip = xraySkipNote(ordersByBeneficiary.get(candidate.getBeneficiaryId()));
+				if (skip != null) {
+					skipNotes.put(candidate.getBenRegId(), skip);
+				}
+			}
+		}
 		for (NikshayPhaseCandidate candidate : toUpload.values()) {
 			if (resultCounts.containsKey(candidate.getBenRegId())) {
 				phaseStatusService.markInProgress(candidate.getBenRegId(), candidate.getBeneficiaryType(),
@@ -189,6 +234,17 @@ public class NikshayUploadService {
 			} else if (invalidResults.containsKey(candidate.getBenRegId())) {
 				fail(run, candidate, phase, NikshayFailureReason.TEST_RESULT_INVALID,
 						invalidResults.get(candidate.getBenRegId()));
+			} else if (closedNotes.containsKey(candidate.getBenRegId())) {
+				finishWithoutPush(run, candidate, phase, episodes.get(candidate.getBenRegId()),
+						closedNotes.get(candidate.getBenRegId()));
+			} else if (skipNotes.containsKey(candidate.getBenRegId())) {
+				phaseStatusService.markNotApplicable(candidate.getBenRegId(), candidate.getBeneficiaryType(),
+						candidate.getIndexBenRegId(), phase, skipNotes.get(candidate.getBenRegId()));
+				phaseStatusService.markTransferOutIfTestsDone(candidate.getBenRegId(), candidate.getBeneficiaryType(),
+						candidate.getIndexBenRegId());
+			} else if (alreadyUploaded.contains(candidate.getBenRegId())) {
+				finishWithoutPush(run, candidate, phase, episodes.get(candidate.getBenRegId()),
+						"Already in Ni-kshay: not sent again");
 			} else {
 				phaseStatusService.markPending(candidate.getBenRegId(), candidate.getBeneficiaryType(),
 						candidate.getIndexBenRegId(), phase, "Waits for a completed " + testName + " result");
@@ -219,14 +275,18 @@ public class NikshayUploadService {
 				continue;
 			}
 			NikshayJobHistoryLog failure = firstFailures.get(candidate.getBenRegId());
+			NikshayEnrollResult episode = episodes.get(candidate.getBenRegId());
 			if (failure != null) {
 				addErrored(run, candidate.getBenRegId(), phase, failure.getReason(), failure.getMessage());
 				phaseStatusService.markFailed(candidate.getBenRegId(), candidate.getBeneficiaryType(),
-						candidate.getIndexBenRegId(), phase, failure.getReason(), failure.getMessage());
+						candidate.getIndexBenRegId(), phase, failure.getReason(), failure.getMessage(),
+						episode.getNikshayId(), episode.getEpisodeId());
 				continue;
 			}
-			NikshayEnrollResult episode = episodes.get(candidate.getBenRegId());
 			String note = count + " " + testName + " result(s) in Ni-kshay";
+			if (closedNotes.containsKey(candidate.getBenRegId())) {
+				note += "; " + closedNotes.get(candidate.getBenRegId());
+			}
 			if (invalidResults.containsKey(candidate.getBenRegId())) {
 				note += "; " + invalidResults.get(candidate.getBenRegId());
 			}
@@ -237,6 +297,75 @@ public class NikshayUploadService {
 			phaseStatusService.markTransferOutIfTestsDone(candidate.getBenRegId(), candidate.getBeneficiaryType(),
 					candidate.getIndexBenRegId());
 		}
+	}
+
+	// CLOSED or REFUSED orders of this phase are not pushed. Null when there is none.
+	private static String closedOrRefusedNote(List<NikshayOrderRow> orders, List<NikshayTestType> testTypes) {
+		if (orders == null) {
+			return null;
+		}
+		List<String> parts = new ArrayList<>();
+		for (NikshayOrderRow order : orders) {
+			if (!orderTypeOf(testTypes, order.getOrderType()) || !isClosedOrRefused(order.getStatus())) {
+				continue;
+			}
+			String part = order.getStatus() + " order " + order.getExternalOrderId();
+			if (order.getReasonToClose() != null && !order.getReasonToClose().isBlank()) {
+				part += " (" + order.getReasonToClose().trim() + ")";
+			}
+			parts.add(part);
+		}
+		return parts.isEmpty() ? null : "Not pushed: " + String.join("; ", parts);
+	}
+
+	// Chest X-ray not done because the order reason says pregnancy or child, and the order
+	// is not a completed result and not already CLOSED or REFUSED. Null when it does not apply.
+	private static String xraySkipNote(List<NikshayOrderRow> orders) {
+		if (orders == null) {
+			return null;
+		}
+		for (NikshayOrderRow order : orders) {
+			if (!"XRAY_CHEST".equals(order.getOrderType()) || "COMPLETED".equalsIgnoreCase(order.getStatus())
+					|| isClosedOrRefused(order.getStatus())) {
+				continue;
+			}
+			if (isPregnancyOrChild(order.getReasonToClose())) {
+				return "Not done: chest X-ray reason '" + order.getReasonToClose().trim() + "'";
+			}
+		}
+		return null;
+	}
+
+	private static boolean orderTypeOf(List<NikshayTestType> testTypes, String orderType) {
+		for (NikshayTestType testType : testTypes) {
+			if (testType.getOrderType().equals(orderType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean isClosedOrRefused(String status) {
+		return "CLOSED".equalsIgnoreCase(status) || "REFUSED".equalsIgnoreCase(status);
+	}
+
+	private static boolean isPregnancyOrChild(String reason) {
+		String normalized = reason == null ? "" : reason.trim().replace('-', ' ').replaceAll("\\s+", " ").toLowerCase();
+		return normalized.contains("pregnan") || normalized.contains("child") || normalized.equals("kid")
+				|| normalized.contains(" kid");
+	}
+
+	// No Ni-kshay call. The phase is DONE so the rest of the flow can continue.
+	private void finishWithoutPush(NikshayPhaseRun run, NikshayPhaseCandidate candidate, NikshayPhase phase,
+			NikshayEnrollResult episode, String note) {
+		phaseStatusService.markDone(candidate.getBenRegId(), candidate.getBeneficiaryType(),
+				candidate.getIndexBenRegId(), phase, episode.getNikshayId(), episode.getEpisodeId(), note);
+		phaseStatusService.markOtherTestNotDone(candidate.getBenRegId(), candidate.getBeneficiaryId(),
+				candidate.getBeneficiaryType(), candidate.getIndexBenRegId(), phase);
+		phaseStatusService.markTransferOutIfTestsDone(candidate.getBenRegId(), candidate.getBeneficiaryType(),
+				candidate.getIndexBenRegId());
+		run.getLogEntries().add(logService.success(run.getContext(), phase.getLogPhase(), candidate.getBenRegId(),
+				null, episode.getEpisodeId(), note));
 	}
 
 	// The completed results of the test type for the given BeneficiaryIDs
@@ -309,11 +438,12 @@ public class NikshayUploadService {
 			}
 		}
 		Set<Integer> undecryptableVillages = new HashSet<>();
+		Set<Integer> duplicateVillages = new HashSet<>();
 		Map<Integer, NikshayDeviceCredentialDTO> credentialsByVillage = credentialService.findCredentials(
 				inNikshayVillage.stream().map(NikshayTestResult::getVillageId).collect(Collectors.toList()),
-				testType.getDeviceName(), undecryptableVillages);
-		return groupByVillage(inNikshayVillage, testType, credentialsByVillage, undecryptableVillages, ctx,
-				logEntries);
+				testType.getDeviceName(), undecryptableVillages, duplicateVillages);
+		return groupByVillage(inNikshayVillage, testType, credentialsByVillage, undecryptableVillages,
+				duplicateVillages, ctx, logEntries);
 	}
 
 	/**
@@ -324,22 +454,28 @@ public class NikshayUploadService {
 	 */
 	private Map<Integer, NikshayVillageBatch> groupByVillage(List<NikshayTestResult> results,
 			NikshayTestType testType, Map<Integer, NikshayDeviceCredentialDTO> credentialsByVillage,
-			Set<Integer> undecryptableVillages, NikshayJobRunContext ctx, List<NikshayJobHistoryLog> logEntries) {
+			Set<Integer> undecryptableVillages, Set<Integer> duplicateVillages, NikshayJobRunContext ctx,
+			List<NikshayJobHistoryLog> logEntries) {
 		Map<Integer, NikshayVillageBatch> batchesByVillage = new LinkedHashMap<>();
 		for (NikshayTestResult result : results) {
 			Integer villageId = result.getVillageId();
 			NikshayDeviceCredentialDTO credential = credentialsByVillage.get(villageId);
 			if (credential == null) {
 				boolean undecryptable = undecryptableVillages.contains(villageId);
+				boolean duplicate = duplicateVillages.contains(villageId);
 				logEntries.add(logService.failure(ctx, testType.getPhase(), result.getBenRegId(),
 						result.getExternalOrderId(),
-						undecryptable ? NikshayFailureReason.DEVICE_CONFIGURATION_MISSING
+						undecryptable || duplicate ? NikshayFailureReason.DEVICE_CONFIGURATION_MISSING
 								: NikshayFailureReason.VILLAGE_MISSING,
-						undecryptable
-								? "The " + testType + " device password for village " + villageId
-										+ " could not be decrypted"
-								: "No active " + testType + " device is mapped to village '" + result.getVillage()
-										+ "' (" + villageId + ")"));
+						duplicate
+								? "More than one active " + testType + " device is mapped to village '"
+										+ result.getVillage() + "' (" + villageId
+										+ "). One device of this type is allowed per village; the same device may be mapped to other villages"
+								: undecryptable
+										? "The " + testType + " device password for village " + villageId
+												+ " could not be decrypted"
+										: "No active " + testType + " device is mapped to village '"
+												+ result.getVillage() + "' (" + villageId + ")"));
 				continue;
 			}
 			batchesByVillage.computeIfAbsent(villageId,

@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -38,9 +38,9 @@ import com.iemr.admin.service.nikshayjoblog.NikshayFailureReason;
  * The AddDiagnosticsTest payload every test type shares (spec section 6): reason for testing
  * ("TB Screening", TrueNat "Diagnosis of TB"), new case, the device's PHI with its district
  * and state as testing facility, a result-only post (sample absent, result present, one stub sample), the lab serial
- * number from the device's serial number, the result date as test and report date,
+ * number from the test's own order id (tb_diagnostic_order.external_order_id), the result date as test and report date,
  * "reported by", the episode as PatientId, plus the result mapped to Ni-kshay's final
- * interpretation. Subclasses give the test type, the lab serial prefix and the mapping.
+ * interpretation. Subclasses give the test type and the mapping.
  */
 public abstract class DiagnosticsTestPayloadBuilder implements NikshayTestPayloadBuilder {
 
@@ -52,10 +52,7 @@ public abstract class DiagnosticsTestPayloadBuilder implements NikshayTestPayloa
 	/** Ni-kshay's TestType, e.g. "Chest X Ray". */
 	protected abstract String nikshayTestType();
 
-	/** Start of the lab serial number, followed by the device serial number, e.g. "SAMPLE-XRAY-". */
-	protected abstract String labSerialPrefix();
-
-	/** EMR Lite result summary (lower case, single spaces) -> Ni-kshay final interpretation. */
+	/** EMR Lite result summary (lower case, single spaces, hyphens treated as spaces) -> Ni-kshay final interpretation. */
 	protected abstract Map<String, String> interpretations();
 
 	/** Ni-kshay's ReasonForTesting: "TB Screening" unless the test type says otherwise. */
@@ -82,9 +79,9 @@ public abstract class DiagnosticsTestPayloadBuilder implements NikshayTestPayloa
 				device);
 		long districtKey = nikshayCode(device.getDistrictNikshayCode(), device.getDistrictName(), "district", device);
 		long stateKey = nikshayCode(device.getStateNikshayCode(), device.getStateName(), "state", device);
-		if (device.getDeviceSerialNumber() == null || device.getDeviceSerialNumber().isBlank()) {
-			throw new NikshayApiException(NikshayFailureReason.DEVICE_CONFIGURATION_MISSING,
-					"Device " + device.getDeviceDetailId() + " has no serial number for the lab serial number");
+		if (result.getExternalOrderId() == null || result.getExternalOrderId().isBlank()) {
+			throw new NikshayApiException(NikshayFailureReason.MANDATORY_FIELD_MISSING,
+					"The " + getTestType() + " order has no order id for the lab serial number");
 		}
 		// Date the result was saved, as the date tested and reported
 		String testDate = new SimpleDateFormat("dd-MM-yyyy")
@@ -109,7 +106,7 @@ public abstract class DiagnosticsTestPayloadBuilder implements NikshayTestPayloa
 		sample.put("SampleSpecimenType", "Sputum");
 		sample.set("SampleCollectionSiteState", keyValue(stateKey, device.getStateName()));
 		sample.set("SampleCollectionSiteDistrict", keyValue(districtKey, device.getDistrictName()));
-		payload.put("LabSerialNumber", labSerialPrefix() + device.getDeviceSerialNumber().trim());
+		payload.put("LabSerialNumber", result.getExternalOrderId().trim());
 		payload.put("ResultDateTested", testDate);
 		payload.put("ResultDateReported", testDate);
 		payload.put("ResultReportedBy", reportedBy);
@@ -146,6 +143,6 @@ public abstract class DiagnosticsTestPayloadBuilder implements NikshayTestPayloa
 	}
 
 	private static String normalize(String value) {
-		return value == null ? "" : value.trim().replaceAll("\\s+", " ").toLowerCase();
+		return value == null ? "" : value.trim().replace('-', ' ').replaceAll("\\s+", " ").toLowerCase();
 	}
 }

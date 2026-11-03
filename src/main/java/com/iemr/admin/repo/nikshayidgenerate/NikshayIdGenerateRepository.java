@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -37,6 +37,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iemr.admin.data.nikshayidgenerate.NikshayDiagnosisGate;
 import com.iemr.admin.data.nikshayidgenerate.NikshayEnrollResult;
 import com.iemr.admin.data.nikshayidgenerate.NikshayFlowScenario;
 import com.iemr.admin.data.nikshayidgenerate.NikshayHouseholdMemberDTO;
@@ -499,6 +500,53 @@ public class NikshayIdGenerateRepository {
 		namedJdbcTemplate.update(SAVE_ID_ON_DIAGNOSTICS_SQL, params);
 		namedJdbcTemplate.update(ADD_EPISODE_SQL, params);
 		return updated;
+	}
+
+	// Sputum (MTB or Rif) and chest X-ray state for each BenRegId, from tb_diagnostic_order.
+	private static final String DIAGNOSIS_GATE_SQL = """
+			SELECT m.BenRegId AS ben_reg_id,
+			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status = 'COMPLETED'
+			                 AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL THEN 1 ELSE 0 END) AS sputum_done,
+			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status IN ('CLOSED', 'REFUSED')
+			                 THEN 1 ELSE 0 END) AS sputum_closed,
+			       MAX(CASE WHEN o.order_type = 'XRAY_CHEST' AND o.status = 'COMPLETED'
+			                 AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL THEN 1 ELSE 0 END) AS xray_done,
+			       MAX(CASE WHEN o.order_type = 'XRAY_CHEST' AND o.status IN ('CLOSED', 'REFUSED')
+			                 THEN 1 ELSE 0 END) AS xray_closed,
+			       MAX(CASE WHEN o.order_type = 'XRAY_CHEST' AND (
+			                  LOWER(IFNULL(o.reason_to_close, '')) LIKE '%pregnan%'
+			                  OR LOWER(IFNULL(o.reason_to_close, '')) LIKE '%child%'
+			                  OR LOWER(TRIM(IFNULL(o.reason_to_close, ''))) = 'kid')
+			                 THEN 1 ELSE 0 END) AS xray_skip
+			FROM db_identity.m_beneficiaryregidmapping m
+			LEFT JOIN db_iemr.tb_diagnostic_order o
+			  ON o.beneficiary_id = m.BeneficiaryID AND (o.deleted = 0 OR o.deleted IS NULL)
+			LEFT JOIN db_iemr.tb_diagnostic_result r
+			  ON r.external_order_id = o.external_order_id AND r.deleted = 0
+			WHERE m.BenRegId IN (:benRegIds) AND m.Deleted = 0
+			GROUP BY m.BenRegId
+			""";
+
+	/** Chest X-ray and sputum state for each given BenRegId. A BenRegId with no orders is absent. */
+	public Map<Long, NikshayDiagnosisGate> findDiagnosisGate(List<Long> benRegIds) {
+		Map<Long, NikshayDiagnosisGate> gates = new HashMap<>();
+		if (benRegIds == null || benRegIds.isEmpty()) {
+			return gates;
+		}
+		List<Map.Entry<Long, NikshayDiagnosisGate>> rows = new NamedParameterJdbcTemplate(dataSource).query(
+				DIAGNOSIS_GATE_SQL, new MapSqlParameterSource("benRegIds", benRegIds), (rs, rowNum) -> {
+					NikshayDiagnosisGate gate = new NikshayDiagnosisGate();
+					gate.setSputumDone(rs.getInt("sputum_done") == 1);
+					gate.setSputumClosed(rs.getInt("sputum_closed") == 1);
+					gate.setXrayDone(rs.getInt("xray_done") == 1);
+					gate.setXrayClosed(rs.getInt("xray_closed") == 1);
+					gate.setXraySkip(rs.getInt("xray_skip") == 1);
+					return Map.entry(rs.getObject("ben_reg_id", Long.class), gate);
+				});
+		for (Map.Entry<Long, NikshayDiagnosisGate> row : rows) {
+			gates.put(row.getKey(), row.getValue());
+		}
+		return gates;
 	}
 
 	private NikshayHouseholdMemberDTO mapMemberRow(ResultSet rs) throws SQLException {

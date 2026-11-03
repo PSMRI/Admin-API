@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -28,9 +28,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.scheduling.support.CronExpression;
+
+import com.iemr.admin.data.nikshayphasestatus.NikshayJobScheduleDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseRunSettingDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayRunMode;
+import com.iemr.admin.repo.nikshayphasestatus.NikshayJobScheduleRepository;
 import com.iemr.admin.repo.nikshayphasestatus.NikshayPhaseRunSettingRepository;
 
 /** The run mode of each Ni-kshay phase (BRD FR-19), set by Admin. */
@@ -40,6 +44,9 @@ public class NikshayPhaseRunSettingService {
 
 	@Autowired
 	private NikshayPhaseRunSettingRepository settingRepository;
+
+	@Autowired
+	private NikshayJobScheduleRepository scheduleRepository;
 
 	public List<NikshayPhaseRunSettingDTO> findAll() {
 		return settingRepository.findAll();
@@ -63,5 +70,32 @@ public class NikshayPhaseRunSettingService {
 			return false;
 		}
 		return setting.getRunMode() == NikshayRunMode.AUTOMATIC;
+	}
+
+	/** The one cron job: whether it is on, and the cron expression. Off when the table is missing. */
+	public NikshayJobScheduleDTO findSchedule() {
+		return scheduleRepository.find();
+	}
+
+	/**
+	 * Saves the one cron job. When enabled, cron must be a Spring expression
+	 * (second minute hour day month weekday). A change is picked up after the current
+	 * wait, without a restart.
+	 */
+	public NikshayJobScheduleDTO saveSchedule(boolean enabled, String cronExpression, String updatedBy) {
+		String cron = cronExpression == null ? null : cronExpression.trim();
+		if (cron != null && cron.isEmpty()) {
+			cron = null;
+		}
+		if (enabled && (cron == null || !CronExpression.isValidExpression(cron))) {
+			throw new IllegalArgumentException(
+					"cron must be a Spring expression (second minute hour day month weekday) when the job is on");
+		}
+		if (cron != null && !CronExpression.isValidExpression(cron)) {
+			throw new IllegalArgumentException("cron must be a Spring expression (second minute hour day month weekday)");
+		}
+		scheduleRepository.save(enabled, cron, updatedBy);
+		logger.info("Ni-kshay job schedule set to enabled={} cron='{}' by {}", enabled, cron, updatedBy);
+		return scheduleRepository.find();
 	}
 }

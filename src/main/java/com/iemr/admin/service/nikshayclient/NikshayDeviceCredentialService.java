@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -55,20 +55,36 @@ public class NikshayDeviceCredentialService {
 
 	/**
 	 * Logins of the given device type (NAAT / XRAY) for the given villages, keyed by
-	 * village ID, password decrypted. Villages with no active device of that type, or
-	 * whose password can't be decrypted, are absent from the map; the latter are also
-	 * added to undecryptableVillages.
+	 * village ID, password decrypted. One active device of this type per village. The same
+	 * device may be mapped to other villages. A village with two different active devices
+	 * of this type is added to duplicateVillages and left out. Villages with no active
+	 * device, or whose password can't be decrypted, are absent from the map; the latter
+	 * are also added to undecryptableVillages.
 	 */
 	public Map<Integer, NikshayDeviceCredentialDTO> findCredentials(Collection<Integer> villageIds, String deviceType,
-			Set<Integer> undecryptableVillages) {
+			Set<Integer> undecryptableVillages, Set<Integer> duplicateVillages) {
 		List<Integer> distinctVillageIds = villageIds.stream().filter(Objects::nonNull).distinct()
 				.collect(Collectors.toList());
 		Map<Integer, NikshayDeviceCredentialDTO> credentialsByVillage = new HashMap<>();
 		if (distinctVillageIds.isEmpty()) {
 			return credentialsByVillage;
 		}
+		Map<Integer, NikshayDeviceCredentialDTO> chosen = new HashMap<>();
 		for (NikshayDeviceCredentialDTO credential : deviceCredentialRepo.findActiveCredentials(distinctVillageIds,
 				NikshayDeviceName.from(deviceType))) {
+			NikshayDeviceCredentialDTO existing = chosen.get(credential.getVillageId());
+			if (existing == null) {
+				chosen.put(credential.getVillageId(), credential);
+			} else if (!existing.getDeviceDetailId().equals(credential.getDeviceDetailId())) {
+				duplicateVillages.add(credential.getVillageId());
+			}
+		}
+		for (Integer villageId : duplicateVillages) {
+			chosen.remove(villageId);
+			logger.error("Village {} has more than one active {} device; one per village is required", villageId,
+					deviceType);
+		}
+		for (NikshayDeviceCredentialDTO credential : chosen.values()) {
 			try {
 				credential.setPassword(passwordCipher.decrypt(credential.getPassword()));
 			} catch (IllegalStateException e) {
@@ -80,7 +96,8 @@ public class NikshayDeviceCredentialService {
 			credentialsByVillage.put(credential.getVillageId(), credential);
 		}
 		List<Integer> missing = distinctVillageIds.stream()
-				.filter(id -> !credentialsByVillage.containsKey(id) && !undecryptableVillages.contains(id))
+				.filter(id -> !credentialsByVillage.containsKey(id) && !undecryptableVillages.contains(id)
+						&& !duplicateVillages.contains(id))
 				.collect(Collectors.toList());
 		if (!missing.isEmpty()) {
 			logger.warn("No active {} device mapped for village(s) {}", deviceType, missing);

@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Repository;
 
 import com.iemr.admin.data.nikshay.DiagnosticOrder;
 import com.iemr.admin.data.nikshayupload.NaatResultDTO;
+import com.iemr.admin.data.nikshayupload.NikshayOrderRow;
 import com.iemr.admin.data.nikshayupload.XrayResultDTO;
 
 @Repository
@@ -105,4 +106,13 @@ public interface DiagnosticOrderRepo extends CrudRepository<DiagnosticOrder, Lon
 			+ " AND o.beneficiaryId IN :beneficiaryIds "
 			+ " ORDER BY o.beneficiaryId, o.createdDate ")
 	List<XrayResultDTO> findXrayResults(@Param("beneficiaryIds") List<Long> beneficiaryIds);
+
+	// Every chest X-ray and TrueNat order for these beneficiaries, including CLOSED and
+	// REFUSED (those are not pushed). reason_to_close is how pregnancy or child is recorded.
+	@Query(" SELECT new com.iemr.admin.data.nikshayupload.NikshayOrderRow(o.beneficiaryId, o.orderType, o.status, "
+			+ " o.externalOrderId, o.reasonToClose) "
+			+ " FROM DiagnosticOrder o "
+			+ " WHERE o.deleted = false AND o.beneficiaryId IN :beneficiaryIds "
+			+ " AND o.orderType IN ('XRAY_CHEST', 'MTB', 'MDR_RIF') ")
+	List<NikshayOrderRow> findOrders(@Param("beneficiaryIds") List<Long> beneficiaryIds);
 }

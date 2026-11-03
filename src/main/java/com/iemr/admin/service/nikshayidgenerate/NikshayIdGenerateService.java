@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
+import com.iemr.admin.data.nikshayidgenerate.NikshayDiagnosisGate;
 import com.iemr.admin.data.nikshayidgenerate.NikshayEnrollResult;
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
 import com.iemr.admin.data.nikshayidgenerate.NikshayFlowScenario;
@@ -47,6 +48,7 @@ import com.iemr.admin.data.nikshayidgenerate.NikshayLinkStatus;
 import com.iemr.admin.data.nikshayphasestatus.NikshayBeneficiaryType;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseCandidate;
+import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseStatus;
 import com.iemr.admin.data.nikshayupload.NikshayDeviceCredentialDTO;
 import com.iemr.admin.repo.nikshayidgenerate.NikshayIdGenerateRepository;
 import com.iemr.admin.service.nikshayclient.NikshayApiException;
@@ -109,8 +111,8 @@ public class NikshayIdGenerateService {
 	public void runEnrolment(List<Long> benRegIds, int limit, NikshayPhaseRun run) {
 		List<NikshayIdGenerateBeneficiaryDTO> eligible = nikshayIdGenerateRepository.findEligibleBeneficiaries();
 		logger.info("Found {} beneficiaries eligible for Ni-kshay ID generation", eligible.size());
-		List<NikshayIdGenerateBeneficiaryDTO> positive = toRun(filterHouseholdScreened(keepRequested(eligible, benRegIds)),
-				benRegIds, limit);
+		List<NikshayIdGenerateBeneficiaryDTO> positive = toRun(filterDiagnosisComplete(
+				filterHouseholdScreened(keepRequested(eligible, benRegIds)), benRegIds, run), benRegIds, limit);
 		processBeneficiaries(positive, NikshayFlowScenario.POSITIVE, run);
 
 		// The query already requires the whole household to be screened
@@ -191,6 +193,37 @@ public class NikshayIdGenerateService {
 		logger.info("{} of {} beneficiaries have their whole household TB screened", householdScreened.size(),
 				beneficiaries.size());
 		return householdScreened;
+	}
+
+	/**
+	 * A TB-positive index is enrolled only when diagnosis is complete: a sputum result is
+	 * saved, and the chest X-ray is saved or the X-ray order is closed, refused, or marked
+	 * not done because of pregnancy or child. Anyone still waiting is left PENDING.
+	 */
+	private List<NikshayIdGenerateBeneficiaryDTO> filterDiagnosisComplete(
+			List<NikshayIdGenerateBeneficiaryDTO> beneficiaries, List<Long> benRegIds, NikshayPhaseRun run) {
+		List<Long> ids = new ArrayList<>();
+		for (NikshayIdGenerateBeneficiaryDTO beneficiary : beneficiaries) {
+			ids.add(beneficiary.getBeneficiaryId());
+		}
+		Map<Long, NikshayDiagnosisGate> gates = nikshayIdGenerateRepository.findDiagnosisGate(ids);
+		List<NikshayIdGenerateBeneficiaryDTO> ready = new ArrayList<>();
+		for (NikshayIdGenerateBeneficiaryDTO beneficiary : beneficiaries) {
+			NikshayDiagnosisGate gate = gates.get(beneficiary.getBeneficiaryId());
+			if (gate != null && gate.positiveReady()) {
+				ready.add(beneficiary);
+				continue;
+			}
+			String note = "Diagnosis is not complete yet: needs a sputum result, and a chest X-ray result or a closed, refused, pregnancy or child X-ray";
+			logger.info("Skipping beneficiary {}: {}", beneficiary.getBeneficiaryId(), note);
+			phaseStatusService.markPending(beneficiary.getBeneficiaryId(), NikshayBeneficiaryType.INDEX, null,
+					NikshayPhase.ENROLMENT, note);
+			if (benRegIds != null) {
+				addErrored(run, beneficiary.getBeneficiaryId(), NikshayPhase.ENROLMENT, null, note);
+			}
+		}
+		logger.info("{} of {} beneficiaries have a complete diagnosis", ready.size(), beneficiaries.size());
+		return ready;
 	}
 
 	/**
@@ -278,7 +311,17 @@ public class NikshayIdGenerateService {
 				phaseStatusService.markNotApplicable(index.getBeneficiaryId(), index.getBeneficiaryType(), null,
 						NikshayPhase.CONTACTS, "No other household members");
 			} else {
-				indexes.add(index);
+				String waiting = contactsNotTested(index);
+				if (waiting != null) {
+					logger.info("Index {}: {}", index.getBeneficiaryId(), waiting);
+					phaseStatusService.markPending(index.getBeneficiaryId(), index.getBeneficiaryType(), null,
+							NikshayPhase.CONTACTS, waiting);
+					if (benRegIds != null) {
+						addErrored(run, index.getBeneficiaryId(), NikshayPhase.CONTACTS, null, waiting);
+					}
+				} else {
+					indexes.add(index);
+				}
 			}
 		}
 
@@ -310,8 +353,9 @@ public class NikshayIdGenerateService {
 			}
 		}
 		Set<Integer> undecryptableVillages = new HashSet<>();
+		Set<Integer> duplicateVillages = new HashSet<>();
 		Map<Integer, NikshayDeviceCredentialDTO> credentialsByVillage = credentialService.findCredentials(villageIds,
-				NikshayTestType.NAAT.name(), undecryptableVillages);
+				NikshayTestType.NAAT.name(), undecryptableVillages, duplicateVillages);
 
 		Map<Integer, NikshayIdGenerateVillageBatch> batchesByVillage = new LinkedHashMap<>();
 		for (NikshayIdGenerateBeneficiaryDTO beneficiary : beneficiaries) {
@@ -323,7 +367,11 @@ public class NikshayIdGenerateService {
 			}
 			NikshayDeviceCredentialDTO credential = credentialsByVillage.get(villageId);
 			if (credential == null) {
-				if (undecryptableVillages.contains(villageId)) {
+				if (duplicateVillages.contains(villageId)) {
+					fail(run, beneficiary, phase, NikshayFailureReason.DEVICE_CONFIGURATION_MISSING,
+							"More than one active NAAT device is mapped to Ni-kshay village " + villageId
+									+ ". One device of this type is allowed per village; the same device may be mapped to other villages");
+				} else if (undecryptableVillages.contains(villageId)) {
 					fail(run, beneficiary, phase, NikshayFailureReason.DEVICE_CONFIGURATION_MISSING,
 							"The NAAT device password for Ni-kshay village " + villageId + " could not be decrypted");
 				} else {
@@ -449,6 +497,44 @@ public class NikshayIdGenerateService {
 	}
 
 	/**
+	 * Null when the index patient's tests are in Ni-kshay and every household member has
+	 * finished sputum and chest X-ray in AMRIT. Otherwise the reason contacts must wait.
+	 */
+	private String contactsNotTested(NikshayIdGenerateBeneficiaryDTO index) {
+		List<Long> indexIds = new ArrayList<>();
+		indexIds.add(index.getBeneficiaryId());
+		if (!phaseSettled(NikshayPhase.XRAY_UPLOAD, indexIds) || !phaseSettled(NikshayPhase.NAAT_UPLOAD, indexIds)) {
+			return "Waits until the index patient's chest X-ray and sputum results are finished";
+		}
+		List<Long> memberIds = new ArrayList<>();
+		for (NikshayHouseholdMemberDTO member : index.getHouseholdMembers()) {
+			memberIds.add(member.getBeneficiaryId());
+		}
+		Map<Long, NikshayDiagnosisGate> gates = nikshayIdGenerateRepository.findDiagnosisGate(memberIds);
+		List<Long> waiting = new ArrayList<>();
+		for (Long memberId : memberIds) {
+			NikshayDiagnosisGate gate = gates.get(memberId);
+			if (gate == null || !gate.tested()) {
+				waiting.add(memberId);
+			}
+		}
+		if (!waiting.isEmpty()) {
+			return "Waits until these contacts have finished sputum and chest X-ray: " + waiting;
+		}
+		return null;
+	}
+
+	private boolean phaseSettled(NikshayPhase phase, List<Long> benRegIds) {
+		List<NikshayPhaseCandidate> rows = phaseStatusService.findRows(phase, benRegIds);
+		if (rows.isEmpty()) {
+			return false;
+		}
+		String status = rows.get(0).getStatus();
+		return NikshayPhaseStatus.DONE.name().equals(status)
+				|| NikshayPhaseStatus.NOT_APPLICABLE.name().equals(status);
+	}
+
+	/**
 	 * Adds the index patient's household members to Ni-kshay as their contacts (BRD section
 	 * 8.1, spec Flow 2-A), with the same NAAT device login. First the household counts are
 	 * written on the index patient (ContactTracing), then each member not yet in Ni-kshay
@@ -526,6 +612,7 @@ public class NikshayIdGenerateService {
 			String note = "Household counts sent; " + added + " contact(s) added or linked";
 			phaseStatusService.markDone(index.getBeneficiaryId(), index.getBeneficiaryType(), null,
 					NikshayPhase.CONTACTS, indexResult.getNikshayId(), sourcePatientId, note);
+			phaseStatusService.markTransferOutIfTestsDone(index.getBeneficiaryId(), index.getBeneficiaryType(), null);
 			run.getLogEntries().add(logService.success(run.getContext(), NikshayPhase.CONTACTS.getLogPhase(),
 					index.getBeneficiaryId(), null, sourcePatientId, note));
 		} else {
@@ -846,7 +933,7 @@ public class NikshayIdGenerateService {
 	/**
 	 * Same person = same full name, gender and phone, and the same date of birth (or age,
 	 * when either side has no date of birth). The portal's own search is mostly by phone
-	 * and gender, so its hits are narrowed down here (as in the nikshay-enroll worker).
+	 * and gender, so its hits are narrowed down here.
 	 */
 	private static boolean isSamePerson(JsonNode record, NikshayIdGenerateBeneficiaryDTO beneficiary) {
 		String recordName = normalize(record.path("FirstName").asText("") + " " + record.path("LastName").asText(""));

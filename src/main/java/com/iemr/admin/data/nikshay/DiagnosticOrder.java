@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -60,6 +60,9 @@ public class DiagnosticOrder {
 
 	@Column(name = "status")
 	private String status;
+
+	@Column(name = "reason_to_close")
+	private String reasonToClose;
 
 	@Column(name = "created_date")
 	private Timestamp createdDate;

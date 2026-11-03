@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -68,7 +68,8 @@ import com.iemr.admin.service.nikshayupload.NikshayTestType;
  * Who is transferred (BRD 10.1, T5, T7, V13):
  * - index patients, for treatment;
  * - contacts: with a TB Positive NAAT for treatment, with an X-ray suggestive of TB for
- *   evaluation, symptomatic ones not at all (not TPT-eligible), the others for TPT;
+ *   evaluation, and every other contact in that TB-positive family for TPT
+ *   (including a symptomatic contact);
  * - members of all-negative households are not transferred.
  * A contact is transferred with the index patient's details (address, phone, village and
  * facility), as they were enrolled.
@@ -230,10 +231,7 @@ public class NikshayTransferOutService {
 		if (tests != null && isSuggestiveXray(tests.getLatestXray())) {
 			return "evaluation (X-ray suggestive of TB)";
 		}
-		if (tests != null && tests.isSymptomatic()) {
-			markNotApplicable(candidate, "V13: Symptomatic contact, not eligible for TPT: no transfer");
-			return null;
-		}
+		// Anyone else in a TB-positive family is TPT, including a symptomatic contact
 		return "TPT";
 	}
 
@@ -278,8 +276,9 @@ public class NikshayTransferOutService {
 		}
 		Map<Integer, NikshayDesignatedPhiDTO> designatedPhis = transferOutRepository.findDesignatedPhis(villageIds);
 		Set<Integer> undecryptableVillages = new HashSet<>();
+		Set<Integer> duplicateVillages = new HashSet<>();
 		Map<Integer, NikshayDeviceCredentialDTO> credentials = credentialService.findCredentials(villageIds,
-				NikshayTestType.NAAT.name(), undecryptableVillages);
+				NikshayTestType.NAAT.name(), undecryptableVillages, duplicateVillages);
 
 		// The transfers to send, by NAAT device (one login per device)
 		Map<Integer, List<Transfer>> byDevice = new LinkedHashMap<>();
@@ -308,12 +307,18 @@ public class NikshayTransferOutService {
 			}
 			NikshayDeviceCredentialDTO credential = credentials.get(transfer.villageId);
 			if (credential == null) {
-				fail(run, transfer.candidate, undecryptableVillages.contains(transfer.villageId)
-						? NikshayFailureReason.DEVICE_CONFIGURATION_MISSING : NikshayFailureReason.VILLAGE_MISSING,
-						undecryptableVillages.contains(transfer.villageId)
-								? "The NAAT device password for Ni-kshay village " + transfer.villageId
-										+ " could not be decrypted"
-								: "No active NAAT device is mapped to Ni-kshay village " + transfer.villageId,
+				boolean duplicate = duplicateVillages.contains(transfer.villageId);
+				boolean undecryptable = undecryptableVillages.contains(transfer.villageId);
+				fail(run, transfer.candidate,
+						duplicate || undecryptable ? NikshayFailureReason.DEVICE_CONFIGURATION_MISSING
+								: NikshayFailureReason.VILLAGE_MISSING,
+						duplicate ? "More than one active NAAT device is mapped to Ni-kshay village "
+								+ transfer.villageId
+								+ ". One device of this type is allowed per village; the same device may be mapped to other villages"
+								: undecryptable
+										? "The NAAT device password for Ni-kshay village " + transfer.villageId
+												+ " could not be decrypted"
+										: "No active NAAT device is mapped to Ni-kshay village " + transfer.villageId,
 						transfer.episode.getEpisodeId());
 				continue;
 			}

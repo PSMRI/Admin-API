@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -23,5 +23,5 @@ package com.iemr.admin.service.nikshayjoblog;
 
 /** Ni-kshay integration phases, in the order the job runs them. */
 public enum NikshayPhase {
-	NIKSHAY_ID_GENERATION, NAAT, NAAT_RIF, XRAY, CONTACT_TPT, TRANSFER_OUT
+	NIKSHAY_ID_GENERATION, NAAT, NAAT_RIF, XRAY, CONTACT_TPT, TRANSFER_OUT, JOB
 }

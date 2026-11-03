@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
+import com.iemr.admin.data.nikshayphasestatus.NikshayJobScheduleDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.data.nikshayphasestatus.NikshayRunMode;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobRunContext;
@@ -105,8 +106,8 @@ public class NikshayPhaseController {
 		}
 	}
 
-	@Operation(summary = "Run mode of each Ni-kshay phase: AUTOMATIC (run by the scheduled job and by manual push) "
-			+ "or MANUAL (manual push only)")
+	@Operation(summary = "Stored run mode of each phase. The scheduled job does not use this. "
+			+ "One switch in nikshay_job_schedule turns every phase on or off together.")
 	@GetMapping(value = "/settings")
 	public ResponseEntity<?> settings() {
 		try {
@@ -134,6 +135,41 @@ public class NikshayPhaseController {
 		} catch (Exception e) {
 			logger.error("Error setting the run mode of Ni-kshay phase {}", phase, e);
 			return ResponseEntity.status(500).body("Could not set the run mode of Ni-kshay phase " + phase);
+		}
+	}
+
+	@Operation(summary = "The one Ni-kshay cron job: enabled and cron from nikshay_job_schedule. "
+			+ "When it is on, every phase runs. There is no separate on/off per phase.")
+	@GetMapping(value = "/job")
+	public ResponseEntity<?> jobSchedule() {
+		try {
+			return ResponseEntity.ok(settingService.findSchedule());
+		} catch (Exception e) {
+			logger.error("Error reading the Ni-kshay job schedule", e);
+			return ResponseEntity.status(500).body("Could not read the Ni-kshay job schedule");
+		}
+	}
+
+	@Operation(summary = "Set the one Ni-kshay cron job. Body {\"enabled\": true, \"cron\": \"0 0 2 * * *\"}. "
+			+ "Cron is Spring format: second minute hour day month weekday. Applies without a restart.")
+	@PutMapping(value = "/job")
+	public ResponseEntity<?> setJobSchedule(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+		boolean enabled = false;
+		String cron = null;
+		if (body != null) {
+			Object enabledValue = body.get("enabled");
+			enabled = enabledValue instanceof Boolean ? (Boolean) enabledValue
+					: Boolean.parseBoolean(enabledValue == null ? "" : enabledValue.toString());
+			cron = body.get("cron") == null ? null : body.get("cron").toString();
+		}
+		try {
+			NikshayJobScheduleDTO saved = settingService.saveSchedule(enabled, cron, currentUsername(request));
+			return ResponseEntity.ok(saved);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (Exception e) {
+			logger.error("Error saving the Ni-kshay job schedule", e);
+			return ResponseEntity.status(500).body("Could not save the Ni-kshay job schedule");
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -50,11 +50,6 @@ public class NaatTestPayloadBuilder extends DiagnosticsTestPayloadBuilder {
 	@Override
 	protected String nikshayTestType() {
 		return "Truenat (MTB)";
-	}
-
-	@Override
-	protected String labSerialPrefix() {
-		return "SAMPLE-TRUENAT(MTB)-";
 	}
 
 	// TrueNat results go to Ni-kshay with reason "Diagnosis of TB" (tested on beta 2026-10-30)

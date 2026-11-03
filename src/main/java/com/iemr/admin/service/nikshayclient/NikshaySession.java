@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -31,7 +31,7 @@ import java.time.Instant;
 
 /**
  * A logged-in Ni-kshay portal session for one PHI login. It holds the login cookies
- * (from the browser login in NikshayAuthClient) and sends them on every call made
+ * (from the Java login in NikshayAuthClient) and sends them on every call made
  * through get()/postJson()/putJson(). One session is meant for one batch (e.g. one village's
  * results) and then dropped. The cookies are a live login: never log or return them.
  */
@@ -103,6 +103,9 @@ public class NikshaySession {
 				.header("Referer", portalUrl + "/")
 				.header("X-Requested-With", "XMLHttpRequest")
 				.header("User-Agent", NikshayAuthClient.USER_AGENT)
+				.header("sec-ch-ua", NikshayAuthClient.CHROME_UA)
+				.header("sec-ch-ua-mobile", "?0")
+				.header("sec-ch-ua-platform", NikshayAuthClient.CHROME_UA_PLATFORM)
 				.header("Cookie", cookieHeader);
 	}
 }

@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -81,7 +81,7 @@ public class NikshayEnrollPayloadBuilder {
 		payload.put("Pincode", beneficiary.getPincode());
 		payload.put("Area", beneficiary.getArea());
 		payload.put("MaritalStatus", beneficiary.getMaritalStatus());
-		payload.put("Occupation", beneficiary.getOccupation());
+		payload.put("Occupation", NikshayOccupationMapper.toNikshay(beneficiary.getOccupation()));
 		payload.put("SocioeconomicStatus", beneficiary.getSocioeconomicStatus());
 		payload.put("KeyPopulation", beneficiary.getKeyPopulation());
 		payload.putNull("VaccinationDate");

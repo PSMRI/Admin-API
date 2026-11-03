@@ -1,5 +1,5 @@
 /*
-* AMRIT – Accessible Medical Records via Integrated Technology
+* AMRIT – Accessible Medical Records via Integrated Technologies
 * Integrated EHR (Electronic Health Records) Solution
 *
 * Copyright (C) "Piramal Swasthya Management and Research Institute"
@@ -41,8 +41,8 @@ public class RifTestPayloadBuilder extends DiagnosticsTestPayloadBuilder {
 	// Stop TB app results, short and long forms
 	private static final Map<String, String> INTERPRETATIONS = new HashMap<>();
 	static {
-		INTERPRETATIONS.put("non-dr tb", RIF_NOT_DETECTED);
-		INTERPRETATIONS.put("non-dr tb (rif resistance not detected)", RIF_NOT_DETECTED);
+		INTERPRETATIONS.put("non dr tb", RIF_NOT_DETECTED);
+		INTERPRETATIONS.put("non dr tb (rif resistance not detected)", RIF_NOT_DETECTED);
 		INTERPRETATIONS.put("rif resistance not detected", RIF_NOT_DETECTED);
 		INTERPRETATIONS.put("dr tb", RIF_DETECTED);
 		INTERPRETATIONS.put("dr tb (rif resistance detected)", RIF_DETECTED);
@@ -58,11 +58,6 @@ public class RifTestPayloadBuilder extends DiagnosticsTestPayloadBuilder {
 	@Override
 	protected String nikshayTestType() {
 		return "Truenat (MTB-RIF)";
-	}
-
-	@Override
-	protected String labSerialPrefix() {
-		return "SAMPLE-TRUENAT(MTB-RIF)-";
 	}
 
 	// TrueNat results go to Ni-kshay with reason "Diagnosis of TB" (tested on beta 2026-10-30)
