@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.iemr.admin.model.nikshay.NikshayActivateRequest;
+import com.iemr.admin.model.nikshay.NikshayDeviceBulkCreateRequest;
+import com.iemr.admin.model.nikshay.NikshayDeviceBulkCreateResponse;
 import com.iemr.admin.model.nikshay.NikshayDeviceRequest;
 import com.iemr.admin.model.nikshay.NikshayDeviceResponse;
 import com.iemr.admin.model.nikshay.NikshayVillageEnrollRequest;
@@ -12,7 +14,7 @@ import com.iemr.admin.model.nikshay.NikshayVillageRemoveRequest;
 
 public interface NikshayDeviceService {
 
-	NikshayDeviceResponse createDevice(NikshayDeviceRequest request) throws Exception;
+	NikshayDeviceBulkCreateResponse createDevices(NikshayDeviceBulkCreateRequest request) throws Exception;
 
 	byte[] getUploadTemplate() throws Exception;
 
