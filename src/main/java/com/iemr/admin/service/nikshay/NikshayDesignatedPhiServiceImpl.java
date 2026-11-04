@@ -70,8 +70,6 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 		}
 		mapping.setDesignationHierarchyId(hierarchyId);
 		mapping = transferOutPhiRepo.save(mapping);
-		logger.info("Designated PHI {} {} for village {} by {}", phiId, existing.isEmpty() ? "added" : "updated",
-				villageId, createdBy);
 		return toMap(mapping);
 	}
 
@@ -108,7 +106,6 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 		}
 		mapping.setUpdatedBy(updatedBy);
 		mapping = transferOutPhiRepo.save(mapping);
-		logger.info("Designated PHI mapping {} updated by {}", id, updatedBy);
 		return toMap(mapping);
 	}
 
@@ -148,7 +145,6 @@ public class NikshayDesignatedPhiServiceImpl implements NikshayDesignatedPhiServ
 		mapping.setStatus(NikshayTransferOutPhiVillageMapping.STATUS_INACTIVE);
 		mapping.setUpdatedBy(updatedBy);
 		mapping = transferOutPhiRepo.save(mapping);
-		logger.info("Designated PHI mapping {} marked inactive by {}", id, updatedBy);
 		return toMap(mapping);
 	}
 
