@@ -11,10 +11,12 @@ import static com.iemr.admin.service.nikshay.NikshayRowUtils.trimToNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -23,15 +25,23 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iemr.admin.data.nikshay.NikshayCreatedDeviceDTO;
 import com.iemr.admin.data.nikshay.NikshayDeviceConfiguration;
+import com.iemr.admin.data.nikshay.NikshayDeviceFieldErrorDTO;
 import com.iemr.admin.data.nikshay.NikshayDeviceName;
 import com.iemr.admin.data.nikshay.NikshayDeviceVillageMapping;
+import com.iemr.admin.data.nikshay.NikshayFailedDeviceDTO;
 import com.iemr.admin.data.nikshay.NikshayFacility;
+import com.iemr.admin.data.nikshay.NikshayPendingDeviceDTO;
 import com.iemr.admin.data.nikshay.NikshayVillage;
 import com.iemr.admin.model.nikshay.NikshayActivateRequest;
+import com.iemr.admin.model.nikshay.NikshayDeviceBulkCreateRequest;
+import com.iemr.admin.model.nikshay.NikshayDeviceBulkCreateResponse;
 import com.iemr.admin.model.nikshay.NikshayDeviceRequest;
 import com.iemr.admin.model.nikshay.NikshayDeviceResponse;
 import com.iemr.admin.model.nikshay.NikshayVillageEnrollRequest;
@@ -68,9 +78,200 @@ public class NikshayDeviceServiceImpl implements NikshayDeviceService {
 	@Autowired
 	private NikshayPasswordCipher passwordCipher;
 
+	private static final int MAX_DEVICES_PER_REQUEST = 1000;
+	private static final int INSERT_CHUNK_SIZE = 200;
+
+	/**
+	 * /create: creates one or more devices with partial success. Every row is
+	 * validated in memory, existing serial numbers are found with one IN query,
+	 * and the rest are inserted with deviceRepo.batchInsert in chunks of
+	 * INSERT_CHUNK_SIZE, each chunk in its own transaction. If a chunk fails (e.g.
+	 * a concurrent insert of the same serial number), it is rolled back and
+	 * retried row by row so only the bad rows fail. Deliberately not
+	 * @Transactional: a failed chunk must not roll back the chunks already saved.
+	 */
 	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public NikshayDeviceResponse createDevice(NikshayDeviceRequest request) throws Exception {
+	public NikshayDeviceBulkCreateResponse createDevices(NikshayDeviceBulkCreateRequest request) throws Exception {
+		require(request, "Request body is required");
+		String createdBy = require(request.getCreatedBy(), "Created by is required");
+		List<NikshayDeviceRequest> devices = request.getDevices();
+		if (devices == null || devices.isEmpty()) {
+			throw new IllegalArgumentException("At least one device is required");
+		}
+		if (devices.size() > MAX_DEVICES_PER_REQUEST) {
+			throw new IllegalArgumentException(
+					"A maximum of " + MAX_DEVICES_PER_REQUEST + " devices can be uploaded at a time");
+		}
+
+		NikshayDeviceBulkCreateResponse result = new NikshayDeviceBulkCreateResponse();
+		result.setTotal(devices.size());
+
+		// 1. Field validation and duplicates inside the request (no database calls)
+		Map<String, Integer> firstRowBySerial = new HashMap<>();
+		List<NikshayPendingDeviceDTO> pending = new ArrayList<>();
+		for (int row = 0; row < devices.size(); row++) {
+			NikshayDeviceRequest d = devices.get(row);
+			if (d == null) {
+				fail(result, row, null, NikshayFailedDeviceDTO.VALIDATION_ERROR,
+						List.of(new NikshayDeviceFieldErrorDTO(null, "Device entry is empty")));
+				continue;
+			}
+			List<NikshayDeviceFieldErrorDTO> errors = new ArrayList<>();
+			NikshayDeviceName deviceName = validateDevice(d, errors);
+			if (!errors.isEmpty()) {
+				fail(result, row, d, NikshayFailedDeviceDTO.VALIDATION_ERROR, errors);
+				continue;
+			}
+			String serialNumber = d.getDeviceSerialNumber().trim();
+			Integer firstRow = firstRowBySerial.putIfAbsent(serialKey(serialNumber), row);
+			if (firstRow != null) {
+				fail(result, row, d, NikshayFailedDeviceDTO.DUPLICATE_IN_REQUEST,
+						List.of(new NikshayDeviceFieldErrorDTO("deviceSerialNumber", "Serial number " + serialNumber
+								+ " is repeated in this upload (first at row " + firstRow + ")")));
+				continue;
+			}
+			pending.add(new NikshayPendingDeviceDTO(row, d, serialNumber, deviceName));
+		}
+
+		// 2. Serial numbers already in the database (one query)
+		if (!pending.isEmpty()) {
+			Set<String> existing = deviceRepo
+					.findByDeviceSerialNumberIn(
+							pending.stream().map(NikshayPendingDeviceDTO::getSerialNumber).collect(Collectors.toList()))
+					.stream().map(e -> serialKey(e.getDeviceSerialNumber())).collect(Collectors.toSet());
+			List<NikshayPendingDeviceDTO> fresh = new ArrayList<>();
+			for (NikshayPendingDeviceDTO p : pending) {
+				if (existing.contains(serialKey(p.getSerialNumber()))) {
+					fail(result, p.getRowIndex(), p.getSource(), NikshayFailedDeviceDTO.ALREADY_EXISTS,
+							List.of(new NikshayDeviceFieldErrorDTO("deviceSerialNumber",
+									"A device with serial number " + p.getSerialNumber() + " already exists")));
+				} else {
+					p.setEntity(newDevice(p, createdBy));
+					fresh.add(p);
+				}
+			}
+			pending = fresh;
+		}
+
+		// 3. Batch insert in chunks, each chunk in its own transaction (repository)
+		List<NikshayPendingDeviceDTO> inserted = new ArrayList<>();
+		for (int from = 0; from < pending.size(); from += INSERT_CHUNK_SIZE) {
+			List<NikshayPendingDeviceDTO> chunk = pending.subList(from,
+					Math.min(from + INSERT_CHUNK_SIZE, pending.size()));
+			inserted.addAll(insertChunk(chunk, result));
+		}
+
+		// 4. Created devices, with the ids returned by the insert itself (no read-back query)
+		for (NikshayPendingDeviceDTO p : inserted) {
+			NikshayDeviceConfiguration e = p.getEntity();
+			NikshayCreatedDeviceDTO c = new NikshayCreatedDeviceDTO();
+			c.setRowIndex(p.getRowIndex());
+			c.setId(e.getId());
+			c.setDeviceSerialNumber(e.getDeviceSerialNumber());
+			c.setDeviceName(e.getDeviceName());
+			c.setPhiUserId(e.getPhiUserId());
+			c.setIsActive(e.getIsActive());
+			result.getCreated().add(c);
+		}
+
+		result.getCreated().sort(Comparator.comparingInt(NikshayCreatedDeviceDTO::getRowIndex));
+		result.getFailed().sort(Comparator.comparingInt(NikshayFailedDeviceDTO::getRowIndex));
+		result.setSuccessCount(result.getCreated().size());
+		result.setFailedCount(result.getFailed().size());
+		logger.info("Nikshay bulk device create by {}: total {}, created {}, failed {}", createdBy, result.getTotal(),
+				result.getSuccessCount(), result.getFailedCount());
+		return result;
+	}
+
+	// Same values the single-device create saves; the password is encrypted here
+	private NikshayDeviceConfiguration newDevice(NikshayPendingDeviceDTO p, String createdBy) {
+		NikshayDeviceRequest source = p.getSource();
+		NikshayDeviceConfiguration device = new NikshayDeviceConfiguration();
+		device.setDeviceSerialNumber(p.getSerialNumber());
+		device.setDeviceName(p.getDeviceName());
+		device.setPhiUserId(source.getPhiUserId().trim());
+		device.setPassword(passwordCipher.encrypt(source.getPassword().trim()));
+		device.setIsActive(true);
+		device.setMoreData(toJson(source.getMoreData()));
+		device.setCreatedBy(createdBy);
+		return device;
+	}
+
+	// Collects every field error of one device; returns the parsed device name when valid
+	private NikshayDeviceName validateDevice(NikshayDeviceRequest d, List<NikshayDeviceFieldErrorDTO> errors) {
+		if (trimToNull(d.getDeviceSerialNumber()) == null) {
+			errors.add(new NikshayDeviceFieldErrorDTO("deviceSerialNumber", "Device serial number is required"));
+		}
+		NikshayDeviceName deviceName = null;
+		try {
+			deviceName = NikshayDeviceName.from(d.getDeviceName());
+		} catch (IllegalArgumentException e) {
+			errors.add(new NikshayDeviceFieldErrorDTO("deviceName", e.getMessage()));
+		}
+		if (trimToNull(d.getPhiUserId()) == null) {
+			errors.add(new NikshayDeviceFieldErrorDTO("phiUserId", "PHI user ID is required"));
+		}
+		if (trimToNull(d.getPassword()) == null) {
+			errors.add(new NikshayDeviceFieldErrorDTO("password", "Password is required"));
+		}
+		return deviceName;
+	}
+
+	// Inserts one chunk; returns the rows that were saved (their entities carry the
+	// generated ids) and adds failed rows to result
+	private List<NikshayPendingDeviceDTO> insertChunk(List<NikshayPendingDeviceDTO> chunk,
+			NikshayDeviceBulkCreateResponse result) {
+		try {
+			deviceRepo.batchInsert(chunk.stream().map(NikshayPendingDeviceDTO::getEntity).collect(Collectors.toList()));
+			return chunk;
+		} catch (DataAccessException e) {
+			// The whole chunk was rolled back; retry row by row so only the bad rows fail
+			logger.warn("Batch insert of {} Nikshay devices failed, retrying one by one: {}", chunk.size(),
+					e.getMostSpecificCause().getMessage());
+		}
+		List<NikshayPendingDeviceDTO> saved = new ArrayList<>();
+		for (NikshayPendingDeviceDTO p : chunk) {
+			try {
+				p.getEntity().setId(null);
+				deviceRepo.insert(p.getEntity());
+				saved.add(p);
+			} catch (DataAccessException e) {
+				String message = e instanceof DuplicateKeyException
+						? "A device with serial number " + p.getSerialNumber() + " already exists"
+						: e.getMostSpecificCause().getMessage();
+				logger.warn("Nikshay device {} could not be created: {}", p.getSerialNumber(), message);
+				fail(result, p.getRowIndex(), p.getSource(), NikshayFailedDeviceDTO.DB_ERROR,
+						List.of(new NikshayDeviceFieldErrorDTO(null, "Failed to create device entry: " + message)));
+			}
+		}
+		return saved;
+	}
+
+	// Echoes the submitted values (never the password) so the row can be corrected
+	private void fail(NikshayDeviceBulkCreateResponse result, int rowIndex, NikshayDeviceRequest d, String reason,
+			List<NikshayDeviceFieldErrorDTO> errors) {
+		NikshayFailedDeviceDTO f = new NikshayFailedDeviceDTO();
+		f.setRowIndex(rowIndex);
+		if (d != null) {
+			f.setDeviceSerialNumber(d.getDeviceSerialNumber());
+			f.setDeviceName(d.getDeviceName());
+			f.setPhiUserId(d.getPhiUserId());
+		}
+		f.setReason(reason);
+		f.setErrors(new ArrayList<>(errors));
+		result.getFailed().add(f);
+	}
+
+	// device_serial_number is unique under MySQL's case-insensitive collation, so compare the same way
+	private String serialKey(String serialNumber) {
+		return serialNumber.trim().toLowerCase(Locale.ROOT);
+	}
+
+	/**
+	 * Single-device create used by the Excel upload (/upload); runs inside
+	 * uploadDevices' transaction. /create uses createDevices instead.
+	 */
+	private NikshayDeviceResponse createDevice(NikshayDeviceRequest request) throws Exception {
 		require(request, "Request body is required");
 		String deviceSerialNumber = require(request.getDeviceSerialNumber(), "Device serial number is required");
 		String password = require(request.getPassword(), "Password is required");

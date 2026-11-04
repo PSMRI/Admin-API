@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.iemr.admin.model.nikshay.NikshayActivateRequest;
+import com.iemr.admin.model.nikshay.NikshayDeviceBulkCreateRequest;
 import com.iemr.admin.model.nikshay.NikshayDeviceRequest;
 import com.iemr.admin.model.nikshay.NikshayVillageEnrollRequest;
 import com.iemr.admin.model.nikshay.NikshayVillageRemoveRequest;
@@ -44,10 +45,11 @@ public class NikshayDeviceController {
 	@Autowired
 	private NikshayDeviceService nikshayDeviceService;
 
-	@Operation(summary = "Create a Ni-kshay camp device (device name NAAT / XRAY) with its PHI login; the password is stored encrypted")
+	@Operation(summary = "Create one or more Nikshay camp devices passwords are stored encrypted. created devices " +
+			"and failed devices with row index, reason and field errors")
 	@PostMapping(value = "/create", produces = "application/json", headers = "Authorization")
-	public String createDevice(@RequestBody NikshayDeviceRequest request) {
-		return respond("createDevice", () -> nikshayDeviceService.createDevice(request));
+	public String createDevices(@RequestBody NikshayDeviceBulkCreateRequest request) {
+		return respond("createDevices", () -> nikshayDeviceService.createDevices(request));
 	}
 
 	@Operation(summary = "Download the Excel template for the bulk device upload")

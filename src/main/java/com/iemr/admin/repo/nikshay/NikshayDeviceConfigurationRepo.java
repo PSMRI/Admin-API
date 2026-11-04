@@ -1,5 +1,6 @@
 package com.iemr.admin.repo.nikshay;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +12,13 @@ import com.iemr.admin.data.nikshay.NikshayDeviceConfiguration;
 import com.iemr.admin.data.nikshay.NikshayDeviceName;
 
 @Repository
-public interface NikshayDeviceConfigurationRepo extends CrudRepository<NikshayDeviceConfiguration, Integer> {
+public interface NikshayDeviceConfigurationRepo
+		extends CrudRepository<NikshayDeviceConfiguration, Integer>, NikshayDeviceConfigurationRepoCustom {
 
 	NikshayDeviceConfiguration findByDeviceSerialNumber(String deviceSerialNumber);
+
+	// Existing devices among the serial numbers of a bulk create, in one query
+	List<NikshayDeviceConfiguration> findByDeviceSerialNumberIn(Collection<String> deviceSerialNumbers);
 
 	// Partial, case-insensitive match on the device serial number; exact matches first
 	@Query("select d from NikshayDeviceConfiguration d where lower(d.deviceSerialNumber) like lower(concat('%', :deviceSerialNumber, '%')) "
