@@ -44,5 +44,7 @@ public enum NikshayFailureReason {
 	// More than one Ni-kshay record matches
 	MULTIPLE_DUPLICATE_MATCHES,
 	// The test result is an error / invalid run (e.g. NAAT "Error-2"): not uploaded, waits for a retest
-	TEST_RESULT_INVALID
+	TEST_RESULT_INVALID,
+	// JOB summary row only: a phase pass threw an error; each such pass has its "error" in the message JSON
+	PHASE_COULD_NOT_RUN
 }

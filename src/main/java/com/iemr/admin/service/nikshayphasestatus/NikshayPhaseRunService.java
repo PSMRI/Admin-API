@@ -21,6 +21,7 @@
 */
 package com.iemr.admin.service.nikshayphasestatus;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,9 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
+import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseCandidate;
+import com.iemr.admin.data.nikshayphasestatus.NikshayPhaseStatus;
 import com.iemr.admin.service.nikshayidgenerate.NikshayIdGenerateService;
+import com.iemr.admin.service.nikshayjoblog.NikshayFailureReason;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobHistoryLogService;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobRunContext;
 import com.iemr.admin.service.nikshaytransferout.NikshayTransferOutService;
@@ -43,6 +48,8 @@ import com.iemr.admin.service.nikshayupload.NikshayUploadService;
  * Runs one Ni-kshay phase: ENROLMENT, XRAY_UPLOAD, NAAT_UPLOAD (MTB and Rif), CONTACTS or
  * TRANSFER_OUT. Only one run of a phase at a time; each run takes up to
  * nikshay.phase.batch-size beneficiaries and writes its job history log entries when it ends.
+ * A manual run of one phase also writes a JOB summary row with its counts (the whole job
+ * writes one row for all its phases, see NikshayPhaseJob).
  */
 @Service
 public class NikshayPhaseRunService {
@@ -85,6 +92,104 @@ public class NikshayPhaseRunService {
 	 */
 	public List<NikshayErroredBeneficiaryDTO> run(NikshayPhase phase, List<Long> benRegIds, int limit,
 			String beneficiaryType, NikshayJobRunContext context) {
+		long startedAt = System.currentTimeMillis();
+		NikshayPhaseRun run;
+		try {
+			run = execute(phase, benRegIds, limit, beneficiaryType, context);
+		} catch (IllegalStateException e) {
+			// Already running: no summary, as before
+			throw e;
+		} catch (RuntimeException e) {
+			saveSummary(context, summaryOf(startedAt, NikshayPhaseMetrics.couldNotRun(phase.name(), e)));
+			throw e;
+		}
+		saveSummary(context, summaryOf(startedAt, count(phase, run)));
+		return run.getErroredBeneficiaries();
+	}
+
+	/**
+	 * One pass of the whole job: runs the phase like run(...) and returns its counts. No
+	 * summary row is written here; the job writes one for all its passes.
+	 */
+	public NikshayPhaseMetrics runInJob(NikshayPhase phase, NikshayJobRunContext context) {
+		return runInJob(phase, batchSize, null, context);
+	}
+
+	/** Same as runInJob(phase, context), with limit and beneficiaryType as in run(...). */
+	public NikshayPhaseMetrics runInJob(NikshayPhase phase, int limit, String beneficiaryType,
+			NikshayJobRunContext context) {
+		return count(phase, execute(phase, null, limit, beneficiaryType, context));
+	}
+
+	/**
+	 * Saves the run's JOB row in nikshay_worker_job_history_log, its counts as JSON in the
+	 * message (FAILED with reason PHASE_COULD_NOT_RUN when a pass could not run). Returns the
+	 * row, or null when it could not be saved; the run itself is not affected.
+	 */
+	public NikshayJobHistoryLog saveSummary(NikshayJobRunContext context, NikshayJobRunSummary summary) {
+		try {
+			String message = summary.toMessage();
+			NikshayJobHistoryLog entry = summary.isAnyCouldNotRun()
+					? logService.failure(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
+							NikshayFailureReason.PHASE_COULD_NOT_RUN, message)
+					: logService.success(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
+							null, message);
+			List<NikshayJobHistoryLog> entries = new ArrayList<>();
+			entries.add(entry);
+			logService.saveAll(entries);
+			return entry;
+		} catch (Exception e) {
+			logger.error("Run {}: could not write the Ni-kshay run summary", context.getJobRunId(), e);
+			return null;
+		}
+	}
+
+	private static NikshayJobRunSummary summaryOf(long startedAt, NikshayPhaseMetrics metrics) {
+		NikshayJobRunSummary summary = new NikshayJobRunSummary(startedAt);
+		summary.add(metrics);
+		summary.finish();
+		return summary;
+	}
+
+	/**
+	 * Counts the picked beneficiaries by their status in the phase now. A failure here is
+	 * only logged: the counts stay 0 apart from picked, and the run goes on.
+	 */
+	private NikshayPhaseMetrics count(NikshayPhase phase, NikshayPhaseRun run) {
+		NikshayPhaseMetrics metrics = new NikshayPhaseMetrics(phase.name());
+		List<Long> picked = new ArrayList<>(run.getPickedBenRegIds());
+		metrics.setPicked(picked.size());
+		if (picked.isEmpty()) {
+			return metrics;
+		}
+		try {
+			int succeeded = 0;
+			int failed = 0;
+			int notApplicable = 0;
+			for (NikshayPhaseCandidate row : phaseStatusService.findRows(phase, picked)) {
+				if (NikshayPhaseStatus.DONE.name().equals(row.getStatus())) {
+					succeeded++;
+				} else if (NikshayPhaseStatus.FAILED.name().equals(row.getStatus())) {
+					failed++;
+				} else if (NikshayPhaseStatus.NOT_APPLICABLE.name().equals(row.getStatus())) {
+					notApplicable++;
+				}
+			}
+			metrics.setSucceeded(succeeded);
+			metrics.setFailed(failed);
+			metrics.setNotApplicable(notApplicable);
+			// PENDING, IN_PROGRESS or no row yet
+			metrics.setWaiting(picked.size() - succeeded - failed - notApplicable);
+		} catch (Exception e) {
+			logger.warn("{} run {}: could not count the picked beneficiaries", phase,
+					run.getContext().getJobRunId(), e);
+		}
+		return metrics;
+	}
+
+	// The phase run itself (unchanged): lock, run, write the history log entries
+	private NikshayPhaseRun execute(NikshayPhase phase, List<Long> benRegIds, int limit, String beneficiaryType,
+			NikshayJobRunContext context) {
 		synchronized (running) {
 			if (!running.add(phase)) {
 				throw new IllegalStateException(phase + " is already running");
@@ -123,7 +228,7 @@ public class NikshayPhaseRunService {
 		}
 		logger.info("{} run {} finished: {} beneficiaries failed", phase, context.getJobRunId(),
 				run.getErroredBeneficiaries().size());
-		return run.getErroredBeneficiaries();
+		return run;
 	}
 
 	/**

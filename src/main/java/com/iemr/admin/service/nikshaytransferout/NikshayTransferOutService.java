@@ -122,6 +122,9 @@ public class NikshayTransferOutService {
 	 */
 	public void runTransferOut(List<Long> benRegIds, int limit, NikshayPhaseRun run) {
 		List<NikshayPhaseCandidate> candidates = findCandidates(benRegIds, limit, run);
+		for (NikshayPhaseCandidate candidate : candidates) {
+			run.getPickedBenRegIds().add(candidate.getBenRegId());
+		}
 		logger.info("TRANSFER_OUT: {} beneficiaries to check", candidates.size());
 		if (candidates.isEmpty()) {
 			return;

@@ -33,18 +33,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
+import com.iemr.admin.data.nikshay.NikshayJobRunDTO;
 import com.iemr.admin.service.nikshayjoblog.NikshayFailureReason;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobHistoryLogService;
 import com.iemr.admin.service.nikshayjoblog.NikshayPhase;
+import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
 
 import io.swagger.v3.oas.annotations.Operation;
 
-/** Read side of the Ni-kshay phase history: failed items and one beneficiary's history. */
+/** Read side of the Ni-kshay phase history: failed items, one beneficiary's history and the runs. */
 @RestController
 @RequestMapping(value = "/nikshay/log", headers = "Authorization")
 public class NikshayJobLogController {
@@ -81,6 +84,46 @@ public class NikshayJobLogController {
 		} catch (Exception e) {
 			logger.error("Error reading failed Ni-kshay beneficiaries", e);
 			return ResponseEntity.status(500).body("Could not read failed beneficiaries");
+		}
+	}
+
+	@Operation(summary = "Ni-kshay runs (the whole job, cron or manual, and manual phase runs), newest first, "
+			+ "with their picked, succeeded, failed, notApplicable and waiting counts")
+	@GetMapping(value = "/runs")
+	public ResponseEntity<?> getRuns(@RequestParam(value = "triggerType", required = false) NikshayTriggerType triggerType,
+			@RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+			@RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "50") int size) {
+		if (page < 0 || size < 1 || size > MAX_PAGE_SIZE) {
+			return ResponseEntity.badRequest().body("page must be >= 0 and size between 1 and " + MAX_PAGE_SIZE);
+		}
+		try {
+			// Dates are whole days: toDate is included, so the query bound is the next day's start.
+			Page<NikshayJobRunDTO> runs = logService.getRuns(triggerType,
+					fromDate != null ? Timestamp.valueOf(fromDate.atStartOfDay()) : null,
+					toDate != null ? Timestamp.valueOf(toDate.plusDays(1).atStartOfDay()) : null, page, size);
+			Map<String, Object> body = new HashMap<>();
+			body.put("runs", runs.getContent());
+			body.put("totalElements", runs.getTotalElements());
+			body.put("page", page);
+			body.put("size", size);
+			return ResponseEntity.ok(body);
+		} catch (Exception e) {
+			logger.error("Error reading Ni-kshay runs", e);
+			return ResponseEntity.status(500).body("Could not read the Ni-kshay runs");
+		}
+	}
+
+	@Operation(summary = "One Ni-kshay run by its jobRunId, with its counts per phase")
+	@GetMapping(value = "/runs/{jobRunId}")
+	public ResponseEntity<?> getRun(@PathVariable("jobRunId") String jobRunId) {
+		try {
+			NikshayJobRunDTO run = logService.getRun(jobRunId);
+			return run != null ? ResponseEntity.ok(run) : ResponseEntity.status(404).body("No Ni-kshay run " + jobRunId);
+		} catch (Exception e) {
+			logger.error("Error reading Ni-kshay run {}", jobRunId, e);
+			return ResponseEntity.status(500).body("Could not read the Ni-kshay run");
 		}
 	}
 

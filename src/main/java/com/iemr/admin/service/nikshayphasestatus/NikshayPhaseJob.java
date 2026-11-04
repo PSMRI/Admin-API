@@ -21,18 +21,13 @@
 */
 package com.iemr.admin.service.nikshayphasestatus;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
-import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
-import com.iemr.admin.service.nikshayjoblog.NikshayJobHistoryLogService;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobRunContext;
 import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
 
@@ -41,8 +36,9 @@ import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
  * fires it with the cron in nikshay.job.cron (one cron for every phase), and
  * POST /nikshay/phase/job/run runs it by hand. Only one whole run goes at a time. Each run
  * goes through the phases in order. A phase that is already running (a manual push) is
- * skipped until the next run; a phase that fails does not stop the others. One summary
- * row is written to nikshay_worker_job_history_log.
+ * skipped until the next run; a phase that fails does not stop the others. One JOB summary
+ * row is written to nikshay_worker_job_history_log, with the picked, succeeded, failed, not
+ * applicable and waiting counts of the run and of each pass as JSON in its message.
  */
 @Component
 public class NikshayPhaseJob {
@@ -65,9 +61,6 @@ public class NikshayPhaseJob {
 
 	@Autowired
 	private NikshayPhaseRunService phaseRunService;
-
-	@Autowired
-	private NikshayJobHistoryLogService logService;
 
 	// True while a whole job run (cron or POST /nikshay/phase/job/run) is going
 	private boolean jobRunning;
@@ -103,56 +96,41 @@ public class NikshayPhaseJob {
 
 	private NikshayJobHistoryLog runPhases(NikshayJobRunContext context) {
 		logger.info("Ni-kshay job {} started by {}", context.getJobRunId(), context.getTriggeredBy());
-		List<String> ran = new ArrayList<>();
-		List<String> skipped = new ArrayList<>();
-		int failedBeneficiaries = 0;
-		boolean phaseCrashed = false;
+		NikshayJobRunSummary summary = new NikshayJobRunSummary();
 		int uploadPass = 0;
 		for (NikshayPhase phase : PHASE_ORDER) {
+			// The first X-ray and TrueNat passes use the batch size. The passes after
+			// contacts upload every waiting contact, and transfer sends everyone ready.
+			boolean contactFollowUp;
+			if (phase == NikshayPhase.XRAY_UPLOAD || phase == NikshayPhase.NAAT_UPLOAD) {
+				contactFollowUp = ++uploadPass > 2;
+			} else {
+				contactFollowUp = phase == NikshayPhase.TRANSFER_OUT;
+			}
+			NikshayPhaseMetrics metrics;
 			try {
-				// The first X-ray and TrueNat passes use the batch size. The passes after
-				// contacts upload every waiting contact, and transfer sends everyone ready.
-				boolean contactFollowUp;
-				if (phase == NikshayPhase.XRAY_UPLOAD || phase == NikshayPhase.NAAT_UPLOAD) {
-					contactFollowUp = ++uploadPass > 2;
-				} else {
-					contactFollowUp = phase == NikshayPhase.TRANSFER_OUT;
-				}
-				List<NikshayErroredBeneficiaryDTO> errored = contactFollowUp
-						? phaseRunService.run(phase, null, CONTACT_FOLLOW_UP_LIMIT,
+				metrics = contactFollowUp
+						? phaseRunService.runInJob(phase, CONTACT_FOLLOW_UP_LIMIT,
 								phase == NikshayPhase.TRANSFER_OUT ? null : "CONTACT", context)
-						: phaseRunService.run(phase, null, context);
-				failedBeneficiaries += errored.size();
-				ran.add(phase.name() + " (" + errored.size() + " failed)");
-				logger.info("Ni-kshay job: {} done, {} beneficiaries failed", phase, errored.size());
+						: phaseRunService.runInJob(phase, context);
+				logger.info("Ni-kshay job: {} done, {} beneficiaries failed", phase, metrics.getFailed());
 			} catch (IllegalStateException e) {
 				// Already running (a manual push): the next run picks it up
 				logger.info("Ni-kshay job: {} skipped: {}", phase, e.getMessage());
-				skipped.add(phase.name());
+				metrics = NikshayPhaseMetrics.skipped(phase.name());
 			} catch (Exception e) {
 				logger.error("Ni-kshay job: {} could not run", phase, e);
-				ran.add(phase.name() + " (could not run)");
-				phaseCrashed = true;
+				metrics = NikshayPhaseMetrics.couldNotRun(phase.name(), e);
 			}
+			if (contactFollowUp && phase != NikshayPhase.TRANSFER_OUT) {
+				metrics.setPass(2);
+			}
+			summary.add(metrics);
 		}
-		String message = (context.getTriggerType() == NikshayTriggerType.JOB ? "Cron run" : "Manual run")
-				+ ". Ran: " + (ran.isEmpty() ? "none" : String.join(", ", ran))
-				+ ". Skipped (already running): " + (skipped.isEmpty() ? "none" : String.join(", ", skipped))
-				+ ". Beneficiaries failed: " + failedBeneficiaries;
-		logger.info("Ni-kshay job {} finished. {}", context.getJobRunId(), message);
-		NikshayJobHistoryLog entry = null;
-		try {
-			entry = phaseCrashed
-					? logService.failure(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
-							null, message)
-					: logService.success(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
-							null, message);
-			List<NikshayJobHistoryLog> entries = new ArrayList<>();
-			entries.add(entry);
-			logService.saveAll(entries);
-		} catch (Exception e) {
-			logger.error("Ni-kshay job {}: could not write the run summary", context.getJobRunId(), e);
-		}
-		return entry;
+		summary.finish();
+		logger.info("Ni-kshay job {} finished: picked {}, succeeded {}, failed {}, not applicable {}, waiting {}",
+				context.getJobRunId(), summary.getPicked(), summary.getSucceeded(), summary.getFailed(),
+				summary.getNotApplicable(), summary.getWaiting());
+		return phaseRunService.saveSummary(context, summary);
 	}
 }
