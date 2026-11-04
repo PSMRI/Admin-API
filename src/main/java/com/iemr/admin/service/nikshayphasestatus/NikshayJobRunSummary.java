@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iemr.admin.service.nikshayjoblog.NikshayJobHistoryLogService;
 
 import lombok.Getter;
 
@@ -45,8 +46,8 @@ import lombok.Getter;
 public class NikshayJobRunSummary {
 	private static final Logger logger = LoggerFactory.getLogger(NikshayJobRunSummary.class);
 	private static final ObjectMapper MAPPER = new ObjectMapper();
-	// Size of nikshay_worker_job_history_log.message
-	private static final int MESSAGE_MAX_LENGTH = 1000;
+	// Longest summary saved (nikshay_worker_job_history_log.message is TEXT since AMRIT-DB V141)
+	private static final int MESSAGE_MAX_LENGTH = NikshayJobHistoryLogService.SUMMARY_MAX_LENGTH;
 
 	// When the run started and ended, in epoch milliseconds (Admin-API's clock)
 	private final long startedAt;
@@ -98,9 +99,10 @@ public class NikshayJobRunSummary {
 	}
 
 	/**
-	 * The JSON for the message column. When it would not fit (the column would cut the JSON and
-	 * make it unreadable), it is made shorter step by step: errors cut to 80 characters, then
-	 * only the passes that did not run, then their errors cut to 40, then only the totals.
+	 * The JSON for the message column. Every pass is always kept. A full job's summary is
+	 * about 1,100 characters with the largest counts and up to about 2,500 with an error on
+	 * every pass, far below the limit; if it were ever longer, the errors are cut to 80, then
+	 * 40 characters, and only then are the passes left out (the totals and times stay).
 	 */
 	public String toMessage() {
 		List<NikshayPhaseMetrics> allPhases = phases;
@@ -111,17 +113,12 @@ public class NikshayJobRunSummary {
 			}
 			logger.warn("Ni-kshay run summary is {} characters, over {}: saving a shorter one", json.length(),
 					MESSAGE_MAX_LENGTH);
-			phases = cutErrors(allPhases, 80, false);
+			phases = cutErrors(allPhases, 80);
 			json = MAPPER.writeValueAsString(this);
 			if (json.length() <= MESSAGE_MAX_LENGTH) {
 				return json;
 			}
-			phases = cutErrors(allPhases, 80, true);
-			json = MAPPER.writeValueAsString(this);
-			if (json.length() <= MESSAGE_MAX_LENGTH) {
-				return json;
-			}
-			phases = cutErrors(allPhases, 40, true);
+			phases = cutErrors(allPhases, 40);
 			json = MAPPER.writeValueAsString(this);
 			if (json.length() <= MESSAGE_MAX_LENGTH) {
 				return json;
@@ -138,14 +135,11 @@ public class NikshayJobRunSummary {
 		}
 	}
 
-	// Copies of the passes with errors cut to maxLength; notRunOnly keeps only the passes that did not run
-	private static List<NikshayPhaseMetrics> cutErrors(List<NikshayPhaseMetrics> passes, int maxLength,
-			boolean notRunOnly) {
+	// Copies of every pass with its error cut to maxLength
+	private static List<NikshayPhaseMetrics> cutErrors(List<NikshayPhaseMetrics> passes, int maxLength) {
 		List<NikshayPhaseMetrics> copies = new ArrayList<>();
 		for (NikshayPhaseMetrics metrics : passes) {
-			if (!notRunOnly || !NikshayPhaseMetrics.RAN.equals(metrics.getResult())) {
-				copies.add(metrics.withErrorCut(maxLength));
-			}
+			copies.add(metrics.withErrorCut(maxLength));
 		}
 		return copies;
 	}

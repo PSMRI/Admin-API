@@ -51,6 +51,8 @@ public class NikshayJobHistoryLogService {
 	private static final Logger logger = LoggerFactory.getLogger(NikshayJobHistoryLogService.class);
 
 	private static final int MESSAGE_MAX_LENGTH = 1000;
+	// A JOB row's message is the run summary JSON (message is TEXT since AMRIT-DB V141)
+	public static final int SUMMARY_MAX_LENGTH = 10000;
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	@Autowired
@@ -164,9 +166,8 @@ public class NikshayJobHistoryLogService {
 		entry.setPhase(phase);
 		entry.setReferenceId(referenceId);
 		entry.setStatus(status);
-		entry.setMessage(message != null && message.length() > MESSAGE_MAX_LENGTH
-				? message.substring(0, MESSAGE_MAX_LENGTH)
-				: message);
+		int maxLength = phase == NikshayPhase.JOB ? SUMMARY_MAX_LENGTH : MESSAGE_MAX_LENGTH;
+		entry.setMessage(message != null && message.length() > maxLength ? message.substring(0, maxLength) : message);
 		entry.setJobRunId(ctx.getJobRunId());
 		entry.setTriggerType(ctx.getTriggerType());
 		entry.setTriggeredBy(ctx.getTriggeredBy());
