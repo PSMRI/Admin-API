@@ -37,11 +37,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
 import com.iemr.admin.data.nikshayphasestatus.NikshayPhase;
 import com.iemr.admin.data.nikshayphasestatus.NikshayRunMode;
 import com.iemr.admin.service.nikshayjoblog.NikshayJobRunContext;
 import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
+import com.iemr.admin.service.nikshayphasestatus.NikshayPhaseJob;
 import com.iemr.admin.service.nikshayphasestatus.NikshayPhaseRunService;
 import com.iemr.admin.service.nikshayphasestatus.NikshayPhaseRunSettingService;
 import com.iemr.admin.utils.JwtUtil;
@@ -50,8 +52,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Runs the Ni-kshay phases one at a time (ENROLMENT, XRAY_UPLOAD, NAAT_UPLOAD, CONTACTS) and
- * sets their run mode (automatic job or manual push only).
+ * Runs the Ni-kshay phases one at a time (ENROLMENT, XRAY_UPLOAD, NAAT_UPLOAD, CONTACTS) or the
+ * whole job, and sets their run mode (automatic job or manual push only).
  */
 @RestController
 @RequestMapping(value = "/nikshay/phase", headers = "Authorization")
@@ -63,6 +65,9 @@ public class NikshayPhaseController {
 
 	@Autowired
 	private NikshayPhaseRunSettingService settingService;
+
+	@Autowired
+	private NikshayPhaseJob phaseJob;
 
 	@Autowired
 	private JwtUtil jwtUtil;
@@ -81,6 +86,21 @@ public class NikshayPhaseController {
 		} catch (Exception e) {
 			logger.error("Error running Ni-kshay phase {}", phase, e);
 			return ResponseEntity.status(500).body("Could not run Ni-kshay phase " + phase);
+		}
+	}
+
+	@Operation(summary = "Run the whole Ni-kshay job now, as the cron does: ENROLMENT, XRAY_UPLOAD, NAAT_UPLOAD, "
+			+ "CONTACTS, the contacts' XRAY_UPLOAD and NAAT_UPLOAD, then TRANSFER_OUT; returns the JOB summary row")
+	@PostMapping(value = "/job/run")
+	public ResponseEntity<?> runJob(HttpServletRequest request) {
+		try {
+			NikshayJobHistoryLog summary = phaseJob.runAllPhases(context(request));
+			return ResponseEntity.ok(summary != null ? summary : "Job ran; its summary could not be saved (see the log)");
+		} catch (IllegalStateException e) {
+			return ResponseEntity.status(409).body(e.getMessage());
+		} catch (Exception e) {
+			logger.error("Error running the Ni-kshay job", e);
+			return ResponseEntity.status(500).body("Could not run the Ni-kshay job");
 		}
 	}
 

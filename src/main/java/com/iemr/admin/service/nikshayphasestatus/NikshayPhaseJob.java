@@ -38,7 +38,8 @@ import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
 
 /**
  * The one automatic Ni-kshay job (BRD FR-19, section 11.2). NikshayJobSchedulingConfig
- * fires it with the cron in nikshay.job.cron (one cron for every phase). Each run
+ * fires it with the cron in nikshay.job.cron (one cron for every phase), and
+ * POST /nikshay/phase/job/run runs it by hand. Only one whole run goes at a time. Each run
  * goes through the phases in order. A phase that is already running (a manual push) is
  * skipped until the next run; a phase that fails does not stop the others. One summary
  * row is written to nikshay_worker_job_history_log.
@@ -68,9 +69,40 @@ public class NikshayPhaseJob {
 	@Autowired
 	private NikshayJobHistoryLogService logService;
 
+	// True while a whole job run (cron or POST /nikshay/phase/job/run) is going
+	private boolean jobRunning;
+
+	/** The cron's entry point. A cron that fires while a whole run is still going is skipped. */
 	public void runAutomaticPhases() {
-		NikshayJobRunContext context = new NikshayJobRunContext(NikshayTriggerType.JOB, TRIGGERED_BY);
-		logger.info("Ni-kshay job {} started", context.getJobRunId());
+		try {
+			runAllPhases(new NikshayJobRunContext(NikshayTriggerType.JOB, TRIGGERED_BY));
+		} catch (IllegalStateException e) {
+			logger.info("Ni-kshay job not started: {}", e.getMessage());
+		}
+	}
+
+	/**
+	 * Runs every phase in PHASE_ORDER and returns the JOB summary row. Throws
+	 * IllegalStateException when a whole run is already going.
+	 */
+	public NikshayJobHistoryLog runAllPhases(NikshayJobRunContext context) {
+		synchronized (this) {
+			if (jobRunning) {
+				throw new IllegalStateException("The Ni-kshay job is already running");
+			}
+			jobRunning = true;
+		}
+		try {
+			return runPhases(context);
+		} finally {
+			synchronized (this) {
+				jobRunning = false;
+			}
+		}
+	}
+
+	private NikshayJobHistoryLog runPhases(NikshayJobRunContext context) {
+		logger.info("Ni-kshay job {} started by {}", context.getJobRunId(), context.getTriggeredBy());
 		List<String> ran = new ArrayList<>();
 		List<String> skipped = new ArrayList<>();
 		int failedBeneficiaries = 0;
@@ -103,12 +135,14 @@ public class NikshayPhaseJob {
 				phaseCrashed = true;
 			}
 		}
-		String message = "Cron run. Ran: " + (ran.isEmpty() ? "none" : String.join(", ", ran))
+		String message = (context.getTriggerType() == NikshayTriggerType.JOB ? "Cron run" : "Manual run")
+				+ ". Ran: " + (ran.isEmpty() ? "none" : String.join(", ", ran))
 				+ ". Skipped (already running): " + (skipped.isEmpty() ? "none" : String.join(", ", skipped))
 				+ ". Beneficiaries failed: " + failedBeneficiaries;
 		logger.info("Ni-kshay job {} finished. {}", context.getJobRunId(), message);
+		NikshayJobHistoryLog entry = null;
 		try {
-			NikshayJobHistoryLog entry = phaseCrashed
+			entry = phaseCrashed
 					? logService.failure(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
 							null, message)
 					: logService.success(context, com.iemr.admin.service.nikshayjoblog.NikshayPhase.JOB, null, null,
@@ -119,5 +153,6 @@ public class NikshayPhaseJob {
 		} catch (Exception e) {
 			logger.error("Ni-kshay job {}: could not write the run summary", context.getJobRunId(), e);
 		}
+		return entry;
 	}
 }
