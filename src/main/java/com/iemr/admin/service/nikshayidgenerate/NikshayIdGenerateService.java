@@ -113,13 +113,23 @@ public class NikshayIdGenerateService {
 		logger.info("Found {} beneficiaries eligible for Ni-kshay ID generation", eligible.size());
 		List<NikshayIdGenerateBeneficiaryDTO> positive = toRun(filterDiagnosisComplete(
 				filterHouseholdScreened(keepRequested(eligible, benRegIds)), benRegIds, run), benRegIds, limit);
+		pick(run, positive);
 		processBeneficiaries(positive, NikshayFlowScenario.POSITIVE, run);
 
 		// The query already requires the whole household to be screened
 		List<NikshayIdGenerateBeneficiaryDTO> allNegative = nikshayIdGenerateRepository.findAllNegativeBeneficiaries();
 		logger.info("Found {} members of all-negative households for Ni-kshay ID generation", allNegative.size());
-		processBeneficiaries(toRun(keepRequested(allNegative, benRegIds), benRegIds, limit - positive.size()),
-				NikshayFlowScenario.ALL_NEGATIVE, run);
+		List<NikshayIdGenerateBeneficiaryDTO> allNegativeToRun = toRun(keepRequested(allNegative, benRegIds), benRegIds,
+				limit - positive.size());
+		pick(run, allNegativeToRun);
+		processBeneficiaries(allNegativeToRun, NikshayFlowScenario.ALL_NEGATIVE, run);
+	}
+
+	// Counted in the run summary as picked by ENROLMENT
+	private static void pick(NikshayPhaseRun run, List<NikshayIdGenerateBeneficiaryDTO> beneficiaries) {
+		for (NikshayIdGenerateBeneficiaryDTO beneficiary : beneficiaries) {
+			run.getPickedBenRegIds().add(beneficiary.getBeneficiaryId());
+		}
 	}
 
 	// The beneficiaries asked for (all of them when benRegIds is null)
@@ -295,6 +305,7 @@ public class NikshayIdGenerateService {
 				}
 			}
 		}
+		run.getPickedBenRegIds().addAll(ids);
 		logger.info("Adding the contacts of {} index patient(s)", ids.size());
 		if (ids.isEmpty()) {
 			return;

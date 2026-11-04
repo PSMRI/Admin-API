@@ -35,7 +35,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
+import com.iemr.admin.data.nikshay.NikshayJobRunDTO;
 import com.iemr.admin.repo.nikshayjoblog.NikshayJobHistoryLogRepo;
 import com.iemr.admin.service.nikshayclient.NikshayApiException;
 
@@ -49,6 +51,7 @@ public class NikshayJobHistoryLogService {
 	private static final Logger logger = LoggerFactory.getLogger(NikshayJobHistoryLogService.class);
 
 	private static final int MESSAGE_MAX_LENGTH = 1000;
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	@Autowired
 	private NikshayJobHistoryLogRepo logRepo;
@@ -111,6 +114,47 @@ public class NikshayJobHistoryLogService {
 	/** Every entry of one beneficiary, newest first. */
 	public List<NikshayJobHistoryLog> getHistory(Long benId) {
 		return logRepo.findByBenIdOrderByIdDesc(benId);
+	}
+
+	/** The runs (their JOB rows), newest first. Null filters are ignored. */
+	public Page<NikshayJobRunDTO> getRuns(NikshayTriggerType triggerType, Timestamp fromDate, Timestamp toDate,
+			int page, int size) {
+		return logRepo.findRuns(NikshayPhase.JOB, triggerType, fromDate, toDate, PageRequest.of(page, size))
+				.map(this::toRun);
+	}
+
+	/** One run by its jobRunId, or null when it has no JOB row. */
+	public NikshayJobRunDTO getRun(String jobRunId) {
+		NikshayJobHistoryLog row = logRepo.findFirstByJobRunIdAndPhaseOrderByIdDesc(jobRunId, NikshayPhase.JOB);
+		return row == null ? null : toRun(row);
+	}
+
+	private NikshayJobRunDTO toRun(NikshayJobHistoryLog row) {
+		NikshayJobRunDTO run = new NikshayJobRunDTO();
+		run.setJobRunId(row.getJobRunId());
+		run.setTriggerType(row.getTriggerType());
+		run.setTriggeredBy(row.getTriggeredBy());
+		run.setStatus(row.getStatus());
+		run.setFinishedAt(row.getCreatedAt());
+		String message = row.getMessage();
+		if (message != null && message.trim().startsWith("{")) {
+			try {
+				run.setSummary(MAPPER.readTree(message));
+				if (run.getSummary().path("startedAt").asLong() > 0) {
+					run.setStartedAt(new Timestamp(run.getSummary().path("startedAt").asLong()));
+				}
+				if (run.getSummary().path("finishedAt").asLong() > 0) {
+					run.setFinishedAt(new Timestamp(run.getSummary().path("finishedAt").asLong()));
+				}
+			} catch (Exception e) {
+				logger.warn("Run {}: summary is not valid JSON", row.getJobRunId());
+			}
+		}
+		if (run.getSummary() == null) {
+			// Older row: plain text
+			run.setMessage(message);
+		}
+		return run;
 	}
 
 	private NikshayJobHistoryLog entry(NikshayJobRunContext ctx, NikshayPhase phase, Long benId,

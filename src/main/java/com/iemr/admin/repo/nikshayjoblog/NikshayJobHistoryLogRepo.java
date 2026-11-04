@@ -35,6 +35,7 @@ import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
 import com.iemr.admin.service.nikshayjoblog.NikshayFailureReason;
 import com.iemr.admin.service.nikshayjoblog.NikshayLogStatus;
 import com.iemr.admin.service.nikshayjoblog.NikshayPhase;
+import com.iemr.admin.service.nikshayjoblog.NikshayTriggerType;
 
 @Repository
 public interface NikshayJobHistoryLogRepo extends CrudRepository<NikshayJobHistoryLog, Long> {
@@ -68,6 +69,21 @@ public interface NikshayJobHistoryLogRepo extends CrudRepository<NikshayJobHisto
 			Pageable pageable);
 
 	List<NikshayJobHistoryLog> findByBenIdOrderByIdDesc(Long benId);
+
+	// JOB summary rows (one per run), newest first. Every filter is optional (null = no
+	// filter); toDate is exclusive.
+	String RUNS_WHERE = " WHERE l.phase = :job "
+			+ " AND (:triggerType IS NULL OR l.triggerType = :triggerType) "
+			+ " AND (:fromDate IS NULL OR l.createdAt >= :fromDate) "
+			+ " AND (:toDate IS NULL OR l.createdAt < :toDate) ";
+
+	@Query(value = " SELECT l FROM NikshayJobHistoryLog l " + RUNS_WHERE + " ORDER BY l.id DESC ",
+			countQuery = " SELECT COUNT(l) FROM NikshayJobHistoryLog l " + RUNS_WHERE)
+	Page<NikshayJobHistoryLog> findRuns(@Param("job") NikshayPhase job,
+			@Param("triggerType") NikshayTriggerType triggerType, @Param("fromDate") Timestamp fromDate,
+			@Param("toDate") Timestamp toDate, Pageable pageable);
+
+	NikshayJobHistoryLog findFirstByJobRunIdAndPhaseOrderByIdDesc(String jobRunId, NikshayPhase phase);
 
 	// Which of the given references already have a successful upload in this phase
 	@Query(" SELECT DISTINCT l.referenceId FROM NikshayJobHistoryLog l WHERE l.phase = :phase "

@@ -22,7 +22,9 @@
 package com.iemr.admin.service.nikshayphasestatus;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.iemr.admin.data.nikshay.NikshayJobHistoryLog;
 import com.iemr.admin.data.nikshayidgenerate.NikshayErroredBeneficiaryDTO;
@@ -32,13 +34,15 @@ import lombok.Getter;
 
 /**
  * One run of a Ni-kshay phase: who triggered it, the beneficiaries that failed (the run's
- * response) and the job history log entries, written once when the run ends.
+ * response), the job history log entries, written once when the run ends, and the
+ * BenRegIds the phase picked (counted in the run summary).
  */
 @Getter
 public class NikshayPhaseRun {
 	private final NikshayJobRunContext context;
 	private final List<NikshayErroredBeneficiaryDTO> erroredBeneficiaries = new ArrayList<>();
 	private final List<NikshayJobHistoryLog> logEntries = new ArrayList<>();
+	private final Set<Long> pickedBenRegIds = new LinkedHashSet<>();
 
 	public NikshayPhaseRun(NikshayJobRunContext context) {
 		this.context = context;

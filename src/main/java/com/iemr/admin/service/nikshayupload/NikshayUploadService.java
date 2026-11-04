@@ -135,6 +135,9 @@ public class NikshayUploadService {
 				}
 			}
 		}
+		for (NikshayPhaseCandidate candidate : candidates) {
+			run.getPickedBenRegIds().add(candidate.getBenRegId());
+		}
 		logger.info("{}: {} beneficiaries to upload", phase, candidates.size());
 		if (candidates.isEmpty()) {
 			return;
