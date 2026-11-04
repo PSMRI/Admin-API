@@ -44,3 +44,7 @@ node_modules
 
 # Logs
 logs/
+*.api-results.csv
+test-results/
+playwright-report/
+playwright/.cache/
