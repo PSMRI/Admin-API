@@ -79,7 +79,7 @@ public class NikshayEnrollPayloadBuilder {
 		residenceHierarchyAll.add(beneficiary.getNikshayTuId());
 		residenceHierarchyAll.add(beneficiary.getNikshayPortalVillageId());
 		payload.put("Pincode", beneficiary.getPincode());
-		payload.put("Area", beneficiary.getArea());
+		payload.put("Area", NikshayAreaMapper.toNikshay(beneficiary.getArea()));
 		payload.put("MaritalStatus", beneficiary.getMaritalStatus());
 		payload.put("Occupation", NikshayOccupationMapper.toNikshay(beneficiary.getOccupation()));
 		payload.put("SocioeconomicStatus", beneficiary.getSocioeconomicStatus());
