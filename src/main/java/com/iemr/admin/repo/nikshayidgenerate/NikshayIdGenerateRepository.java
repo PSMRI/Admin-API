@@ -196,6 +196,9 @@ public class NikshayIdGenerateRepository {
 			+ "  AND NULLIF(TRIM(dx.digital_chest_xray_result), '') IS NOT NULL "
 			+ "ORDER BY dx.id DESC LIMIT 1)";
 
+	// X-ray results (lower case) that do not stop a household from being all negative
+	private static final String CLEAR_XRAY = "('normal', 'abnormal but not tb presumptive')";
+
 	// Latest completed chest X-ray order result of "mem" (the result the X-ray upload sends)
 	private static final String ORDER_XRAY_SQL = "(SELECT rx.result_summary "
 			+ "FROM db_iemr.tb_diagnostic_order ox "
@@ -209,9 +212,9 @@ public class NikshayIdGenerateRepository {
 			+ "ORDER BY ox.created_date DESC, ox.id DESC LIMIT 1)";
 
 	// A member of the household (each from their latest rmnch row) who stops it from being
-	// all negative: not TB screened, ever TB confirmed or M. Tb detected, or no normal X-ray.
-	// The X-ray is normal when at least one of the two results says Normal and neither
-	// says anything else
+	// all negative: not TB screened, ever TB confirmed or M. Tb detected, or no clear X-ray.
+	// The X-ray is clear when at least one of the two results says Normal or "Abnormal but
+	// not TB Presumptive" and neither says anything else
 	private static final String MEMBER_NOT_CLEARED_SQL = "SELECT 1 FROM db_identity.i_beneficiarydetails_rmnch mem "
 			+ "WHERE mem.houseoldId = rm.houseoldId "
 			+ "  AND mem.BeneficiaryRegID IS NOT NULL "
@@ -237,13 +240,13 @@ public class NikshayIdGenerateRepository {
 			+ "        AND " + detected("d3.truenat_result") + ") "
 			+ "    OR NOT ( "
 			+ "      (" + FORM_XRAY_SQL + " IS NOT NULL OR " + ORDER_XRAY_SQL + " IS NOT NULL) "
-			+ "      AND LOWER(TRIM(IFNULL(" + FORM_XRAY_SQL + ", 'normal'))) = 'normal' "
-			+ "      AND LOWER(TRIM(IFNULL(" + ORDER_XRAY_SQL + ", 'normal'))) = 'normal' "
+			+ "      AND LOWER(TRIM(IFNULL(" + FORM_XRAY_SQL + ", 'normal'))) IN " + CLEAR_XRAY + " "
+			+ "      AND LOWER(TRIM(IFNULL(" + ORDER_XRAY_SQL + ", 'normal'))) IN " + CLEAR_XRAY + " "
 			+ "    ) "
 			+ "  )";
 
 	// Members of all-negative households who have no Ni-kshay ID yet: every member of the
-	// household is TB screened, has a normal X-ray and is not TB confirmed
+	// household is TB screened, has a clear X-ray (see MEMBER_NOT_CLEARED_SQL) and is not TB confirmed
 	private static final String ALL_NEGATIVE_BENEFICIARIES_SQL = BENEFICIARY_COLUMNS_SQL
 			+ "WHERE m.Deleted = 0 "
 			+ "  AND m.BenRegId IS NOT NULL "
