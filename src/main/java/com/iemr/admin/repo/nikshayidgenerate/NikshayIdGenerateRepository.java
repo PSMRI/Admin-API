@@ -196,8 +196,10 @@ public class NikshayIdGenerateRepository {
 			+ "  AND NULLIF(TRIM(dx.digital_chest_xray_result), '') IS NOT NULL "
 			+ "ORDER BY dx.id DESC LIMIT 1)";
 
-	// X-ray results (lower case) that do not stop a household from being all negative
-	private static final String CLEAR_XRAY = "('normal', 'abnormal but not tb presumptive')";
+	// X-ray results (lower case) that do not stop a household from being all negative; both
+	// "not suggestive" wordings, as in XrayTestPayloadBuilder
+	private static final String CLEAR_XRAY = "('normal', 'abnormal but not tb presumptive', "
+			+ "'abnormal but tb not presumptive')";
 
 	// Latest completed chest X-ray order result of "mem" (the result the X-ray upload sends)
 	private static final String ORDER_XRAY_SQL = "(SELECT rx.result_summary "
