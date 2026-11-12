@@ -225,6 +225,15 @@ public class ItemController {
 		try {
 
 			ItemMaster saveData = itemService.getItemMasterByID(item.getItemID());
+			// Name, strength, UOM and item form are editable; keep the stored value when one is not sent
+			if (item.getItemName() != null && !item.getItemName().trim().isEmpty())
+				saveData.setItemName(item.getItemName().trim());
+			if (item.getStrength() != null && !item.getStrength().trim().isEmpty())
+				saveData.setStrength(item.getStrength().trim());
+			if (item.getUomID() != null)
+				saveData.setUomID(item.getUomID());
+			if (item.getItemFormID() != null)
+				saveData.setItemFormID(item.getItemFormID());
 			saveData.setIsMedical(item.getIsMedical());
 			saveData.setItemCategoryID(item.getItemCategoryID());
 			saveData.setPharmacologyCategoryID(item.getPharmacologyCategoryID());
