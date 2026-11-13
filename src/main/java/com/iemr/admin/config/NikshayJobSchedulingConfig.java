@@ -36,8 +36,9 @@ import com.iemr.admin.service.nikshayphasestatus.NikshayPhaseJob;
 /**
  * Schedules the one Ni-kshay job (NikshayPhaseJob) with the cron expression in
  * nikshay.job.cron (env NIKSHAY_JOB_CRON; Spring format: second minute hour day month
- * weekday, e.g. 0 0 2 * * * for 02:00 every day). The application does not start when the
- * value is missing, blank or not a valid cron expression. "-" turns the job off. A change
+ * weekday, e.g. 0 0 2 * * * for 02:00 every day). "-" turns the job off, and is the default
+ * in the environment property files when NIKSHAY_JOB_CRON is not set. The application does
+ * not start when the value is blank or not a valid cron expression. A change
  * needs a restart. Runs on one thread, so a run never overlaps the previous one.
  */
 @Configuration
@@ -50,7 +51,7 @@ public class NikshayJobSchedulingConfig implements SchedulingConfigurer {
 	// Spring's value for "no schedule"
 	private static final String CRON_DISABLED = "-";
 
-	// No default: a missing NIKSHAY_JOB_CRON stops the application at startup
+	// The property files default a missing NIKSHAY_JOB_CRON to "-" (job off)
 	@Value("${" + CRON_PROPERTY + "}")
 	private String cron;
 
