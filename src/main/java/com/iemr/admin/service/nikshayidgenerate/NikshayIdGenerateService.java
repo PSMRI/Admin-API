@@ -559,7 +559,7 @@ public class NikshayIdGenerateService {
 	 * Adds the index patient's household members to Ni-kshay as their contacts (BRD section
 	 * 8.1, spec Flow 2-A), with the same NAAT device login. First the household counts are
 	 * written on the index patient (ContactTracing), then each member not yet in Ni-kshay
-	 * and not TB positive (their NAAT says so; they are enrolled as their own index patient)
+	 * and not TB positive (by any source index eligibility uses; they are enrolled as their own index patient)
 	 * is validated and enrolled with Source = contactTracing. The counts must go first:
 	 * beta Ni-kshay links a contact to the index only when the index already has them. When
 	 * the counts are not accepted, no contact is added. The contacts are added against the
@@ -591,7 +591,7 @@ public class NikshayIdGenerateService {
 			return;
 		}
 
-		// A member whose NAAT is TB positive is enrolled as their own index patient, not as a contact
+		// A TB-positive member (confirmed, form, suspected or NAAT order) is enrolled as their own index patient, not as a contact
 		List<Long> memberIds = new ArrayList<>();
 		for (NikshayHouseholdMemberDTO member : index.getHouseholdMembers()) {
 			memberIds.add(member.getBeneficiaryId());
@@ -606,7 +606,7 @@ public class NikshayIdGenerateService {
 				continue;
 			}
 			NikshayDiagnosisGate gate = gates.get(member.getBeneficiaryId());
-			if (gate != null && gate.isSputumPositive()) {
+			if (gate != null && gate.isTbPositive()) {
 				logger.info("Member {} of index {} is TB positive: enrolled as their own index patient, not as a contact",
 						member.getBeneficiaryId(), sourcePatientId);
 				continue;

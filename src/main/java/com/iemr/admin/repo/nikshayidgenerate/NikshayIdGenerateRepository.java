@@ -192,8 +192,7 @@ public class NikshayIdGenerateRepository {
 		return "(" + detected(column) + " OR LOWER(TRIM(IFNULL(" + column + ", ''))) = 'tb positive')";
 	}
 
-	// The beneficiary (BenRegId column) has a completed MTB order whose result is TB positive;
-	// the same rule the contacts phase uses (DIAGNOSIS_GATE_SQL sputum_positive)
+	// The beneficiary (BenRegId column) has a completed MTB order whose result is TB positive
 	private static String positiveNaatOrder(String benRegIdColumn) {
 		return "EXISTS (SELECT 1 FROM db_iemr.tb_diagnostic_order po "
 				+ "JOIN db_iemr.tb_diagnostic_result pr "
@@ -203,6 +202,28 @@ public class NikshayIdGenerateRepository {
 				+ "WHERE pm.BenRegId = " + benRegIdColumn + " AND po.order_type = 'MTB' "
 				+ "  AND po.status = 'COMPLETED' AND (po.deleted = 0 OR po.deleted IS NULL) "
 				+ "  AND " + positiveResult("pr.result_summary") + ")";
+	}
+
+	// The beneficiary (BenRegId column) is TB positive by the same sources as
+	// ELIGIBLE_BENEFICIARIES_SQL: a TB confirmed case, their latest tb_suspected row confirmed,
+	// their latest Stop TB form TrueNat (else latest suspected sputum) result positive, or a
+	// positive MTB order. The contacts phase uses it so a TB-positive member is never added as a contact.
+	private static String tbPositive(String benRegIdColumn) {
+		String latestForm = "(SELECT d2.truenat_result FROM db_iemr.tb_stoptb_diagnostics d2 "
+				+ "WHERE d2.ben_reg_id = " + benRegIdColumn + " AND d2.deleted = 0 ORDER BY d2.id DESC LIMIT 1)";
+		return "(EXISTS (SELECT 1 FROM db_iemr.tb_confirmed_cases c2 WHERE c2.benRegID = " + benRegIdColumn + ") "
+				+ "OR IFNULL(" + latestSuspected("is_tb_confirmed", benRegIdColumn) + ", 0) = 1 "
+				+ "OR IFNULL(" + latestSuspected("is_confirmed", benRegIdColumn) + ", 0) = 1 "
+				+ "OR " + positiveResult("COALESCE(" + latestForm + ", "
+						+ latestSuspected("sputum_test_result", benRegIdColumn) + ")") + " "
+				+ "OR " + positiveNaatOrder(benRegIdColumn) + ")";
+	}
+
+	// One column of the beneficiary's latest tb_suspected row (same row as the eligibility query)
+	private static String latestSuspected(String column, String benRegIdColumn) {
+		return "(SELECT x2." + column + " FROM db_iemr.tb_suspected x2 "
+				+ "WHERE x2.benRegID = " + benRegIdColumn + " OR x2.ben_id = " + benRegIdColumn + " "
+				+ "ORDER BY x2.id DESC LIMIT 1)";
 	}
 
 	// Latest X-ray result of household member "mem" from the Stop TB diagnostics form
@@ -527,14 +548,13 @@ public class NikshayIdGenerateRepository {
 
 	// Sputum (MTB or Rif) and chest X-ray state for each BenRegId, from tb_diagnostic_order.
 	// xray_clear: the latest completed chest X-ray result is negative (CLEAR_XRAY);
-	// sputum_positive: a completed MTB result says TB positive or M. Tb detected.
+	// tb_positive: TB positive by any source index eligibility uses (tbPositive).
 	private static final String DIAGNOSIS_GATE_SQL = """
 			SELECT m.BenRegId AS ben_reg_id,
 			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status = 'COMPLETED'
 			                 AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL THEN 1 ELSE 0 END) AS sputum_done,
-			       MAX(CASE WHEN o.order_type = 'MTB' AND o.status = 'COMPLETED'
-			                 AND """ + positiveResult("r.result_summary") + """
-			 THEN 1 ELSE 0 END) AS sputum_positive,
+			       """ + tbPositive("m.BenRegId") + """
+			 AS tb_positive,
 			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status IN ('CLOSED', 'REFUSED')
 			                 THEN 1 ELSE 0 END) AS sputum_closed,
 			       IFNULL((SELECT LOWER(TRIM(rx.result_summary))
@@ -574,7 +594,7 @@ public class NikshayIdGenerateRepository {
 				DIAGNOSIS_GATE_SQL, new MapSqlParameterSource("benRegIds", benRegIds), (rs, rowNum) -> {
 					NikshayDiagnosisGate gate = new NikshayDiagnosisGate();
 					gate.setSputumDone(rs.getInt("sputum_done") == 1);
-					gate.setSputumPositive(rs.getInt("sputum_positive") == 1);
+					gate.setTbPositive(rs.getInt("tb_positive") == 1);
 					gate.setSputumClosed(rs.getInt("sputum_closed") == 1);
 					gate.setXrayClear(rs.getInt("xray_clear") == 1);
 					gate.setXrayDone(rs.getInt("xray_done") == 1);

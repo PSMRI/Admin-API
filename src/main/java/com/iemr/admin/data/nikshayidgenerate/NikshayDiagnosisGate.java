@@ -11,7 +11,8 @@ import lombok.Data;
 public class NikshayDiagnosisGate {
 
 	private boolean sputumDone;
-	private boolean sputumPositive;
+	// TB positive by any source index eligibility uses (confirmed, form, suspected or NAAT order)
+	private boolean tbPositive;
 	private boolean sputumClosed;
 	private boolean xrayDone;
 	private boolean xrayClear;
