@@ -11,8 +11,11 @@ import lombok.Data;
 public class NikshayDiagnosisGate {
 
 	private boolean sputumDone;
+	// TB positive by any source index eligibility uses (confirmed, form, suspected or NAAT order)
+	private boolean tbPositive;
 	private boolean sputumClosed;
 	private boolean xrayDone;
+	private boolean xrayClear;
 	private boolean xrayClosed;
 	private boolean xraySkip;
 
@@ -21,9 +24,20 @@ public class NikshayDiagnosisGate {
 		return sputumDone && xraySettled();
 	}
 
-	/** Index or contact has been tested: sputum finished and X-ray finished or skipped. */
-	public boolean tested() {
-		return (sputumDone || sputumClosed) && xraySettled();
+	/**
+	 * What a household member still waits for before the index patient's contacts are
+	 * added, or null when nothing. A negative chest X-ray needs no sputum. A TB Presumptive,
+	 * closed, refused or skipped X-ray needs a sputum result (a closed or refused sputum
+	 * order keeps waiting).
+	 */
+	public String contactWaitsFor() {
+		if (!xraySettled()) {
+			return "X-ray";
+		}
+		if (xrayClear || sputumDone) {
+			return null;
+		}
+		return "NAAT result";
 	}
 
 	private boolean xraySettled() {

@@ -173,10 +173,8 @@ public class NikshayIdGenerateRepository {
 			+ "    conf.benRegID IS NOT NULL "
 			+ "    OR IFNULL(sus.is_tb_confirmed, 0) = 1 "
 			+ "    OR IFNULL(sus.is_confirmed, 0) = 1 "
-			+ "    OR ( "
-			+ "      LOWER(IFNULL(COALESCE(diag.truenat_result, sus.sputum_test_result), '')) LIKE '%detect%' "
-			+ "      AND LOWER(IFNULL(COALESCE(diag.truenat_result, sus.sputum_test_result), '')) NOT LIKE '%not detect%' "
-			+ "    ) "
+			+ "    OR " + positiveResult("COALESCE(diag.truenat_result, sus.sputum_test_result)") + " "
+			+ "    OR " + positiveNaatOrder("m.BenRegId") + " "
 			+ "  ) "
 			+ "  AND IFNULL(NULLIF(TRIM(d.nikshayId), ''), '') = '' "
 			+ "  AND IFNULL(NULLIF(TRIM(sus.nikshay_id), ''), '') = '' "
@@ -187,6 +185,45 @@ public class NikshayIdGenerateRepository {
 	private static String detected(String column) {
 		return "(LOWER(IFNULL(" + column + ", '')) LIKE '%detect%' "
 				+ "AND LOWER(IFNULL(" + column + ", '')) NOT LIKE '%not detect%')";
+	}
+
+	// A TB-positive TrueNat / sputum result: "M. Tb detected" or "TB Positive"
+	private static String positiveResult(String column) {
+		return "(" + detected(column) + " OR LOWER(TRIM(IFNULL(" + column + ", ''))) = 'tb positive')";
+	}
+
+	// The beneficiary (BenRegId column) has a completed MTB order whose result is TB positive
+	private static String positiveNaatOrder(String benRegIdColumn) {
+		return "EXISTS (SELECT 1 FROM db_iemr.tb_diagnostic_order po "
+				+ "JOIN db_iemr.tb_diagnostic_result pr "
+				+ "  ON pr.external_order_id = po.external_order_id AND pr.deleted = 0 "
+				+ "JOIN db_identity.m_beneficiaryregidmapping pm "
+				+ "  ON pm.BeneficiaryID = po.beneficiary_id AND pm.Deleted = 0 "
+				+ "WHERE pm.BenRegId = " + benRegIdColumn + " AND po.order_type = 'MTB' "
+				+ "  AND po.status = 'COMPLETED' AND (po.deleted = 0 OR po.deleted IS NULL) "
+				+ "  AND " + positiveResult("pr.result_summary") + ")";
+	}
+
+	// The beneficiary (BenRegId column) is TB positive by the same sources as
+	// ELIGIBLE_BENEFICIARIES_SQL: a TB confirmed case, their latest tb_suspected row confirmed,
+	// their latest Stop TB form TrueNat (else latest suspected sputum) result positive, or a
+	// positive MTB order. The contacts phase uses it so a TB-positive member is never added as a contact.
+	private static String tbPositive(String benRegIdColumn) {
+		String latestForm = "(SELECT d2.truenat_result FROM db_iemr.tb_stoptb_diagnostics d2 "
+				+ "WHERE d2.ben_reg_id = " + benRegIdColumn + " AND d2.deleted = 0 ORDER BY d2.id DESC LIMIT 1)";
+		return "(EXISTS (SELECT 1 FROM db_iemr.tb_confirmed_cases c2 WHERE c2.benRegID = " + benRegIdColumn + ") "
+				+ "OR IFNULL(" + latestSuspected("is_tb_confirmed", benRegIdColumn) + ", 0) = 1 "
+				+ "OR IFNULL(" + latestSuspected("is_confirmed", benRegIdColumn) + ", 0) = 1 "
+				+ "OR " + positiveResult("COALESCE(" + latestForm + ", "
+						+ latestSuspected("sputum_test_result", benRegIdColumn) + ")") + " "
+				+ "OR " + positiveNaatOrder(benRegIdColumn) + ")";
+	}
+
+	// One column of the beneficiary's latest tb_suspected row (same row as the eligibility query)
+	private static String latestSuspected(String column, String benRegIdColumn) {
+		return "(SELECT x2." + column + " FROM db_iemr.tb_suspected x2 "
+				+ "WHERE x2.benRegID = " + benRegIdColumn + " OR x2.ben_id = " + benRegIdColumn + " "
+				+ "ORDER BY x2.id DESC LIMIT 1)";
 	}
 
 	// Latest X-ray result of household member "mem" from the Stop TB diagnostics form
@@ -214,7 +251,8 @@ public class NikshayIdGenerateRepository {
 			+ "ORDER BY ox.created_date DESC, ox.id DESC LIMIT 1)";
 
 	// A member of the household (each from their latest rmnch row) who stops it from being
-	// all negative: not TB screened, ever TB confirmed or M. Tb detected, or no clear X-ray.
+	// all negative: not TB screened, ever TB confirmed or TB positive (form, suspected or NAAT
+	// order result), or no clear X-ray.
 	// The X-ray is clear when at least one of the two results says Normal or "Abnormal but
 	// not TB Presumptive" and neither says anything else
 	private static final String MEMBER_NOT_CLEARED_SQL = "SELECT 1 FROM db_identity.i_beneficiarydetails_rmnch mem "
@@ -236,10 +274,11 @@ public class NikshayIdGenerateRepository {
 			+ "    OR EXISTS (SELECT 1 FROM db_iemr.tb_suspected x3 "
 			+ "      WHERE (x3.benRegID = mem.BeneficiaryRegID OR x3.ben_id = mem.BeneficiaryRegID) "
 			+ "        AND (IFNULL(x3.is_tb_confirmed, 0) = 1 OR IFNULL(x3.is_confirmed, 0) = 1 "
-			+ "          OR " + detected("x3.sputum_test_result") + ")) "
+			+ "          OR " + positiveResult("x3.sputum_test_result") + ")) "
 			+ "    OR EXISTS (SELECT 1 FROM db_iemr.tb_stoptb_diagnostics d3 "
 			+ "      WHERE d3.ben_reg_id = mem.BeneficiaryRegID AND d3.deleted = 0 "
-			+ "        AND " + detected("d3.truenat_result") + ") "
+			+ "        AND " + positiveResult("d3.truenat_result") + ") "
+			+ "    OR " + positiveNaatOrder("mem.BeneficiaryRegID") + " "
 			+ "    OR NOT ( "
 			+ "      (" + FORM_XRAY_SQL + " IS NOT NULL OR " + ORDER_XRAY_SQL + " IS NOT NULL) "
 			+ "      AND LOWER(TRIM(IFNULL(" + FORM_XRAY_SQL + ", 'normal'))) IN " + CLEAR_XRAY + " "
@@ -508,12 +547,25 @@ public class NikshayIdGenerateRepository {
 	}
 
 	// Sputum (MTB or Rif) and chest X-ray state for each BenRegId, from tb_diagnostic_order.
+	// xray_clear: the latest completed chest X-ray result is negative (CLEAR_XRAY);
+	// tb_positive: TB positive by any source index eligibility uses (tbPositive).
 	private static final String DIAGNOSIS_GATE_SQL = """
 			SELECT m.BenRegId AS ben_reg_id,
 			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status = 'COMPLETED'
 			                 AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL THEN 1 ELSE 0 END) AS sputum_done,
+			       """ + tbPositive("m.BenRegId") + """
+			 AS tb_positive,
 			       MAX(CASE WHEN o.order_type IN ('MTB', 'MDR_RIF') AND o.status IN ('CLOSED', 'REFUSED')
 			                 THEN 1 ELSE 0 END) AS sputum_closed,
+			       IFNULL((SELECT LOWER(TRIM(rx.result_summary))
+			               FROM db_iemr.tb_diagnostic_order ox
+			               JOIN db_iemr.tb_diagnostic_result rx
+			                 ON rx.external_order_id = ox.external_order_id AND rx.deleted = 0
+			               WHERE ox.beneficiary_id = m.BeneficiaryID AND ox.order_type = 'XRAY_CHEST'
+			                 AND ox.status = 'COMPLETED' AND (ox.deleted = 0 OR ox.deleted IS NULL)
+			                 AND NULLIF(TRIM(rx.result_summary), '') IS NOT NULL
+			               ORDER BY ox.created_date DESC, ox.id DESC LIMIT 1) IN """ + CLEAR_XRAY + """
+			, 0) AS xray_clear,
 			       MAX(CASE WHEN o.order_type = 'XRAY_CHEST' AND o.status = 'COMPLETED'
 			                 AND NULLIF(TRIM(r.result_summary), '') IS NOT NULL THEN 1 ELSE 0 END) AS xray_done,
 			       MAX(CASE WHEN o.order_type = 'XRAY_CHEST' AND o.status IN ('CLOSED', 'REFUSED')
@@ -529,7 +581,7 @@ public class NikshayIdGenerateRepository {
 			LEFT JOIN db_iemr.tb_diagnostic_result r
 			  ON r.external_order_id = o.external_order_id AND r.deleted = 0
 			WHERE m.BenRegId IN (:benRegIds) AND m.Deleted = 0
-			GROUP BY m.BenRegId
+			GROUP BY m.BenRegId, m.BeneficiaryID
 			""";
 
 	/** Chest X-ray and sputum state for each given BenRegId. A BenRegId with no orders is absent. */
@@ -542,7 +594,9 @@ public class NikshayIdGenerateRepository {
 				DIAGNOSIS_GATE_SQL, new MapSqlParameterSource("benRegIds", benRegIds), (rs, rowNum) -> {
 					NikshayDiagnosisGate gate = new NikshayDiagnosisGate();
 					gate.setSputumDone(rs.getInt("sputum_done") == 1);
+					gate.setTbPositive(rs.getInt("tb_positive") == 1);
 					gate.setSputumClosed(rs.getInt("sputum_closed") == 1);
+					gate.setXrayClear(rs.getInt("xray_clear") == 1);
 					gate.setXrayDone(rs.getInt("xray_done") == 1);
 					gate.setXrayClosed(rs.getInt("xray_closed") == 1);
 					gate.setXraySkip(rs.getInt("xray_skip") == 1);
