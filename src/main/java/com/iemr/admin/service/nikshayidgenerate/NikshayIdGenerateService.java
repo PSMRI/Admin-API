@@ -508,8 +508,9 @@ public class NikshayIdGenerateService {
 	}
 
 	/**
-	 * Null when the index patient's tests are in Ni-kshay and every household member has
-	 * finished sputum and chest X-ray in AMRIT. Otherwise the reason contacts must wait.
+	 * Null when the index patient's tests are in Ni-kshay and every household member is
+	 * ready (NikshayDiagnosisGate.contactWaitsFor). Otherwise the reason contacts must wait,
+	 * with what each member waits for.
 	 */
 	private String contactsNotTested(NikshayIdGenerateBeneficiaryDTO index) {
 		List<Long> indexIds = new ArrayList<>();
@@ -522,17 +523,26 @@ public class NikshayIdGenerateService {
 			memberIds.add(member.getBeneficiaryId());
 		}
 		Map<Long, NikshayDiagnosisGate> gates = nikshayIdGenerateRepository.findDiagnosisGate(memberIds);
-		List<Long> waiting = new ArrayList<>();
-		for (Long memberId : memberIds) {
-			NikshayDiagnosisGate gate = gates.get(memberId);
-			if (gate == null || !gate.tested()) {
-				waiting.add(memberId);
+		List<String> waiting = new ArrayList<>();
+		for (NikshayHouseholdMemberDTO member : index.getHouseholdMembers()) {
+			NikshayDiagnosisGate gate = gates.get(member.getBeneficiaryId());
+			String waitsFor = gate == null ? "X-ray" : gate.contactWaitsFor();
+			if (waitsFor != null) {
+				waiting.add("(" + member.getBeneficiaryId() + ", " + memberName(member) + ") " + waitsFor);
 			}
 		}
 		if (!waiting.isEmpty()) {
-			return "Waits until these contacts have finished sputum and chest X-ray: " + waiting;
+			return "Waits until these contacts have their tests: " + String.join(", ", waiting);
 		}
 		return null;
+	}
+
+	// First and last name, or "name unknown" when both are empty
+	private static String memberName(NikshayHouseholdMemberDTO member) {
+		String first = member.getFirstName() == null ? "" : member.getFirstName().trim();
+		String last = member.getLastName() == null ? "" : member.getLastName().trim();
+		String name = (first + " " + last).trim();
+		return name.isEmpty() ? "name unknown" : name;
 	}
 
 	private boolean phaseSettled(NikshayPhase phase, List<Long> benRegIds) {
@@ -549,6 +559,7 @@ public class NikshayIdGenerateService {
 	 * Adds the index patient's household members to Ni-kshay as their contacts (BRD section
 	 * 8.1, spec Flow 2-A), with the same NAAT device login. First the household counts are
 	 * written on the index patient (ContactTracing), then each member not yet in Ni-kshay
+	 * and not TB positive (their NAAT says so; they are enrolled as their own index patient)
 	 * is validated and enrolled with Source = contactTracing. The counts must go first:
 	 * beta Ni-kshay links a contact to the index only when the index already has them. When
 	 * the counts are not accepted, no contact is added. The contacts are added against the
@@ -580,11 +591,24 @@ public class NikshayIdGenerateService {
 			return;
 		}
 
+		// A member whose NAAT is TB positive is enrolled as their own index patient, not as a contact
+		List<Long> memberIds = new ArrayList<>();
+		for (NikshayHouseholdMemberDTO member : index.getHouseholdMembers()) {
+			memberIds.add(member.getBeneficiaryId());
+		}
+		Map<Long, NikshayDiagnosisGate> gates = nikshayIdGenerateRepository.findDiagnosisGate(memberIds);
+
 		int added = 0;
 		int toAdd = 0;
 		NikshayFailureReason firstFailure = null;
 		for (NikshayHouseholdMemberDTO member : index.getHouseholdMembers()) {
 			if (member.getNikshayId() != null) {
+				continue;
+			}
+			NikshayDiagnosisGate gate = gates.get(member.getBeneficiaryId());
+			if (gate != null && gate.isSputumPositive()) {
+				logger.info("Member {} of index {} is TB positive: enrolled as their own index patient, not as a contact",
+						member.getBeneficiaryId(), sourcePatientId);
 				continue;
 			}
 			toAdd++;
