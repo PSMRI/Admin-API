@@ -41,7 +41,7 @@ public enum NikshayFailureReason {
 	DESIGNATED_PHI_NOT_MAPPED,
 	// Ni-kshay rejected the transfer
 	TRANSFER_REJECTED,
-	// More than one Ni-kshay record matches
+	// More than one Ni-kshay record matches (no longer raised: the latest record is used; kept for old log rows)
 	MULTIPLE_DUPLICATE_MATCHES,
 	// The test result is an error / invalid run (e.g. NAAT "Error-2"): not uploaded, waits for a retest
 	TEST_RESULT_INVALID,

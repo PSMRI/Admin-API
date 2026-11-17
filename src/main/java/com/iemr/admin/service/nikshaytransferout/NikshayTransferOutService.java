@@ -70,7 +70,7 @@ import com.iemr.admin.service.nikshayupload.NikshayTestType;
  * - contacts: with a TB Positive NAAT for treatment, with an X-ray suggestive of TB for
  *   evaluation, and every other contact in that TB-positive family for TPT
  *   (including a symptomatic contact);
- * - members of all-negative households are not transferred.
+ * - members of all-negative households, labelled "all-negative household".
  * A contact is transferred with the index patient's details (address, phone, village and
  * facility), as they were enrolled.
  */
@@ -168,9 +168,6 @@ public class NikshayTransferOutService {
 				continue;
 			}
 			String purpose = purpose(candidate, contactTests.get(benRegId));
-			if (purpose == null) {
-				continue;
-			}
 			NikshayIdGenerateBeneficiaryDTO detail = details.get(detailId(candidate));
 			String missing = missingDetail(detail);
 			if (missing != null) {
@@ -218,15 +215,14 @@ public class NikshayTransferOutService {
 		return candidates;
 	}
 
-	// Why the beneficiary is transferred, or null (and NOT_APPLICABLE) when they are not
+	// Why the beneficiary is transferred, shown in the status note (not sent to Ni-kshay)
 	private String purpose(NikshayPhaseCandidate candidate, NikshayContactTestsDTO tests) {
 		NikshayBeneficiaryType type = candidate.getBeneficiaryType();
 		if (type == NikshayBeneficiaryType.INDEX) {
 			return "treatment";
 		}
 		if (type == NikshayBeneficiaryType.ALL_NEGATIVE) {
-			markNotApplicable(candidate, "All-negative household: no transfer");
-			return null;
+			return "all-negative household";
 		}
 		if (tests != null && tests.isNaatPositive()) {
 			return "treatment (M.Tb. detected)";
