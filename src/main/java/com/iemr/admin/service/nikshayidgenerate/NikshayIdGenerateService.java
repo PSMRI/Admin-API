@@ -899,14 +899,21 @@ public class NikshayIdGenerateService {
 					null, deviceId);
 		}
 		// V14: with more than one record of this person, the latest one's stage decides what
-		// happens, and the earliest one is the parent of a new episode
+		// happens, and the earliest one is the parent of a new episode. Dates are used only when
+		// every record has one, so all records are ordered the same way
+		boolean byDate = true;
+		for (JsonNode record : samePerson) {
+			if (enrollmentDate(record) == null) {
+				byDate = false;
+			}
+		}
 		JsonNode existing = samePerson.get(0);
 		JsonNode earliest = samePerson.get(0);
 		for (JsonNode record : samePerson) {
-			if (isEnrolledLater(record, existing)) {
+			if (isEnrolledLater(record, existing, byDate)) {
 				existing = record;
 			}
-			if (isEnrolledLater(earliest, record)) {
+			if (isEnrolledLater(earliest, record, byDate)) {
 				earliest = record;
 			}
 		}
@@ -952,14 +959,17 @@ public class NikshayIdGenerateService {
 	}
 
 	/**
-	 * Whether record a was enrolled in Ni-kshay after record b: by DateOfEnrollment
-	 * (M/d/yyyy), and by the bigger PatientId when the dates are the same or can't be read.
+	 * Whether record a was enrolled in Ni-kshay after record b. byDate (every matching record
+	 * has a readable DateOfEnrollment): by date, and by the bigger PatientId on the same date.
+	 * Otherwise by the bigger PatientId only.
 	 */
-	private static boolean isEnrolledLater(JsonNode a, JsonNode b) {
-		LocalDate dateA = enrollmentDate(a);
-		LocalDate dateB = enrollmentDate(b);
-		if (dateA != null && dateB != null && !dateA.equals(dateB)) {
-			return dateA.isAfter(dateB);
+	private static boolean isEnrolledLater(JsonNode a, JsonNode b, boolean byDate) {
+		if (byDate) {
+			LocalDate dateA = enrollmentDate(a);
+			LocalDate dateB = enrollmentDate(b);
+			if (!dateA.equals(dateB)) {
+				return dateA.isAfter(dateB);
+			}
 		}
 		return a.path("PatientId").asLong() > b.path("PatientId").asLong();
 	}
