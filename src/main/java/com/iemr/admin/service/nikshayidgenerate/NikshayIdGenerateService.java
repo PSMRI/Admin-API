@@ -21,6 +21,9 @@
 */
 package com.iemr.admin.service.nikshayidgenerate;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -674,6 +677,9 @@ public class NikshayIdGenerateService {
 		Long indexId = beneficiary.getIndexBeneficiaryId();
 		String note = result.getLinkStatus() == NikshayLinkStatus.NEW ? null
 				: result.getLinkStatus() + " (stage '" + result.getStageFound() + "')";
+		if (result.getMatchNote() != null) {
+			note = note + "; " + result.getMatchNote();
+		}
 		phaseStatusService.markDone(benRegId, type, indexId, NikshayPhase.ENROLMENT, result.getNikshayId(),
 				result.getEpisodeId(), note);
 		run.getLogEntries().add(logService.success(run.getContext(), NikshayPhase.ENROLMENT.getLogPhase(), benRegId,
@@ -861,7 +867,8 @@ public class NikshayIdGenerateService {
 	/**
 	 * Enrols one beneficiary (BRD section 7). Runs the duplicate check; with no firm match a
 	 * fresh Ni-kshay ID is created, otherwise the match's status decides what happens.
-	 * With a sourcePatientId the beneficiary is added as that index patient's contact.
+	 * With more than one match (V14), the latest record's status decides, and the earliest
+	 * record is the parent of a new episode. With a sourcePatientId the beneficiary is added as that index patient's contact.
 	 * Returns null, with no change in Ni-kshay, when skipIfInNikshay is set and the
 	 * beneficiary is already there.
 	 */
@@ -891,18 +898,39 @@ public class NikshayIdGenerateService {
 			return new NikshayEnrollResult(beneficiary.getBeneficiaryId(), patientId, patientId, NikshayLinkStatus.NEW,
 					null, deviceId);
 		}
+		// V14: with more than one record of this person, the latest one's stage decides what
+		// happens, and the earliest one is the parent of a new episode. Dates are used only when
+		// every record has one, so all records are ordered the same way
+		boolean byDate = true;
+		for (JsonNode record : samePerson) {
+			if (enrollmentDate(record) == null) {
+				byDate = false;
+			}
+		}
+		JsonNode existing = samePerson.get(0);
+		JsonNode earliest = samePerson.get(0);
+		for (JsonNode record : samePerson) {
+			if (isEnrolledLater(record, existing, byDate)) {
+				existing = record;
+			}
+			if (isEnrolledLater(earliest, record, byDate)) {
+				earliest = record;
+			}
+		}
+		String existingId = existing.path("PatientId").asText();
+		String parentId = earliest.path("PatientId").asText();
+		String stage = existing.path("Stage").asText(null);
+		String matchNote = null;
 		if (samePerson.size() > 1) {
 			List<String> ids = new ArrayList<>();
 			for (JsonNode record : samePerson) {
 				ids.add(record.path("PatientId").asText());
 			}
-			throw new NikshayApiException(NikshayFailureReason.MULTIPLE_DUPLICATE_MATCHES,
-					"V14: More than one Ni-kshay record matches this person: " + String.join(", ", ids));
+			matchNote = samePerson.size() + " matching Ni-kshay records (" + String.join(", ", ids) + "); used latest "
+					+ existingId;
+			logger.info("Beneficiary {}: {} (stage '{}'), earliest {}", beneficiary.getBeneficiaryId(), matchNote, stage,
+					parentId);
 		}
-
-		JsonNode existing = samePerson.get(0);
-		String existingId = existing.path("PatientId").asText();
-		String stage = existing.path("Stage").asText(null);
 		boolean outcomeAssigned = existing.path("IsPatientOutcomeAssigned").asBoolean(false);
 		NikshayLinkStatus linkStatus = linkStatusFor(stage, outcomeAssigned);
 		if (linkStatus == null) {
@@ -911,19 +939,48 @@ public class NikshayIdGenerateService {
 		}
 
 		if (linkStatus == NikshayLinkStatus.NEW_EPISODE) {
-			// Cases 2.2, 2.4, 2.6: new episode under the existing record (parent ID)
-			ObjectNode payload = payloadBuilder.build(beneficiary, existingId, true, sourcePatientId);
+			// Cases 2.2, 2.4, 2.6: new episode under the earliest record (parent ID)
+			ObjectNode payload = payloadBuilder.build(beneficiary, parentId, true, sourcePatientId);
 			String episodeId = enrollClient.addIndiaTb(session, payload);
 			logger.info("Beneficiary {}: created episode {} under Ni-kshay ID {} (stage '{}')",
-					beneficiary.getBeneficiaryId(), episodeId, existingId, stage);
-			return new NikshayEnrollResult(beneficiary.getBeneficiaryId(), existingId, episodeId, linkStatus, stage,
-					deviceId);
+					beneficiary.getBeneficiaryId(), episodeId, parentId, stage);
+			NikshayEnrollResult result = new NikshayEnrollResult(beneficiary.getBeneficiaryId(), parentId, episodeId,
+					linkStatus, stage, deviceId);
+			result.setMatchNote(matchNote == null ? null : matchNote + ", parent " + parentId);
+			return result;
 		}
 		// Case 2.1 (use the existing record), 2.3 and 2.5 (no action, ID only)
 		logger.info("Beneficiary {}: linked to existing Ni-kshay ID {} as {} (stage '{}')",
 				beneficiary.getBeneficiaryId(), existingId, linkStatus, stage);
-		return new NikshayEnrollResult(beneficiary.getBeneficiaryId(), existingId, existingId, linkStatus, stage,
-				deviceId);
+		NikshayEnrollResult result = new NikshayEnrollResult(beneficiary.getBeneficiaryId(), existingId, existingId,
+				linkStatus, stage, deviceId);
+		result.setMatchNote(matchNote);
+		return result;
+	}
+
+	/**
+	 * Whether record a was enrolled in Ni-kshay after record b. byDate (every matching record
+	 * has a readable DateOfEnrollment): by date, and by the bigger PatientId on the same date.
+	 * Otherwise by the bigger PatientId only.
+	 */
+	private static boolean isEnrolledLater(JsonNode a, JsonNode b, boolean byDate) {
+		if (byDate) {
+			LocalDate dateA = enrollmentDate(a);
+			LocalDate dateB = enrollmentDate(b);
+			if (!dateA.equals(dateB)) {
+				return dateA.isAfter(dateB);
+			}
+		}
+		return a.path("PatientId").asLong() > b.path("PatientId").asLong();
+	}
+
+	private static LocalDate enrollmentDate(JsonNode record) {
+		try {
+			return LocalDate.parse(record.path("DateOfEnrollment").asText("").trim(),
+					DateTimeFormatter.ofPattern("M/d/yyyy"));
+		} catch (DateTimeParseException e) {
+			return null;
+		}
 	}
 
 	/**

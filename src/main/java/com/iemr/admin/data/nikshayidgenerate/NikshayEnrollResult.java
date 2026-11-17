@@ -41,6 +41,8 @@ public class NikshayEnrollResult {
 	private Integer deviceId;
 	// Set by the flow before the enrolment is saved
 	private NikshayFlowScenario flowScenario;
+	// Set when more than one Ni-kshay record matched: which ones, which was used and the parent
+	private String matchNote;
 
 	public NikshayEnrollResult(Long beneficiaryId, String nikshayId, String episodeId, NikshayLinkStatus linkStatus,
 			String stageFound, Integer deviceId) {
