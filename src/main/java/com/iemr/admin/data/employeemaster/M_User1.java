@@ -200,8 +200,11 @@ public class M_User1{
 	   @OneToOne(fetch = FetchType.LAZY)
 	   @JoinColumn(name = "maritalstatusID", insertable = false, updatable = false)
 	   @Expose
-	    private M_Maritalstatus m_Maritalstatus;
-	   
+	   private M_Maritalstatus m_Maritalstatus;
+
+	   @Expose
+	   @Column(name = "adminPermissionType")
+	   private String adminPermissionType ;
 	   @Expose
 	   @Transient
 	   private String signatureStatus;
@@ -788,11 +791,13 @@ public class M_User1{
 	public String toString() {
 		return outputMapper.gson().toJson(this);
 	}
-	
-	
-	
-	   
-	   
-	   
 
+
+	public String getAdminPermissionType() {
+		return adminPermissionType;
+	}
+
+	public void setAdminPermissionType(String adminPermissionType) {
+		this.adminPermissionType = adminPermissionType;
+	}
 }
