@@ -1295,6 +1295,10 @@ public class EmployeeMasterController {
 			getProviderAdminFromDB.setModifiedBy(employeeMaster.getModifiedBy());
 			getProviderAdminFromDB.setRemarks(employeeMaster.getRemarks());
 			getProviderAdminFromDB.setdOB(employeeMaster.getdOB());
+			if(employeeMaster.getAdminPermissionType()!=null && !employeeMaster.getAdminPermissionType().isEmpty()){
+				getProviderAdminFromDB.setAdminPermissionType(employeeMaster.getAdminPermissionType());
+
+			}
 
 			M_User1 saveeditedData = employeeMasterInter.saveeditedData(getProviderAdminFromDB);
 
