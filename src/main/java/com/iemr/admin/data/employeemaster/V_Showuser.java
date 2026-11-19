@@ -258,14 +258,6 @@ public class V_Showuser {
 	   @Transient
 	   private Boolean lockedDueToFailedAttempts;
 
-	   @Expose
-	   @Column(name = "adminPermissionType")
-	   private String adminPermissionType ;
-
-	 
-	 
-	 
-	 
 	 
 	
 	
@@ -979,11 +971,4 @@ public class V_Showuser {
 		return outputMapper.gson().toJson(this);
 	}
 
-	public String getAdminPermissionType() {
-		return adminPermissionType;
-	}
-
-	public void setAdminPermissionType(String adminPermissionType) {
-		this.adminPermissionType = adminPermissionType;
-	}
 }
