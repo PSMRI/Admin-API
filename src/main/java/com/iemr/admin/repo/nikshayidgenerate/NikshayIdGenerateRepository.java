@@ -165,7 +165,23 @@ public class NikshayIdGenerateRepository {
 			+ "  ON ns.NikshayStateID = nd.NikshayStateID "
 			+ " AND (ns.Deleted = 0 OR ns.Deleted IS NULL) ";
 
+	// Villages whose NAAT login can be used. Built once from the small device tables and
+	// joined once, so a village mapped more than once does not duplicate a person, and the
+	// big beneficiary scan is not repeated per device row. Same active-mapping rule as
+	// NikshayDeviceCredentialRepo.findActiveCredentials. A device with no PHI user or no
+	// password is not a login. The contacts-by-id query does not use this join.
+	private static final String NAAT_LOGIN_JOIN_SQL = "INNER JOIN ( "
+			+ "  SELECT DISTINCT m.village_id AS village_id "
+			+ "  FROM db_iemr.m_nikshay_device_village_mapping m "
+			+ "  INNER JOIN db_iemr.m_nikshay_device_configuration d ON d.id = m.device_detail_id "
+			+ "  WHERE m.is_active = true AND d.is_active = true AND d.device_name = 'NAAT' "
+			+ "    AND m.village_id IS NOT NULL "
+			+ "    AND NULLIF(TRIM(d.phi_user_id), '') IS NOT NULL "
+			+ "    AND NULLIF(TRIM(d.password), '') IS NOT NULL "
+			+ ") naat_login ON naat_login.village_id = nv.NikshayVillageID ";
+
 	private static final String ELIGIBLE_BENEFICIARIES_SQL = BENEFICIARY_COLUMNS_SQL
+			+ NAAT_LOGIN_JOIN_SQL
 			+ "WHERE m.Deleted = 0 "
 			+ "  AND m.BenRegId IS NOT NULL "
 			+ "  AND IFNULL(d.is_death, 0) = 0 "
@@ -287,8 +303,10 @@ public class NikshayIdGenerateRepository {
 			+ "  )";
 
 	// Members of all-negative households who have no Ni-kshay ID yet: every member of the
-	// household is TB screened, has a clear X-ray (see MEMBER_NOT_CLEARED_SQL) and is not TB confirmed
+	// household is TB screened, has a clear X-ray (see MEMBER_NOT_CLEARED_SQL) and is not TB confirmed.
+	// Only villages that already have an active NAAT login (see NAAT_LOGIN_JOIN_SQL).
 	private static final String ALL_NEGATIVE_BENEFICIARIES_SQL = BENEFICIARY_COLUMNS_SQL
+			+ NAAT_LOGIN_JOIN_SQL
 			+ "WHERE m.Deleted = 0 "
 			+ "  AND m.BenRegId IS NOT NULL "
 			+ "  AND IFNULL(d.is_death, 0) = 0 "
@@ -419,8 +437,9 @@ public class NikshayIdGenerateRepository {
 	private DataSource dataSource;
 
 	/**
-	 * Returns every beneficiary that is eligible for a Ni-kshay ID, each with the other
-	 * members of their household and their TB screening status.
+	 * Returns every beneficiary that is eligible for a Ni-kshay ID and whose village has an
+	 * active NAAT login, each with the other members of their household and their TB
+	 * screening status.
 	 */
 	public List<NikshayIdGenerateBeneficiaryDTO> findEligibleBeneficiaries() {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -432,8 +451,9 @@ public class NikshayIdGenerateRepository {
 
 	/**
 	 * Returns the members of all-negative households (every member TB screened, every X-ray
-	 * normal, no one TB confirmed) who have no Ni-kshay ID yet. No household members are
-	 * attached: there is no index patient, so no contacts.
+	 * normal, no one TB confirmed) who have no Ni-kshay ID yet and whose village has an
+	 * active NAAT login. No household members are attached: there is no index patient, so
+	 * no contacts.
 	 */
 	public List<NikshayIdGenerateBeneficiaryDTO> findAllNegativeBeneficiaries() {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
